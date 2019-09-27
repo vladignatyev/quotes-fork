@@ -16,11 +16,12 @@ class Profile(models.Model):
 
 @receiver(post_save, sender='api.DeviceSession')
 def create_profile_on_new_device_session(sender, instance, created, **kwargs):
-    if created:
-        session = instance
-        profile = Profile.objects.create()
-        profile.device_sessions.set([session,])
-        profile.save()
+    if not created:
+        return
+    session = instance
+    profile = Profile.objects.create()
+    profile.device_sessions.set([session,])
+    profile.save()
 
 
 def _truncate(text, length=50, suffix='...'):
