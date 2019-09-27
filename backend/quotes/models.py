@@ -33,7 +33,7 @@ def _truncate(text, length=50, suffix='...'):
 
 
 class QuoteAuthor(models.Model):
-    author = models.CharField("Автор цитаты", max_length=256)
+    name = models.CharField("Автор цитаты", max_length=256)
 
     def __str__(self):
         return _truncate(self.author)
