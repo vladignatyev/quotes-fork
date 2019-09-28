@@ -7,20 +7,22 @@ from django.dispatch import receiver
 from api.models import PurchaseStatus
 
 
+class ProfileManager(models.Manager):
+    def create(self, *args, **kwargs):
+        profile = super(ProfileManager, self).create(*args, **kwargs)
+        profile.balance = kwargs.get('balance', settings.QUOTES_INITIAL_PROFILE_BALANCE)
+        return profile
+
+
 class Profile(models.Model):
     device_sessions = models.ManyToManyField('api.DeviceSession')
     balance = models.PositiveIntegerField(default=0)
 
+    objects = ProfileManager()
+
     class Meta:
         verbose_name = 'профиль пользователя'
         verbose_name_plural = 'профили пользователей'
-
-
-class ProfileFactory:
-    def create_new_profile(self):
-        profile = Profile.objects.create()
-        profile.balance = settings.QUOTES_INITIAL_PROFILE_BALANCE
-        return profile
 
 
 @receiver(post_save, sender='api.DeviceSession')
@@ -28,8 +30,7 @@ def create_profile_on_new_device_session(sender, instance, created, **kwargs):
     if not created:
         return
     session = instance
-    factory = ProfileFactory()
-    profile = factory.create_new_profile()
+    profile = Profile.objects.create()
     profile.device_sessions.set([session,])
     profile.save()
 
@@ -41,8 +42,7 @@ def recharge_profile_on_purchase(sender, instance, created, **kwargs):
         return
     purchase = instance
     session = purchase.device_session
-    purchase_product = purchase.product
-    app_product = Product.objects.filter(google_play_product__pk=purchase_product.pk)[0]
+    app_product = Product.objects.filter(google_play_product__pk=purchase.product.pk)[0]
 
     profile_to_recharge = Profile.objects.filter(device_sessions__pk__contains=session)[0]
     profile_to_recharge.balance = profile_to_recharge.balance + app_product.balance_recharge

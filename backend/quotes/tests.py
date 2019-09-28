@@ -1,7 +1,7 @@
 from django.conf import settings
 from django.test import TestCase
 
-from .models import Profile, Product, ProfileFactory
+from .models import Profile, Product
 from api.models import DeviceSession, GooglePlayProduct, GooglePlayIAPPurchase, PurchaseStatus
 
 
@@ -37,10 +37,10 @@ class ProfileTest(TestCase):
 
     def test_should_have_default_balance(self):
         # Given
-        factory = ProfileFactory()
+        profile = Profile.objects.create()
 
         # When
-        profile = factory.create_new_profile()
+        # profile = factory.create_new_profile()
 
         # Then
         self.assertEqual(settings.QUOTES_INITIAL_PROFILE_BALANCE, profile.balance)
