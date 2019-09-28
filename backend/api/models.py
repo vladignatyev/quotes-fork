@@ -4,7 +4,6 @@ from django.conf import settings
 from django.db import models
 
 
-
 class DeviceSession(models.Model):
     token = models.CharField("Токен идентификатор сессии", max_length=256)
     timestamp = models.DateTimeField(auto_now_add=True)
@@ -35,6 +34,9 @@ class PushSubscription(models.Model):
 
 
 class GooglePlayIAPSubscription(models.Model):
+    pass
+
+class AppStoreIAPSubscription(models.Model):
     pass
 
 
@@ -86,19 +88,23 @@ class GooglePlayIAPPurchase(Purchase):
     order_id = models.CharField(max_length=256, blank=True)
 
 
-class AppStoreIAPSubscription(models.Model):
-    pass
-
-
 class AppStoreIAPPurchase(Purchase):
     product = models.ForeignKey(AppStoreProduct, on_delete=models.SET_NULL, null=True, blank=True)
+
+
+class CredentialsManager(models.Manager):
+    def get(self):
+        return self.order_by('-id')[0]
 
 
 class Credentials(models.Model):
     google_play_bundle_id = models.CharField("Play Market Bundle ID", max_length=256)
     google_play_api_key = models.CharField("Google Play API Key", max_length=256)
-
     appstore_bundle_id = models.CharField("AppStore Bundle ID", max_length=256)
+
+    date_added = models.DateTimeField(auto_now_add=True)
+
+    objects = CredentialsManager()
 
     class Meta:
         verbose_name = 'Credentials'
