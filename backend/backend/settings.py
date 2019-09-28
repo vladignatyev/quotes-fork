@@ -127,14 +127,17 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 
-QUOTE_LANGUAGES = [
-    ('EN', 'Английский'),
-    ('RU', 'Русский'),
-]
-
+# QUOTE_LANGUAGES = [
+#     ('EN', 'Английский'),
+#     ('RU', 'Русский'),
+# ]
+#
 API_VERSION = 1
 
 REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 10
 }
+
+
+QUOTES_INITIAL_PROFILE_BALANCE = 40

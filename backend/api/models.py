@@ -11,7 +11,6 @@ class DeviceSession(models.Model):
 
     @classmethod
     def is_valid_token(cls, token, valid_chars=r'^[a-z|A-Z|0-9]{32}$'):
-        # todo:
         is_empty = token == ''
         is_match_rules = re.match(valid_chars, token) is not None
 
@@ -39,16 +38,55 @@ class GooglePlayIAPSubscription(models.Model):
     pass
 
 
-class GooglePlayIAPPurchase(models.Model):
+class PurchaseTypes:
+    DEFAULT = 'purchase'
+
+    choices = (('video', 'Reward Video'),
+               ('purchase', 'Purchase'))
+
+
+class PurchaseStatus:
+    DEFAULT = UNKNOWN = 'unknown'
+    VALID = 'valid'
+
+    choices = (('unknown', 'Unknown'),
+               ('valid', 'Valid'),
+               ('invalid', 'Invalid'))
+
+
+class Purchase(models.Model):
+    type = models.CharField(choices=PurchaseTypes.choices, default=PurchaseTypes.DEFAULT, max_length=16)
+    status = models.CharField(choices=PurchaseStatus.choices, default=PurchaseStatus.DEFAULT, max_length=16)
+    device_session = models.ForeignKey(DeviceSession, on_delete=models.CASCADE, null=True)
+
+    class Meta:
+        abstract = True
+
+    def validate(self):
+        pass
+
+    def is_valid(self):
+        return self.status == PurchaseStatus.VALID
+
+
+class GooglePlayProduct(models.Model):
     pass
+
+
+class AppStoreProduct(models.Model):
+    pass
+
+
+class GooglePlayIAPPurchase(Purchase):
+    product = models.ForeignKey(GooglePlayProduct, on_delete=models.SET_NULL, null=True, blank=True)
 
 
 class AppStoreIAPSubscription(models.Model):
     pass
 
 
-class AppStoreIAPPurchase(models.Model):
-    pass
+class AppStoreIAPPurchase(Purchase):
+    product = models.ForeignKey(AppStoreProduct, on_delete=models.SET_NULL, null=True, blank=True)
 
 
 class Credentials(models.Model):

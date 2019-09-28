@@ -4,24 +4,49 @@ from django.conf import settings
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
-# from ..api.models import DeviceSession
+from api.models import PurchaseStatus
 
 
 class Profile(models.Model):
     device_sessions = models.ManyToManyField('api.DeviceSession')
+    balance = models.PositiveIntegerField(default=0)
 
     class Meta:
         verbose_name = 'профиль пользователя'
         verbose_name_plural = 'профили пользователей'
+
+
+class ProfileFactory:
+    def create_new_profile(self):
+        profile = Profile.objects.create()
+        profile.balance = settings.QUOTES_INITIAL_PROFILE_BALANCE
+        return profile
+
 
 @receiver(post_save, sender='api.DeviceSession')
 def create_profile_on_new_device_session(sender, instance, created, **kwargs):
     if not created:
         return
     session = instance
-    profile = Profile.objects.create()
+    factory = ProfileFactory()
+    profile = factory.create_new_profile()
     profile.device_sessions.set([session,])
     profile.save()
+
+@receiver(post_save, sender='api.GooglePlayIAPPurchase')
+def recharge_profile_on_purchase(sender, instance, created, **kwargs):
+    if created:
+        return
+    if instance.status != PurchaseStatus.VALID:
+        return
+    purchase = instance
+    session = purchase.device_session
+    purchase_product = purchase.product
+    app_product = Product.objects.filter(google_play_product__pk=purchase_product.pk)[0]
+
+    profile_to_recharge = Profile.objects.filter(device_sessions__pk__contains=session)[0]
+    profile_to_recharge.balance = profile_to_recharge.balance + app_product.balance_recharge
+    profile_to_recharge.save()
 
 
 def _truncate(text, length=50, suffix='...'):
@@ -43,10 +68,25 @@ class QuoteAuthor(models.Model):
         verbose_name_plural = 'авторы цитат'
 
 
+class QuoteLanguage(models.Model):
+    short_name = models.CharField("Короткое название языка (en, us, ...)", max_length=2)
+    admin_name = models.CharField("Название языка в админке", max_length=256)
+
+    def __str__(self):
+        return self.admin_name
+
+    class Meta:
+        verbose_name = 'язык'
+        verbose_name_plural = 'языки'
+
+
 class QuoteCategory(models.Model):
     title = models.CharField("Название категории", max_length=256)
-    language = models.CharField("Язык категории", max_length=2,
-                                choices=settings.QUOTE_LANGUAGES)
+    # language = models.CharField("Язык категории", max_length=2,
+    #                             choices=settings.QUOTE_LANGUAGES)
+
+    language = models.ForeignKey(QuoteLanguage, "Язык категории")
+
 
     def __str__(self):
         return _truncate(self.title)
@@ -58,8 +98,8 @@ class QuoteCategory(models.Model):
 
 class Quote(models.Model):
     text = models.CharField("Текст цитаты", max_length=256)
-    author = models.ForeignKey(QuoteAuthor, on_delete=models.SET_NULL, null=True, blank=True)
-    category = models.ForeignKey(QuoteCategory, on_delete=models.SET_NULL, null=True, blank=True)
+    author = models.ForeignKey(QuoteAuthor, on_delete=models.SET_NULL, null=True)
+    category = models.ForeignKey(QuoteCategory, on_delete=models.SET_NULL, null=True)
 
     def __str__(self):
         return _truncate(self.text)
@@ -67,3 +107,12 @@ class Quote(models.Model):
     class Meta:
         verbose_name = 'цитата'
         verbose_name_plural = 'цитаты'
+
+
+class Product(models.Model):
+    admin_title = models.CharField("Название", max_length=256)
+    app_title = models.CharField("Название для приложения", max_length=256)
+    balance_recharge = models.IntegerField("Сумма пополнения баланса", default=1)
+
+    google_play_product = models.ForeignKey('api.GooglePlayProduct', on_delete=models.SET_NULL, null=True)
+    app_store_product = models.ForeignKey('api.AppStoreProduct', on_delete=models.SET_NULL, null=True)
