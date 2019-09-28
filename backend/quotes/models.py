@@ -4,7 +4,7 @@ from django.conf import settings
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
-from api.models import PurchaseStatus
+from api.models import PurchaseStatus, GooglePlayProduct, AppStoreProduct
 
 
 class ProfileManager(models.Manager):
@@ -12,6 +12,9 @@ class ProfileManager(models.Manager):
         profile = super(ProfileManager, self).create(*args, **kwargs)
         profile.balance = kwargs.get('balance', settings.QUOTES_INITIAL_PROFILE_BALANCE)
         return profile
+
+    def get_by_session(self, device_session):
+        return Profile.objects.filter(device_sessions__pk__contains=device_session)[0]
 
 
 class Profile(models.Model):
@@ -42,9 +45,10 @@ def recharge_profile_on_purchase(sender, instance, created, **kwargs):
         return
     purchase = instance
     session = purchase.device_session
-    app_product = Product.objects.filter(google_play_product__pk=purchase.product.pk)[0]
+    # app_product = Product.objects.filter(google_play_product__pk=purchase.product.pk)[0]
+    app_product = Product.objects.get_by_store_product(purchase.product)
 
-    profile_to_recharge = Profile.objects.filter(device_sessions__pk__contains=session)[0]
+    profile_to_recharge = Profile.objects.get_by_session(session)
     profile_to_recharge.balance = profile_to_recharge.balance + app_product.balance_recharge
     profile_to_recharge.save()
 
@@ -106,6 +110,16 @@ class Quote(models.Model):
         verbose_name_plural = 'цитаты'
 
 
+class ProductManager(models.Manager):
+    def get_by_store_product(self, store_product):
+        if type(store_product) is GooglePlayProduct:
+            return Product.objects.get(google_play_product=store_product)
+        elif type(store_product) is AppStoreProduct:
+            return Product.objects.get(app_store_product=store_product)
+        else:
+            raise Error('Unknown product type.')
+
+
 class Product(models.Model):
     admin_title = models.CharField("Название", max_length=256)
     app_title = models.CharField("Название для приложения", max_length=256)
@@ -113,3 +127,5 @@ class Product(models.Model):
 
     google_play_product = models.ForeignKey('api.GooglePlayProduct', on_delete=models.SET_NULL, null=True)
     app_store_product = models.ForeignKey('api.AppStoreProduct', on_delete=models.SET_NULL, null=True)
+
+    objects = ProductManager()

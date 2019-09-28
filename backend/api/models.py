@@ -70,7 +70,8 @@ class Purchase(models.Model):
 
 
 class GooglePlayProduct(models.Model):
-    pass
+    # according to: https://developer.android.com/google/play/billing/billing_library_overview
+    sku = models.CharField(max_length=256, blank=True)
 
 
 class AppStoreProduct(models.Model):
@@ -79,6 +80,10 @@ class AppStoreProduct(models.Model):
 
 class GooglePlayIAPPurchase(Purchase):
     product = models.ForeignKey(GooglePlayProduct, on_delete=models.SET_NULL, null=True, blank=True)
+
+    # according to: https://developer.android.com/google/play/billing/billing_overview
+    purchase_token = models.CharField(max_length=256, blank=True)
+    order_id = models.CharField(max_length=256, blank=True)
 
 
 class AppStoreIAPSubscription(models.Model):
