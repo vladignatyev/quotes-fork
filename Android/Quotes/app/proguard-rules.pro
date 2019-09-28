@@ -61,14 +61,6 @@
 -dontwarn org.codehaus.mojo.animal_sniffer.IgnoreJRERequirement
 # ====== END Misc ======
 
-# ====== BEGIN Lokalise ======
--keep class co.lokalise.** { *; }
--dontwarn co.lokalise.*
-# ====== End Lokalise ======
-
--keep class com.finance.investing.mintos.** { *; }
--keep class com.finance.data.** { *; }
-
 # ===== BEGIN Kotlin ======
 -keep class kotlin.** { *; }
 -keep class kotlin.Metadata { *; }
@@ -83,7 +75,3 @@
     static void checkParameterIsNotNull(java.lang.Object, java.lang.String);
 }
 # ===== BEGIN Kotlin ======
-
-# ===== BEGIN MPAndroidChart ======
--keep class com.github.mikephil.charting.** { *; }
-# ===== END MPAndroidChart ======
