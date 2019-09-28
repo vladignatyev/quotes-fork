@@ -1,0 +1,33 @@
+apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-android-extensions'
+apply plugin: 'kotlin-kapt'
+
+android {
+    compileSdkVersion rootProject.ext.sdk.compile
+
+    defaultConfig {
+        minSdkVersion rootProject.ext.sdk.min
+        targetSdkVersion rootProject.ext.sdk.target
+    }
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$versions.kotlin"
+    implementation "io.reactivex.rxjava2:rxjava:$versions.rxjava"
+
+    implementation "com.squareup.retrofit2:retrofit:$versions.retrofit"
+    implementation "com.jakewharton.rxrelay2:rxrelay:$versions.rxrelay"
+    implementation "com.fasterxml.jackson.module:jackson-module-kotlin:$versions.jackson"
+
+    //Testing
+    testImplementation "junit:junit:$versions.junit"
+    androidTestImplementation "androidx.test:runner:$versions.testRunner"
+    testImplementation "com.nhaarman:mockito-kotlin-kt1.1:$versions.mockitoKotlinVersion"
+}
+repositories {
+    mavenCentral()
+}
+
