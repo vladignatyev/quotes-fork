@@ -82,9 +82,6 @@ class QuoteLanguage(models.Model):
 
 class QuoteCategory(models.Model):
     title = models.CharField("Название категории", max_length=256)
-    # language = models.CharField("Язык категории", max_length=2,
-    #                             choices=settings.QUOTE_LANGUAGES)
-
     language = models.ForeignKey(QuoteLanguage, "Язык категории")
 
 
