@@ -4,6 +4,10 @@ from django.conf import settings
 from django.db import models
 
 
+class DeviceSessionManager(models.Manager):
+    # todo:
+    pass
+
 class DeviceSession(models.Model):
     token = models.CharField("Токен идентификатор сессии", max_length=256)
     timestamp = models.DateTimeField(auto_now_add=True)
@@ -57,8 +61,8 @@ class PurchaseStatus:
 
 
 class Purchase(models.Model):
-    type = models.CharField(choices=PurchaseTypes.choices, default=PurchaseTypes.DEFAULT, max_length=16)
-    status = models.CharField(choices=PurchaseStatus.choices, default=PurchaseStatus.DEFAULT, max_length=16)
+    type = models.CharField('Type: reward video or purchase', choices=PurchaseTypes.choices, default=PurchaseTypes.DEFAULT, max_length=16)
+    status = models.CharField('Validation status', choices=PurchaseStatus.choices, default=PurchaseStatus.DEFAULT, max_length=16)
     device_session = models.ForeignKey(DeviceSession, on_delete=models.CASCADE, null=True)
 
     class Meta:
@@ -73,7 +77,10 @@ class Purchase(models.Model):
 
 class GooglePlayProduct(models.Model):
     # according to: https://developer.android.com/google/play/billing/billing_library_overview
-    sku = models.CharField(max_length=256, blank=True)
+    sku = models.CharField('IAP SKU (Product ID)', max_length=256, blank=True)
+
+    def __str__(self):
+        return f'{self.sku}'
 
 
 class AppStoreProduct(models.Model):

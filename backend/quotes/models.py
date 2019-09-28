@@ -14,7 +14,7 @@ class ProfileManager(models.Manager):
         return profile
 
     def get_by_session(self, device_session):
-        return Profile.objects.filter(device_sessions__pk__contains=device_session)[0]
+        return Profile.objects.filter(device_sessions__pk__contains=device_session.pk)[0]
 
 
 class Profile(models.Model):
@@ -65,7 +65,7 @@ class QuoteAuthor(models.Model):
     name = models.CharField("Автор цитаты", max_length=256)
 
     def __str__(self):
-        return _truncate(self.author)
+        return _truncate(self.name)
 
     class Meta:
         verbose_name = 'автор цитат'
@@ -121,11 +121,14 @@ class ProductManager(models.Manager):
 
 
 class Product(models.Model):
-    admin_title = models.CharField("Название", max_length=256)
-    app_title = models.CharField("Название для приложения", max_length=256)
+    admin_title = models.CharField("Название для админки", max_length=256)
     balance_recharge = models.IntegerField("Сумма пополнения баланса", default=1)
 
-    google_play_product = models.ForeignKey('api.GooglePlayProduct', on_delete=models.SET_NULL, null=True)
-    app_store_product = models.ForeignKey('api.AppStoreProduct', on_delete=models.SET_NULL, null=True)
+    google_play_product = models.ForeignKey('api.GooglePlayProduct', on_delete=models.SET_NULL, null=True, blank=True)
+    app_store_product = models.ForeignKey('api.AppStoreProduct', on_delete=models.SET_NULL, null=True, blank=True)
 
     objects = ProductManager()
+
+    class Meta:
+        verbose_name = 'IAP продукт'
+        verbose_name_plural = 'продукты'

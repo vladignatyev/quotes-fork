@@ -12,6 +12,14 @@ class QuoteCategoryAdmin(admin.ModelAdmin):
 
 
 admin.site.register(Profile)
+
 admin.site.register(Quote, QuoteAdmin)
 admin.site.register(QuoteCategory, QuoteCategoryAdmin)
 admin.site.register(QuoteAuthor)
+admin.site.register(QuoteLanguage)
+
+
+class ProductAdmin(admin.ModelAdmin):
+    list_display = ('admin_title', 'google_play_product', 'app_store_product')
+
+admin.site.register(Product, ProductAdmin)

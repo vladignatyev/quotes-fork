@@ -52,7 +52,6 @@ class ProfileTest(TestCase):
 
         google_play_product = GooglePlayProduct.objects.create()
         app_product = Product.objects.create(admin_title='10 монет',
-                                             app_title='test_product',
                                              balance_recharge=BALANCE_RECHARGE,
                                              google_play_product=google_play_product)
         session = DeviceSession.objects.create()
@@ -74,7 +73,6 @@ class ProfileTest(TestCase):
 
         google_play_product = GooglePlayProduct.objects.create()
         app_product = Product.objects.create(admin_title='10 монет',
-                                             app_title='test_product',
                                              balance_recharge=BALANCE_RECHARGE,
                                              google_play_product=google_play_product)
         session = DeviceSession.objects.create()

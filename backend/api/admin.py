@@ -31,11 +31,21 @@ class CredentialsAdmin(admin.ModelAdmin):
     pass
 
 
+class GooglePlayProductAdmin(admin.ModelAdmin):
+    pass
+
+class AppStoreProductAdmin(admin.ModelAdmin):
+    pass
+
 
 admin.site.register(DeviceSession, DeviceSessionAdmin)
 admin.site.register(PushSubscription, PushSubscriptionAdmin)
+
+admin.site.register(GooglePlayProduct, GooglePlayProductAdmin)
 admin.site.register(GooglePlayIAPSubscription, GooglePlayIAPSubscriptionAdmin)
 admin.site.register(GooglePlayIAPPurchase, GooglePlayIAPPurchaseAdmin)
+
+admin.site.register(AppStoreProduct, AppStoreProductAdmin)
 admin.site.register(AppStoreIAPSubscription, AppStoreIAPSubscriptionAdmin)
 admin.site.register(AppStoreIAPPurchase, AppStoreIAPPurchaseAdmin)
 admin.site.register(Credentials, CredentialsAdmin)
