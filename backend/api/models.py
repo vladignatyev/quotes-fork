@@ -40,6 +40,7 @@ class PushSubscription(models.Model):
 class GooglePlayIAPSubscription(models.Model):
     pass
 
+
 class AppStoreIAPSubscription(models.Model):
     pass
 
@@ -93,7 +94,6 @@ class GooglePlayIAPPurchase(Purchase):
     # according to: https://developer.android.com/google/play/billing/billing_overview
     purchase_token = models.CharField(max_length=256, blank=True)
     order_id = models.CharField(max_length=256, blank=True)
-
 
 class AppStoreIAPPurchase(Purchase):
     product = models.ForeignKey(AppStoreProduct, on_delete=models.SET_NULL, null=True, blank=True)

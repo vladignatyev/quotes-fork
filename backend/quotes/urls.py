@@ -17,13 +17,16 @@ Including another URLconf
 from django.urls import include, path
 
 from rest_framework import routers, serializers, viewsets
-from .views import QuoteViewSet, QuoteCategoryViewSet
+from .views import Quotes #, QuoteViewSet #, QuoteCategoryViewSet
 
 router = routers.DefaultRouter()
 
-router.register(r'quotes', QuoteViewSet)
-router.register(r'categories', QuoteCategoryViewSet)
+router.register(r'quotes/(?P<topic>.+)/(?P<category>.+)', Quotes, Quotes.basename)
 
+# router.register(r'quotes', QuotesList, basename=QuotesList.basename)
+
+# router.register(r'categories', QuoteCategoryViewSet)
+# urlpatterns = [router.urls,]
 urlpatterns = [
     path('', include(router.urls)),
 ]

@@ -6,36 +6,17 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 
+
+from rest_framework.decorators import action
+
 from .models import Quote, QuoteCategory, QuoteAuthor
 
+from .serializers import *
 
-from rest_framework import serializers
-
-
-class QuoteAuthorSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = QuoteAuthor
-        fields = ['name']
-
-class QuoteCategorySerializer(serializers.ModelSerializer):
-    class Meta:
-        model = QuoteCategory
-        fields = ['title', 'language']
-
-class QuoteSerializer(serializers.ModelSerializer):
-    author = QuoteAuthorSerializer()
-    category = QuoteCategorySerializer()
-
-    class Meta:
-        model = Quote
-        fields = ['text', 'author', 'category']
-
-class QuoteViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = Quote.objects.all()
-
-    serializer_class = QuoteSerializer
-
-class QuoteCategoryViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = QuoteCategory.objects.all()
-
-    serializer_class = QuoteCategorySerializer
+class Quotes(viewsets.ViewSet):
+    basename = 'quotes'
+    # @action(detail=False)
+    def list(self, request, topic, category, format=None):
+        quotes = Quote.objects.all()
+        serializer = QuoteSerializer(quotes, many=True)
+        return Response(serializer.data)
