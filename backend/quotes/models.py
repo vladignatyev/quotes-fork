@@ -8,37 +8,6 @@ from django.db.models.signals import post_save
 from api.models import PurchaseStatus, GooglePlayProduct, AppStoreProduct
 
 
-class ProfileManager(models.Manager):
-    def create(self, *args, **kwargs):
-        profile = super(ProfileManager, self).create(*args, **kwargs)
-        game_settings = GameBalance.objects.get_actual_game_settings()
-        profile.balance = kwargs.get('balance', game_settings.initial_profile_balance)
-        return profile
-
-    def get_by_session(self, device_session):
-        return Profile.objects.filter(device_sessions__pk__contains=device_session.pk)[0]
-
-    # todo:
-    def buy_unlock_category(self, profile, quote_category):
-        balance = profile.balance
-        price = quote_category.price_to_unlock
-        new_balance = balance - price
-        profile.balance = new_balance
-
-
-class Profile(models.Model):
-    device_sessions = models.ManyToManyField('api.DeviceSession')
-    balance = models.PositiveIntegerField(default=0)
-    nickname = models.CharField(max_length=256, default='Пан Инкогнито')
-
-    settings = models.ForeignKey('GameBalance', on_delete=models.CASCADE, default=0)  # todo: default first one GameBalance
-
-    objects = ProfileManager()
-
-    class Meta:
-        verbose_name = 'профиль пользователя'
-        verbose_name_plural = 'профили пользователей'
-
 
 def _truncate(text, length=50, suffix='...'):
     '''
@@ -94,7 +63,7 @@ class QuoteCategory(models.Model):
     is_payable = models.BooleanField('Категория платная?', default=False)
     price_to_unlock = models.BigIntegerField('Стоимость открытия категории если она платная', default=0)
 
-    available_to_users = models.ManyToManyField(Profile, verbose_name='Профили пользователей которым доступна категория')
+    available_to_users = models.ManyToManyField('Profile', verbose_name='Профили пользователей которым доступна категория')
 
 
     def __str__(self):
@@ -121,14 +90,14 @@ class Quote(models.Model):
 class ProductManager(models.Manager):
     def get_by_store_product(self, store_product):
         if type(store_product) is GooglePlayProduct:
-            return Product.objects.get(google_play_product=store_product)
+            return BalanceRechargeProduct.objects.get(google_play_product=store_product)
         elif type(store_product) is AppStoreProduct:
-            return Product.objects.get(app_store_product=store_product)
+            return BalanceRechargeProduct.objects.get(app_store_product=store_product)
         else:
             raise Error('Unknown product type.')
 
 
-class Product(models.Model):
+class BalanceRechargeProduct(models.Model):
     admin_title = models.CharField("Название для админки", max_length=256)
     balance_recharge = models.IntegerField("Сумма пополнения баланса", default=1)
 
@@ -142,15 +111,65 @@ class Product(models.Model):
         verbose_name_plural = 'продукты'
 
 
+
 class GameBalanceManager(models.Manager):
     def get_actual_game_settings(self):
         try:
             return GameBalance.objects.order_by('-pk')[0]
         except IndexError:
-            return self.create(initial_profile_balance=0)
+            game_settings = self.create(initial_profile_balance=0)
+            game_settings.save()
+            return game_settings
 
 
 class GameBalance(models.Model):
     initial_profile_balance = models.BigIntegerField(default=0)
 
     objects = GameBalanceManager()
+
+
+
+class ProfileManager(models.Manager):
+    def create(self, *args, **kwargs):
+        profile = super(ProfileManager, self).create(*args, **kwargs)
+        game_settings = GameBalance.objects.get_actual_game_settings()
+        profile.balance = kwargs.get('balance', game_settings.initial_profile_balance)
+        return profile
+
+    def get_by_session(self, device_session):
+        return Profile.objects.filter(device_sessions__pk__contains=device_session.pk)[0]
+
+    def unlock_category(self, profile, quote_category):
+        balance = profile.balance
+        price = quote_category.price_to_unlock
+        new_balance = balance - price
+        if new_balance < 0:
+            return (False, 'Not enough funds.')
+        profile.balance = new_balance
+        quote_category.available_to_users.add(profile)
+        return (True,'')
+
+
+class Profile(models.Model):
+    device_sessions = models.ManyToManyField('api.DeviceSession')
+    balance = models.PositiveIntegerField(default=0)
+    nickname = models.CharField(max_length=256, default='Пан Инкогнито')
+
+    settings = models.ForeignKey('GameBalance', on_delete=models.CASCADE, null=True, default=None)
+
+    objects = ProfileManager()
+
+    class Meta:
+        verbose_name = 'профиль пользователя'
+        verbose_name_plural = 'профили пользователей'
+
+
+class CategoryUnlockPurchase(models.Model):
+    profile = models.ForeignKey(Profile, on_delete=models.CASCADE)
+    category_to_unlock = models.ForeignKey(QuoteCategory, on_delete=models.CASCADE)
+
+    google_play_purchase = models.ForeignKey('api.GooglePlayIAPPurchase', on_delete=models.SET_NULL, null=True, blank=True)
+
+    class Meta:
+        verbose_name = 'Покупка доступа к категории'
+        verbose_name_plural = 'Покупки доступов к категориям'

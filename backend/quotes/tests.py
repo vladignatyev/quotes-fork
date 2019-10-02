@@ -75,7 +75,7 @@ class ProfileTest(GameBalanceTestCase):
         BALANCE_RECHARGE = 10
 
         google_play_product = GooglePlayProduct.objects.create()
-        app_product = Product.objects.create(admin_title='10 монет',
+        app_product = BalanceRechargeProduct.objects.create(admin_title='10 монет',
                                              balance_recharge=BALANCE_RECHARGE,
                                              google_play_product=google_play_product)
         session = DeviceSession.objects.create()
@@ -96,7 +96,7 @@ class ProfileTest(GameBalanceTestCase):
         BALANCE_RECHARGE = 10
 
         google_play_product = GooglePlayProduct.objects.create()
-        app_product = Product.objects.create(admin_title='10 монет',
+        app_product = BalanceRechargeProduct.objects.create(admin_title='10 монет',
                                              balance_recharge=BALANCE_RECHARGE,
                                              google_play_product=google_play_product)
         session = DeviceSession.objects.create()
@@ -125,7 +125,7 @@ class GameBalanceTest(TestCase):
         # Then
         self.assertEqual(30, game_settings.initial_profile_balance)
 
-#
+
 class ProfileCategoryUnlocking(GameBalanceTestCase):
     def test_should_unlock_category_for_given_profile(self):
         # Given
@@ -142,7 +142,66 @@ class ProfileCategoryUnlocking(GameBalanceTestCase):
                                                 price_to_unlock=PRICE_TO_UNLOCK)
 
         # When
-        Profile.objects.buy_unlock_category(profile, category)
+        result, explanation = Profile.objects.unlock_category(profile, category)
+        category = QuoteCategory.objects.get(pk=category.pk)
 
         # Then
+        self.assertTrue(result)
         self.assertEqual(INITIAL_BALANCE - PRICE_TO_UNLOCK, profile.balance)
+        self.assertIn(profile, category.available_to_users.all())
+
+    def test_shouldnt_unlock_category_if_no_funds_available(self):
+        # Given
+        INITIAL_BALANCE = 4
+        PRICE_TO_UNLOCK = 5
+
+        GameBalance.objects.create(initial_profile_balance=INITIAL_BALANCE)
+
+        profile = Profile.objects.create()
+        profile.save()
+
+        category = QuoteCategory.objects.create(title='Тестовая платная категория',
+                                                is_payable=True,
+                                                price_to_unlock=PRICE_TO_UNLOCK)
+
+        # When
+        result, explanation = Profile.objects.unlock_category(profile, category)
+        category = QuoteCategory.objects.get(pk=category.pk)
+
+        # Then
+        self.assertFalse(result)
+        self.assertNotIn(profile, category.available_to_users.all())
+
+
+class ProfileCategoryPurchaseUnlock(GameBalanceTestCase):
+    def test_should_unlock_after_purchase_validated(self):
+        # Given
+        PRICE_TO_UNLOCK = 10E8 # ANY
+
+        session = DeviceSession.objects.create()
+        session.save()
+
+        GameBalance.objects.create(initial_profile_balance=0)
+        profile = Profile.objects.get_by_session(device_session=session)
+
+        category = QuoteCategory.objects.create(title='Тестовая платная категория',
+                                                is_payable=True,
+                                                price_to_unlock=PRICE_TO_UNLOCK)
+
+
+        google_play_product = GooglePlayProduct.objects.create()
+        google_play_purchase = GooglePlayIAPPurchase.objects.create(product=google_play_product,
+                                                                    device_session=session)
+        google_play_purchase.save()
+
+        purchase = CategoryUnlockPurchase.objects.create(profile=profile,
+                                              category_to_unlock=category,
+                                              google_play_purchase=google_play_purchase)
+        purchase.save()
+
+        # When
+        google_play_purchase.status = PurchaseStatus.VALID  # manually 'validated' purchase
+        google_play_purchase.save()
+
+        # Then
+        self.assertIn(profile, category.available_to_users.all())

@@ -25,7 +25,7 @@ admin.site.register(Topic, TopicAdmin)
 admin.site.register(QuoteAuthor)
 
 
-class ProductAdmin(admin.ModelAdmin):
+class BalanceRechargeProductAdmin(admin.ModelAdmin):
     list_display = ('admin_title', 'google_play_product',) # 'app_store_product')
 
-admin.site.register(Product, ProductAdmin)
+admin.site.register(BalanceRechargeProduct, BalanceRechargeProductAdmin)
