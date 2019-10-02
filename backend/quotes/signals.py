@@ -10,6 +10,9 @@ def create_profile_on_new_device_session(sender, instance, created, **kwargs):
     profile.device_sessions.set([session,])
     profile.save()
 
+
+# TODO: - extract core logic: find responsible for processing purchase and then call him to process a purchase
+# TODO: - guarantee that every purchase has been processed
 def recharge_profile_on_purchase(sender, instance, created, **kwargs):
     if created:
         return
@@ -17,12 +20,10 @@ def recharge_profile_on_purchase(sender, instance, created, **kwargs):
         return
     purchase = instance
 
-    session = purchase.device_session
-
     try:
         app_product = BalanceRechargeProduct.objects.get_by_store_product(purchase.product)
 
-        profile_to_recharge = Profile.objects.get_by_session(session)
+        profile_to_recharge = Profile.objects.get_by_session(purchase.device_session)
         profile_to_recharge.balance = profile_to_recharge.balance + app_product.balance_recharge
         profile_to_recharge.save()
     except BalanceRechargeProduct.DoesNotExist:
