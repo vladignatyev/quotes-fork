@@ -8,18 +8,24 @@ class QuoteAdmin(admin.ModelAdmin):
 
 
 class QuoteCategoryAdmin(admin.ModelAdmin):
-    list_display = ('title', 'language')
+    list_display = ('title',)
 
 
-admin.site.register(Profile)
+class TopicAdmin(admin.ModelAdmin):
+    list_display = ('title',)
+
+class ProfileAdmin(admin.ModelAdmin):
+    list_display = ('nickname', 'balance', )
+
+admin.site.register(Profile, ProfileAdmin)
 
 admin.site.register(Quote, QuoteAdmin)
 admin.site.register(QuoteCategory, QuoteCategoryAdmin)
+admin.site.register(Topic, TopicAdmin)
 admin.site.register(QuoteAuthor)
-admin.site.register(QuoteLanguage)
 
 
 class ProductAdmin(admin.ModelAdmin):
-    list_display = ('admin_title', 'google_play_product', 'app_store_product')
+    list_display = ('admin_title', 'google_play_product',) # 'app_store_product')
 
 admin.site.register(Product, ProductAdmin)

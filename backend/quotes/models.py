@@ -1,3 +1,5 @@
+from django.utils import timezone
+
 from django.db import models
 
 from django.conf import settings
@@ -20,6 +22,7 @@ class ProfileManager(models.Manager):
 class Profile(models.Model):
     device_sessions = models.ManyToManyField('api.DeviceSession')
     balance = models.PositiveIntegerField(default=0)
+    nickname = models.CharField(max_length=256, default='Пан Инкогнито')
 
     objects = ProfileManager()
 
@@ -28,6 +31,7 @@ class Profile(models.Model):
         verbose_name_plural = 'профили пользователей'
 
 
+# todo: replace when auth get done
 @receiver(post_save, sender='api.DeviceSession')
 def create_profile_on_new_device_session(sender, instance, created, **kwargs):
     if not created:
@@ -72,25 +76,36 @@ class QuoteAuthor(models.Model):
         verbose_name_plural = 'авторы цитат'
 
 
-class QuoteLanguage(models.Model):
-    short_name = models.CharField("Короткое название языка (en, us, ...)", max_length=2)
-    admin_name = models.CharField("Название языка в админке", max_length=256)
+class Achievement(models.Model):
+    icon_id = models.CharField("Имя иконки в приложении", max_length=256)
+    title = models.CharField(max_length=256)
+    received_text = models.TextField(default='')
+    description_text = models.TextField(default='')
 
-    def __str__(self):
-        return self.admin_name
 
-    class Meta:
-        verbose_name = 'язык'
-        verbose_name_plural = 'языки'
+class Topic(models.Model):
+    title = models.CharField("Название Темы", max_length=256)
+
+    on_complete_achievement = models.ForeignKey(Achievement, on_delete=models.SET_NULL, null=True)
 
 
 class QuoteCategory(models.Model):
-    title = models.CharField("Название категории", max_length=256)
-    language = models.ForeignKey(QuoteLanguage, "Язык категории")
+    topic = models.ForeignKey(Topic, on_delete=models.CASCADE, default=None, null=True)
+    title = models.CharField("Название Раздела", max_length=256)
 
+    available_by_default = models.BooleanField(default=False)
+    available_to_users = models.ManyToManyField(Profile)
+
+    # language = models.ForeignKey(QuoteLanguage, "Язык категории")
+    # Events
+    is_event = models.BooleanField(default=False)
+    event_due_date = models.DateTimeField(default=timezone.now)
+    event_title = models.CharField(max_length=256, default='')
+    event_description = models.TextField(default='')
+    event_win_achievement = models.ForeignKey(Achievement, on_delete=models.SET_NULL, null=True)
 
     def __str__(self):
-        return _truncate(self.title)
+        return _truncate(f'{self.topic.title} > {self.title}')
 
     class Meta:
         verbose_name = 'категория цитат'
@@ -125,7 +140,7 @@ class Product(models.Model):
     balance_recharge = models.IntegerField("Сумма пополнения баланса", default=1)
 
     google_play_product = models.ForeignKey('api.GooglePlayProduct', on_delete=models.SET_NULL, null=True, blank=True)
-    app_store_product = models.ForeignKey('api.AppStoreProduct', on_delete=models.SET_NULL, null=True, blank=True)
+    # app_store_product = models.ForeignKey('api.AppStoreProduct', on_delete=models.SET_NULL, null=True, blank=True)
 
     objects = ProductManager()
 
