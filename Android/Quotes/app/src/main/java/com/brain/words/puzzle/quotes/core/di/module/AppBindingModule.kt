@@ -1,7 +1,6 @@
 package com.brain.words.puzzle.quotes.core.di.module
 
-import com.brain.words.puzzle.quotes.core.binding.ImageViewBindingAdapters
-import com.brain.words.puzzle.quotes.core.binding.ViewBindingAdapters
+import com.brain.words.puzzle.quotes.core.binding.*
 import com.brain.words.puzzle.quotes.core.di.AppDataBindingComponent
 import dagger.Module
 import dagger.Provides
@@ -17,6 +16,12 @@ class AppBindingModule {
         override fun getViewBindingAdapters() = ViewBindingAdapters()
 
         override fun getImageViewBindingAdapters() = ImageViewBindingAdapters()
+
+        override fun getViewPagerBindingAdapters() = ViewPagerBindingAdapters()
+
+        override fun getPreloaderButtonBindingAdapters() = PreloaderButtonBindingAdapters()
+
+        override fun getRecyclerViewBindingAdapters() = RecyclerViewBindingAdapters()
     }
 
 }

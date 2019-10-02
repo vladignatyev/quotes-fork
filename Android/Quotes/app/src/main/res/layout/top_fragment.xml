@@ -6,25 +6,25 @@
 
         <variable
             name="fragment"
-            type="com.brain.words.puzzle.quotes.ui.onboarding.login.LoginFragment" />
+            type="com.brain.words.puzzle.quotes.ui.main.top.TopFragment" />
 
         <variable
             name="viewModel"
-            type="com.brain.words.puzzle.quotes.ui.onboarding.login.LoginViewModel" />
+            type="com.brain.words.puzzle.quotes.ui.main.top.TopViewModel" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:background="#a5a5a5">
 
-        <TextView
-            android:layout_width="wrap_content"
+        <View
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="LOGIN"
+            android:background="@drawable/ic_background"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
-
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

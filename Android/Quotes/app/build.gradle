@@ -100,4 +100,7 @@ dependencies {
     testImplementation "com.nhaarman:mockito-kotlin-kt1.1:$versions.mockitoKotlinVersion"
 
     //UI Libraries
+    implementation "com.airbnb.android:lottie:$versions.lottieVersion"
+    implementation "nl.dionsegijn:konfetti:$versions.konfetti"
+
 }

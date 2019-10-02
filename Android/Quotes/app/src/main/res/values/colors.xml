@@ -1,6 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <color name="colorPrimary">#008577</color>
-    <color name="colorPrimaryDark">#00574B</color>
-    <color name="colorAccent">#D81B60</color>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <color name="colorPrimary">#FFFFFF</color>
+    <color name="colorPrimaryDark">#FFFFFF</color>
+    <color name="colorAccent">#FFFFFF</color>
+
+    <color name="blue">#0981CC</color>
+    <color name="darkBlue">#003E65</color>
+
+    <color name="indigo">#766CC7</color>
+    <color name="darkIndigo">#443E74</color>
+
+    <color name="purple">#B04EA6</color>
+    <color name="darkPurple">#7B3473</color>
+
+    <color name="white">#FFFFFF</color>
+    <color name="transparent">#00000000</color>
+
+    <color name="bg_item_normal_state">#fff0f0f0</color>
+    <color name="bg_item_dragging_state">#33ffffff</color>
+    <color name="bg_item_dragging_active_state">#ffffff</color>
+    <color name="bg_swipe_item_neutral">@android:color/transparent</color>
+
+    <color name="white_semi_trans">#A6FFFFFF</color>
+
+    <color name="mtrl_textinput_default_box_stroke_color" tools:override="true">#FFFFFF</color>
+    <color name="black">#000000</color>
+
 </resources>

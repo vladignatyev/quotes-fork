@@ -1,3 +1,9 @@
 <resources>
     <string name="app_name">Quotes</string>
+
+    <string name="button_continue">Продолжить</string>
+    <string name="name_hint">Ваше имя</string>
+    <string name="welcome_hint">Привет!\nДавай знакомиться.</string>
+    <string name="welcome_aboard">Добро пожаловать на борт, %s!</string>
+    <string name="welcome_aboard_hint">Правила игры просты: меняй слова местами, чтобы собрать фразу!</string>
 </resources>

@@ -3,6 +3,7 @@ package com.brain.words.puzzle.quotes.core.di.module
 import android.content.Context
 import android.content.SharedPreferences
 import com.brain.words.puzzle.quotes.core.App
+import com.brain.words.puzzle.quotes.core.common.utils.TimedActionConfirmHelper
 import dagger.Module
 import dagger.Provides
 import javax.inject.Singleton
@@ -15,6 +16,9 @@ class CoreModule {
     fun sharedPreferences(app: App): SharedPreferences = app.getSharedPreferences(
         "shared_prefs", Context.MODE_PRIVATE
     )
+
+    @Provides
+    fun timedActionConfirmHelper() = TimedActionConfirmHelper(TimedActionConfirmHelper.TIMEOUT_DEFAULT)
 
 //     @Provides
 //    fun timedActionConfirmHelper() = TimedActionConfirmHelper(TimedActionConfirmHelper.TIMEOUT_DEFAULT)
