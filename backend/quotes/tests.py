@@ -1,8 +1,8 @@
 from django.conf import settings
 from django.test import TestCase
 
-from .models import Profile, Product
-from api.models import DeviceSession, GooglePlayProduct, GooglePlayIAPPurchase, PurchaseStatus
+from .models import *
+from api.models import *
 
 
 class UtilsTest(TestCase):
@@ -13,7 +13,19 @@ class UtilsTest(TestCase):
         self.assertEqual('Карл у Клары украл коралы', _truncate('Карл у Клары украл коралы', length=100, suffix='˚˚˚'))
 
 
-class ProfileTest(TestCase):
+class GameBalanceTestCase(TestCase):
+    TEST_INITIAL_PROFILE_BALANCE = 20
+
+    def setUp(self):
+        super(GameBalanceTestCase, self).setUp()
+        self._gamebalance = GameBalance.objects.create(initial_profile_balance=self.TEST_INITIAL_PROFILE_BALANCE)
+
+    def tearDown(self):
+        super(GameBalanceTestCase, self).tearDown()
+        self._gamebalance.delete()
+
+
+class ProfileTest(GameBalanceTestCase):
     def test_autocreate_profile_when_new_device_session_created(self):
         # Given
         self.assertEqual(0, len(Profile.objects.all()))
@@ -40,10 +52,22 @@ class ProfileTest(TestCase):
         profile = Profile.objects.create()
 
         # When
-        # profile = factory.create_new_profile()
+        pass
 
         # Then
-        self.assertEqual(settings.QUOTES_INITIAL_PROFILE_BALANCE, profile.balance)
+        self.assertEqual(self.TEST_INITIAL_PROFILE_BALANCE, profile.balance)
+
+    def test_should_have_default_balance_equal_to_latest_game_balance(self):
+        # Given
+        GameBalance.objects.create(initial_profile_balance=10)
+        GameBalance.objects.create(initial_profile_balance=20)
+        GameBalance.objects.create(initial_profile_balance=30)
+
+        # When
+        profile = Profile.objects.create()
+
+        # Then
+        self.assertEqual(30, profile.balance)
 
 
     def test_should_increase_balance_after_valid_purchase(self):
@@ -65,7 +89,7 @@ class ProfileTest(TestCase):
         # Then
         profile = Profile.objects.filter(device_sessions__pk__contains=session)[0]  # auto-generated profile
 
-        self.assertEqual(settings.QUOTES_INITIAL_PROFILE_BALANCE + BALANCE_RECHARGE, profile.balance)
+        self.assertEqual(self.TEST_INITIAL_PROFILE_BALANCE + BALANCE_RECHARGE, profile.balance)
 
     def test_shouldnt_increase_balance_when_purchase_has_default_status(self):
         # Given
@@ -85,4 +109,40 @@ class ProfileTest(TestCase):
         # Then
         profile = Profile.objects.filter(device_sessions__pk__contains=session)[0]  # auto-generated profile
 
-        self.assertEqual(settings.QUOTES_INITIAL_PROFILE_BALANCE, profile.balance)
+        self.assertEqual(self.TEST_INITIAL_PROFILE_BALANCE, profile.balance)
+
+
+class GameBalanceTest(TestCase):
+    def test_should_always_return_the_latest(self):
+        # Given
+        GameBalance.objects.create(initial_profile_balance=10)
+        GameBalance.objects.create(initial_profile_balance=20)
+        GameBalance.objects.create(initial_profile_balance=30)
+
+        # When
+        game_settings = GameBalance.objects.get_actual_game_settings()
+
+        # Then
+        self.assertEqual(30, game_settings.initial_profile_balance)
+
+#
+class ProfileCategoryUnlocking(GameBalanceTestCase):
+    def test_should_unlock_category_for_given_profile(self):
+        # Given
+        INITIAL_BALANCE = 30
+        PRICE_TO_UNLOCK = 5
+
+        GameBalance.objects.create(initial_profile_balance=INITIAL_BALANCE)
+
+        profile = Profile.objects.create()
+        profile.save()
+
+        category = QuoteCategory.objects.create(title='Тестовая платная категория',
+                                                is_payable=True,
+                                                price_to_unlock=PRICE_TO_UNLOCK)
+
+        # When
+        Profile.objects.buy_unlock_category(profile, category)
+
+        # Then
+        self.assertEqual(INITIAL_BALANCE - PRICE_TO_UNLOCK, profile.balance)

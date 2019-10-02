@@ -4,7 +4,6 @@ from django.db import models
 
 from django.conf import settings
 from django.db.models.signals import post_save
-from django.dispatch import receiver
 
 from api.models import PurchaseStatus, GooglePlayProduct, AppStoreProduct
 
@@ -12,11 +11,19 @@ from api.models import PurchaseStatus, GooglePlayProduct, AppStoreProduct
 class ProfileManager(models.Manager):
     def create(self, *args, **kwargs):
         profile = super(ProfileManager, self).create(*args, **kwargs)
-        profile.balance = kwargs.get('balance', settings.QUOTES_INITIAL_PROFILE_BALANCE)
+        game_settings = GameBalance.objects.get_actual_game_settings()
+        profile.balance = kwargs.get('balance', game_settings.initial_profile_balance)
         return profile
 
     def get_by_session(self, device_session):
         return Profile.objects.filter(device_sessions__pk__contains=device_session.pk)[0]
+
+    # todo:
+    def buy_unlock_category(self, profile, quote_category):
+        balance = profile.balance
+        price = quote_category.price_to_unlock
+        new_balance = balance - price
+        profile.balance = new_balance
 
 
 class Profile(models.Model):
@@ -24,37 +31,13 @@ class Profile(models.Model):
     balance = models.PositiveIntegerField(default=0)
     nickname = models.CharField(max_length=256, default='Пан Инкогнито')
 
+    settings = models.ForeignKey('GameBalance', on_delete=models.CASCADE, default=0)  # todo: default first one GameBalance
+
     objects = ProfileManager()
 
     class Meta:
         verbose_name = 'профиль пользователя'
         verbose_name_plural = 'профили пользователей'
-
-
-# todo: replace when auth get done
-@receiver(post_save, sender='api.DeviceSession')
-def create_profile_on_new_device_session(sender, instance, created, **kwargs):
-    if not created:
-        return
-    session = instance
-    profile = Profile.objects.create()
-    profile.device_sessions.set([session,])
-    profile.save()
-
-@receiver(post_save, sender='api.GooglePlayIAPPurchase')
-def recharge_profile_on_purchase(sender, instance, created, **kwargs):
-    if created:
-        return
-    if instance.status != PurchaseStatus.VALID:
-        return
-    purchase = instance
-    session = purchase.device_session
-    # app_product = Product.objects.filter(google_play_product__pk=purchase.product.pk)[0]
-    app_product = Product.objects.get_by_store_product(purchase.product)
-
-    profile_to_recharge = Profile.objects.get_by_session(session)
-    profile_to_recharge.balance = profile_to_recharge.balance + app_product.balance_recharge
-    profile_to_recharge.save()
 
 
 def _truncate(text, length=50, suffix='...'):
@@ -89,20 +72,30 @@ class Topic(models.Model):
     on_complete_achievement = models.ForeignKey(Achievement, on_delete=models.SET_NULL, null=True)
 
 
-class QuoteCategory(models.Model):
-    topic = models.ForeignKey(Topic, on_delete=models.CASCADE, default=None, null=True)
+class Section(models.Model):
     title = models.CharField("Название Раздела", max_length=256)
+    topic = models.ForeignKey(Topic, on_delete=models.CASCADE)
 
-    available_by_default = models.BooleanField(default=False)
-    available_to_users = models.ManyToManyField(Profile)
+    on_complete_achievement = models.ForeignKey(Achievement, on_delete=models.SET_NULL, null=True)
 
-    # language = models.ForeignKey(QuoteLanguage, "Язык категории")
+
+class QuoteCategory(models.Model):
+    section = models.ForeignKey(Section, on_delete=models.CASCADE, default=None, null=True)
+    title = models.CharField("Название Категории", max_length=256)
+
     # Events
     is_event = models.BooleanField(default=False)
     event_due_date = models.DateTimeField(default=timezone.now)
     event_title = models.CharField(max_length=256, default='')
     event_description = models.TextField(default='')
     event_win_achievement = models.ForeignKey(Achievement, on_delete=models.SET_NULL, null=True)
+
+    # Locked category
+    is_payable = models.BooleanField('Категория платная?', default=False)
+    price_to_unlock = models.BigIntegerField('Стоимость открытия категории если она платная', default=0)
+
+    available_to_users = models.ManyToManyField(Profile, verbose_name='Профили пользователей которым доступна категория')
+
 
     def __str__(self):
         return _truncate(f'{self.topic.title} > {self.title}')
@@ -147,3 +140,17 @@ class Product(models.Model):
     class Meta:
         verbose_name = 'IAP продукт'
         verbose_name_plural = 'продукты'
+
+
+class GameBalanceManager(models.Manager):
+    def get_actual_game_settings(self):
+        try:
+            return GameBalance.objects.order_by('-pk')[0]
+        except IndexError:
+            return self.create(initial_profile_balance=0)
+
+
+class GameBalance(models.Model):
+    initial_profile_balance = models.BigIntegerField(default=0)
+
+    objects = GameBalanceManager()

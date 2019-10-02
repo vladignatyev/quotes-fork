@@ -1,6 +1,7 @@
 from django.test import TestCase
 from .models import DeviceSession, Credentials
 
+
 class ModelTest(TestCase):
     def test_device_session_creation(self):
         test_token = 'abcdabcdabcdabcdabcdabcdabcdabcd'

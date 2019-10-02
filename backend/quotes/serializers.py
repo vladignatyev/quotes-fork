@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Quote, QuoteCategory, QuoteAuthor
+from .models import *
 
 
 class QuoteAuthorSerializer(serializers.ModelSerializer):
@@ -19,4 +19,19 @@ class QuoteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Quote
         fields = ['text', 'author', 'category']
+
+
 #
+
+class TopicSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Topic
+        fields = ['title',]
+#
+
+
+class SectionSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Section
+        fields = ['title', ]
