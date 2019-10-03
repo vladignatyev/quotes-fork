@@ -32,5 +32,5 @@ router.register(r'topic/(?P<topic_pk>\d+)/sections/(?P<profile_pk>\d+)', Section
 # router.register(r'categories', QuoteCategoryViewSet)
 # urlpatterns = [router.urls,]
 urlpatterns = [
-    path('', include(router.urls)),
+    path('', include(router.urls), name='quotes-api'),
 ]
