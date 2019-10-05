@@ -150,3 +150,24 @@ def clean_tokens_lru_cache(*args, **kwargs):
     get_server_secret.cache_clear()
 
 post_save.connect(clean_tokens_lru_cache, sender='api.Credentials')
+
+
+def generate_signature(device_token, timestamp):
+    shared_secret = get_shared_secret()
+
+    h = hashlib.sha256()
+    h.update(shared_secret)
+    masked_shared_secret = h.hexdigest()
+
+    sequence = [str(device_token), str(timestamp)].join('|')
+
+    h2 = hashlib.sha256()
+    h2.update(masked_shared_secret)
+    h2.update(sequence)
+
+    signature = h2.hexdigest()
+    return signature
+
+
+def check_signature(device_token, timestamp, signature):
+    return generate_signature(device_token, timestamp) == signature

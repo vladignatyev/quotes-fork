@@ -4,7 +4,6 @@ import os
 from django.conf import settings
 
 
-
 def generate_secret():
     '''
     Here we generate random sequence of bytes by OS provided RNG.
@@ -18,24 +17,3 @@ def generate_secret():
     h.update(settings.SECRET_KEY.encode('utf-8'))
     h.update(os.urandom(32))
     return h.hexdigest()
-
-
-def generate_signature(device_token, timestamp):
-    shared_secret = get_shared_secret()
-
-    h = hashlib.sha256()
-    h.update(shared_secret)
-    masked_shared_secret = h.hexdigest()
-
-    sequence = [str(device_token), str(timestamp)].join('|')
-
-    h2 = hashlib.sha256()
-    h2.update(masked_shared_secret)
-    h2.update(sequence)
-
-    signature = h2.hexdigest()
-    return signature
-
-
-def check_signature(device_token, timestamp, signature):
-    return generate_signature(device_token, timestamp) == signature
