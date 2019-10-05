@@ -167,3 +167,7 @@ class AuthenticationTest(TestCase):
         # Then
         self.assertTrue(check_result)
         self.assertNotIn(crafted_auth_token, get_server_secret())
+
+    def test_auth_token_shouldnt_be_none_or_empty(self):
+        self.assertFalse(check_auth_token(None))
+        self.assertFalse(check_auth_token(''))

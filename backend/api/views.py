@@ -70,3 +70,23 @@ class AuthenticateView(View):
 
     def invalid_response(self):
         return HttpResponse(status=401)
+
+
+class SafeView(View):
+    def dispatch(self, request, *args, **kwargs):
+        auth_token = request.headers.get('X-Client-Auth', None)
+
+        if not check_auth_token(auth_token):
+            return HttpResponse(status=401)
+
+        try:
+            request.device_session = DeviceSession.objects.get(auth_token=auth_token)
+        except DeviceSession.DoesNotExist:
+            return HttpResponse(status=401)
+
+        self.mixin_authorized(request)
+
+        return super(SafeView, self).dispatch(request, *args, **kwargs)
+
+    def mixin_authorized(self, request):
+        pass

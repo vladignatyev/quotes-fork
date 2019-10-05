@@ -14,12 +14,16 @@ from django.views.decorators.http import require_http_methods
 from django.urls import reverse
 from django import forms
 
-from api.views import AuthenticationForm, AuthenticateView
+from api.views import AuthenticationForm, AuthenticateView, SafeView
 
 
 def json_response(res_dict):
     return JsonResponse(res_dict, json_dumps_params={'indent': 4, 'ensure_ascii': False})
 
+
+class BaseView(SafeView):
+    def mixin_authorized(self, request):
+        request.user_profile = Profile.objects.get_by_session(request.device_session)
 
 
 class RestDetailView(View):
@@ -42,7 +46,7 @@ class TopicDetail(View):
         return json_response(topic)
 
 
-class TopicList(View):
+class TopicList(BaseView):
     queryset = Topic.objects.filter(hidden=False)
     ordering = '-pk'
 

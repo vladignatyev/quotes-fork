@@ -181,6 +181,8 @@ def check_signature(device_token, timestamp, signature):
     return generate_signature(device_token, timestamp) == signature
 
 def check_auth_token(auth_token):
+    if auth_token is None or auth_token == '':
+        return False
     auth_token_payload = auth_token[0:-16]
     server_sig = auth_token[-16:]
     return sign_auth_token(auth_token_payload) == server_sig
