@@ -40,12 +40,6 @@ INSTALLED_APPS = [
 ]
 
 INSTALLED_APPS += [
-    'tastypie'
-]
-
-TASTYPIE_DEFAULT_FORMATS = ['json', 'xml', 'yaml', 'plist']
-
-INSTALLED_APPS += [
     'api.apps.ApiConfig',
     'quotes.apps.QuotesConfig'
 ]

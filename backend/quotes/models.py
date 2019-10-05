@@ -149,7 +149,7 @@ class QuoteCategory(models.Model):
 
     price_to_unlock = models.BigIntegerField('Стоимость открытия категории если она платная', default=0, blank=True)
 
-    available_to_users = models.ManyToManyField('Profile', verbose_name='Профили пользователей которым доступна категория', blank=True, through='CategoryUnlockPurchase')
+    available_to_users = models.ManyToManyField('Profile', verbose_name='Профили пользователей которым доступна категория', blank=True, through='CategoryUnlockPurchase', related_name='availability_to_profile')
     on_complete_achievement = models.ForeignKey(Achievement, on_delete=models.SET_NULL, null=True, blank=True, related_name='on_complete_achievement')
 
     complete_by_users = models.ManyToManyField('Profile',  verbose_name='Юзеры которые прошли категорию', blank=True, related_name='category_complete_by_users')
