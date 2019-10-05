@@ -36,9 +36,14 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
-    'django.contrib.staticfiles',
-    'rest_framework'
+    'django.contrib.staticfiles'
 ]
+
+INSTALLED_APPS += [
+    'tastypie'
+]
+
+TASTYPIE_DEFAULT_FORMATS = ['json', 'xml', 'yaml', 'plist']
 
 INSTALLED_APPS += [
     'api.apps.ApiConfig',
@@ -54,6 +59,8 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+
 
 ROOT_URLCONF = 'backend.urls'
 

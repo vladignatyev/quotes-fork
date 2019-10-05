@@ -95,6 +95,9 @@ class GooglePlayIAPPurchase(Purchase):
     purchase_token = models.CharField(max_length=256, blank=True)
     order_id = models.CharField(max_length=256, blank=True)
 
+    date_created = models.DateTimeField(auto_now_add=True)
+    date_updated = models.DateTimeField(auto_now=True)
+
 class AppStoreIAPPurchase(Purchase):
     product = models.ForeignKey(AppStoreProduct, on_delete=models.SET_NULL, null=True, blank=True)
 
