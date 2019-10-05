@@ -1,5 +1,8 @@
 import re
 import hashlib
+import hmac
+import codecs
+
 from functools import lru_cache
 
 from django.conf import settings
@@ -12,7 +15,7 @@ from .crypto import generate_secret
 
 
 class DeviceSessionManager(models.Manager):
-    def is_valid_token(self, token, valid_chars=r'^[a-z|A-Z|0-9]{32}$'):
+    def is_valid_token(self, token, valid_chars=r'^[a-z|A-Z|0-9]+$'):
         is_empty = token == ''
         is_match_rules = re.match(valid_chars, token) is not None
 
@@ -22,14 +25,15 @@ class DeviceSessionManager(models.Manager):
     def create_from_token(self, token):
         if not self.is_valid_token(token):
             return
-            
-        session = DeviceSession.objects.create(token=token)
+
+        session = DeviceSession.objects.create(token=token)#, auth_token=)
         session.save()
         return session
 
 
 class DeviceSession(models.Model):
-    token = models.CharField("Токен идентификатор сессии", max_length=256, unique=True)
+    token = models.CharField("Токен устройства", max_length=256, unique=True)
+    auth_token = models.CharField("Токен идентификатор сессии", max_length=256, unique=True, default='')
     timestamp = models.DateTimeField(auto_now_add=True)
 
     objects = DeviceSessionManager()
@@ -153,6 +157,11 @@ post_save.connect(clean_tokens_lru_cache, sender='api.Credentials')
 
 
 def generate_signature(device_token, timestamp):
+    '''
+    Generate deterministic signature.
+    The algorithm should be implemented on client too,
+    to be able to sign requests to authentication API.
+    '''
     shared_secret = get_shared_secret()
 
     h = hashlib.sha256()
@@ -171,3 +180,16 @@ def generate_signature(device_token, timestamp):
 
 def check_signature(device_token, timestamp, signature):
     return generate_signature(device_token, timestamp) == signature
+
+def check_auth_token(auth_token):
+    auth_token_payload = auth_token[0:-16]
+    server_sig = auth_token[-16:]
+    return sign_auth_token(auth_token_payload) == server_sig
+
+def generate_auth_token():
+    random_value = str(generate_secret())
+    server_sig = str(sign_auth_token(random_value))
+    return random_value + server_sig
+
+def sign_auth_token(auth_token_payload):
+    return hmac.new(codecs.encode(get_server_secret()), codecs.encode(auth_token_payload), digestmod=hashlib.sha256).hexdigest()[:16]

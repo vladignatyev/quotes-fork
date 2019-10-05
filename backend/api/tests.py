@@ -1,10 +1,13 @@
 import json
 
 from django.test import TestCase
-from .models import DeviceSession, Credentials, get_shared_secret, get_server_secret, generate_signature
+from .models import *
 from django.urls import reverse
 from django.utils import timezone
 
+from django.test import RequestFactory
+
+from .views import AuthenticateView
 
 
 class ModelTest(TestCase):
@@ -60,21 +63,25 @@ class ModelTest(TestCase):
 
 
 class AuthenticationTest(TestCase):
-    def post_data(self, payload, url=reverse('api-auth')):
-        # return self.client.generic("POST", url, json.dumps(payload))
-        return self.client.post(url, {'data': json.dumps(payload, ensure_ascii=False)})
+    FAKE_URL_PATH = '/someauthpath/'
 
+    def setUp(self):
+        self.factory = RequestFactory()
 
-    def test_get_not_allowed(self):
-        response = self.client.get(reverse('api-auth'))
-        self.assertEqual(405, response.status_code)
+    def post_data(self, payload):
+        data_dict = {
+            'data': json.dumps(payload, ensure_ascii=False)
+        }
 
-    def test_put_not_allowed(self):
-        response = self.client.put(reverse('api-auth'))
-        self.assertEqual(405, response.status_code)
+        request = self.factory.post(self.FAKE_URL_PATH, data_dict)
+        view = AuthenticateView()
+        response = view.post(request)
+        return response
 
     def test_post_allowed(self):
-        response = self.client.post(reverse('api-auth'))
+        request = self.factory.post(self.FAKE_URL_PATH)
+        view = AuthenticateView()
+        response = view.post(request)
         self.assertNotEqual(405, response.status_code)
 
     def test_invalid_form(self):
@@ -91,14 +98,12 @@ class AuthenticationTest(TestCase):
         # Given
         device_token = 'cafe' * 10000
         timestamp = timezone.now().strftime('%Y-%m-%dT%H:%M:%S%z')
-        nickname = 'Тестировщик'
         signature = generate_signature(device_token, timestamp)
 
         very_big_object = {
             'device_token': device_token,
             'timestamp': timestamp,
             'signature': signature,
-            'nickname': nickname
         }
 
         # When
@@ -106,8 +111,6 @@ class AuthenticationTest(TestCase):
 
         # Then
         self.assertEqual(401, response.status_code)
-
-
 
     def test_authentication_new_user(self):
         # Given
@@ -118,7 +121,6 @@ class AuthenticationTest(TestCase):
         payload = {
             'device_token': device_token,
             'timestamp': timestamp,
-            'nickname': 'Тестировщик',
             'signature': signature
         }
 
@@ -128,3 +130,37 @@ class AuthenticationTest(TestCase):
         # Then
         self.assertEqual(200, response.status_code)
         self.assertIsNotNone(response.content)
+        self.assertIsNotNone(DeviceSession.objects.get(token=device_token))
+
+    def test_auth_token_generation_symmetry(self):
+        # Given
+        auth_token = generate_auth_token()
+        # When
+        check_result = check_auth_token(auth_token)
+        # Then
+        self.assertTrue(check_result)
+
+    def test_auth_token_generation_modification_doesnt_pass_validation(self):
+        # Given
+        auth_token = generate_auth_token()
+
+        # When
+        modified_token1 = auth_token[1] + auth_token[0] + auth_token[2:]
+        modified_token2 = auth_token[:-2] + auth_token[-1] + auth_token[-2]
+
+        # Then
+        self.assertFalse(check_auth_token(modified_token1))
+        self.assertFalse(check_auth_token(modified_token2))
+
+    def test_auth_token_generation_zero_padding_attack_doesnt_expose_server_secret(self):
+        # Given
+        random_value = ''
+        server_secret = get_server_secret()
+        crafted_auth_token = sign_auth_token(random_value)
+
+        # When
+        check_result = check_auth_token(crafted_auth_token)
+
+        # Then
+        self.assertTrue(check_result)
+        self.assertNotIn(crafted_auth_token, get_server_secret())

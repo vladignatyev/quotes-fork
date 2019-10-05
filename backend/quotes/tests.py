@@ -1,3 +1,5 @@
+import json
+
 from django.conf import settings
 from django.test import TestCase
 
@@ -207,11 +209,25 @@ class ProfileCategoryPurchaseUnlock(GameBalanceTestCase):
         self.assertIn(profile, category.available_to_users.all())
 
 
-class ViewsTestCase(TestCase):
+class QuotesAuthenticateTest(TestCase):
+    def test_should_create_profile(self):
+        # Given
+        url = reverse('quote-auth')
 
-    #
-    # def test_should_return_list_of_topics(self):
-    #     response = self.client.get(reverse('quotes-api:topics'))
-    #
-    #     self.assertEqual(response.status_code, 200)
-    pass
+        device_token = 'sometesttoken'
+        timestamp = timezone.now().strftime('%Y-%m-%dT%H:%M:%S%z')
+        signature = generate_signature(device_token, timestamp)
+
+        payload = {
+            'device_token': device_token,
+            'timestamp': timestamp,
+            'signature': signature,
+            'nickname': 'Тестировщик'
+        }
+
+        # When
+        self.client.post(url, {'payload': json.dumps(payload, ensure_ascii=False)})
+
+        # Then
+        profile = Profile.objects.get_by_token(device_token)
+        self.assertEqual(nickname, profile.nickname)

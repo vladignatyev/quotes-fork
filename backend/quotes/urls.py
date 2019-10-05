@@ -20,6 +20,8 @@ from django.conf import settings
 from .views import *
 
 urlpatterns = [
+    path('auth/', QuotesAuthenticateView.as_view(), name='quote-auth'),
+
     path('topic/<int:pk>/', TopicDetail.as_view(), name='topic-detail'),
     path('topic/list/', TopicList.as_view(), name='topic-list'),
 

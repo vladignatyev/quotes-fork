@@ -18,11 +18,9 @@ from django.urls import include, path
 
 
 from django.conf import settings
-from api.views import AuthenticateView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path(r'api/' + f'v{settings.API_VERSION}/', include('quotes.urls')),
-    path(r'api/' + f'v{settings.API_VERSION}/general/', include('api.urls')),
     # path(r'api-auth/', include('rest_framework.urls'))
 ]

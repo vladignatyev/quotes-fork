@@ -59,8 +59,7 @@ class AuthenticateView(View):
         if not self.form.is_valid():
             return self.invalid_response()
 
-        cleaned_data = self.form.clean()
-
+        self.cleaned_data = self.form.clean()
         self.device_session = DeviceSession.objects.create_from_token(cleaned_data['device_token'])
         return self.respond_authenticated()
 

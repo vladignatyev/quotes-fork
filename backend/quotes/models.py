@@ -225,12 +225,19 @@ class GameBalance(models.Model):
 class ProfileManager(models.Manager):
     def create(self, *args, **kwargs):
         profile = super(ProfileManager, self).create(*args, **kwargs)
+
         game_settings = GameBalance.objects.get_actual_game_settings()
+
         profile.balance = kwargs.get('balance', game_settings.initial_profile_balance)
+        profile.nickname = kwargs.get('nickname', '')
+
         return profile
 
     def get_by_session(self, device_session):
-        return Profile.objects.filter(device_sessions__pk__contains=device_session.pk)[0]
+        return Profile.objects.get(device_sessions__pk__contains=device_session.pk)
+
+    def get_by_token(self, device_session_token):
+        return Profile.objects.get(device_sessions__token__contains=device_token)
 
     def unlock_category(self, profile, quote_category):
         balance = profile.balance
