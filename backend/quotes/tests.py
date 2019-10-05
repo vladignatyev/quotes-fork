@@ -217,17 +217,19 @@ class QuotesAuthenticateTest(TestCase):
         device_token = 'sometesttoken'
         timestamp = timezone.now().strftime('%Y-%m-%dT%H:%M:%S%z')
         signature = generate_signature(device_token, timestamp)
+        nickname = 'Тестировщик'
 
         payload = {
             'device_token': device_token,
             'timestamp': timestamp,
             'signature': signature,
-            'nickname': 'Тестировщик'
+            'nickname': nickname
         }
 
         # When
-        self.client.post(url, {'payload': json.dumps(payload, ensure_ascii=False)})
+        response = self.client.post(url, {'payload': json.dumps(payload, ensure_ascii=False)})
 
         # Then
+        self.assertEqual(200, response.status_code)
         profile = Profile.objects.get_by_token(device_token)
         self.assertEqual(nickname, profile.nickname)

@@ -85,3 +85,11 @@ class QuotesAuthenticationForm(AuthenticationForm):
 class QuotesAuthenticateView(AuthenticateView):
     def __init__(self, *args, **kwargs):
         super(QuotesAuthenticateView, self).__init__(form_cls=QuotesAuthenticationForm, *args, **kwargs)
+
+    def respond_authenticated(self):
+        print('YEAH!')
+        # profile = Profile.objects.create(nickname=self.cleaned_data['nickname'])
+        # profile.device_sessions.add(self.device_session)
+        # profile.save()
+        # Profile.objects.get()
+        # return

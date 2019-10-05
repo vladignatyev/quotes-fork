@@ -237,7 +237,11 @@ class ProfileManager(models.Manager):
         return Profile.objects.get(device_sessions__pk__contains=device_session.pk)
 
     def get_by_token(self, device_session_token):
-        return Profile.objects.get(device_sessions__token__contains=device_token)
+        return Profile.objects.get(device_sessions__token__contains=device_session_token)
+
+    def get_by_auth_token(self, auth_token):
+        return self.get_by_session(DeviceSession.objects.get(auth_token=auth_token))
+
 
     def unlock_category(self, profile, quote_category):
         balance = profile.balance
