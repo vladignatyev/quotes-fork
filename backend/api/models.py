@@ -1,7 +1,13 @@
 import re
 
+from functools import lru_cache
+
 from django.conf import settings
 from django.db import models
+
+from django.db.models.signals import post_save
+
+from .crypto import generate_secret
 
 
 class DeviceSessionManager(models.Manager):
@@ -104,18 +110,43 @@ class AppStoreIAPPurchase(Purchase):
 
 class CredentialsManager(models.Manager):
     def get(self):
-        return self.order_by('-id')[0]
+        try:
+            return self.latest('date_added')
+        except self.model.DoesNotExist:
+            instance = self.create()
+            instance.save()
+            return instance
 
 
 class Credentials(models.Model):
-    google_play_bundle_id = models.CharField("Play Market Bundle ID", max_length=256)
-    google_play_api_key = models.CharField("Google Play API Key", max_length=256)
-    appstore_bundle_id = models.CharField("AppStore Bundle ID", max_length=256)
+    google_play_bundle_id = models.CharField("Play Market Bundle ID", default='', max_length=256)
+    google_play_api_key = models.CharField("Google Play API Key", default='', max_length=256)
+    # appstore_bundle_id = models.CharField("AppStore Bundle ID", default='', max_length=256)
 
     date_added = models.DateTimeField(auto_now_add=True)
+
+    server_secret = models.CharField("Server-only secret", max_length=256, default=generate_secret)
+    shared_secret = models.CharField("Shared secret", max_length=256, default=generate_secret)
 
     objects = CredentialsManager()
 
     class Meta:
         verbose_name = 'Credentials'
         verbose_name_plural = 'Credentials'
+
+
+@lru_cache(maxsize=1)
+def get_shared_secret():
+    credentials = Credentials.objects.get()
+    return str(credentials.shared_secret)
+
+@lru_cache(maxsize=1)
+def get_server_secret():
+    credentials = Credentials.objects.get()
+    return str(credentials.server_secret)
+
+def clean_tokens_lru_cache(*args, **kwargs):
+    get_shared_secret.cache_clear()
+    get_server_secret.cache_clear()
+
+post_save.connect(clean_tokens_lru_cache, sender='api.Credentials')
