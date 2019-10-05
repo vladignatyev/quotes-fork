@@ -227,9 +227,13 @@ class QuotesAuthenticateTest(TestCase):
         }
 
         # When
-        response = self.client.post(url, {'payload': json.dumps(payload, ensure_ascii=False)})
+        response = self.client.post(url, {'data': json.dumps(payload, ensure_ascii=False)})
 
         # Then
         self.assertEqual(200, response.status_code)
-        profile = Profile.objects.get_by_token(device_token)
+
+        payload = json.loads(response.content)
+        auth_token = payload['auth_token']
+
+        profile = Profile.objects.get_by_auth_token(auth_token)
         self.assertEqual(nickname, profile.nickname)

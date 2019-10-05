@@ -53,7 +53,6 @@ class AuthenticateView(View):
         return self.form_cls(deserialized)
 
     def post(self, request, *args, **kwargs):
-        # self.form = self.form_cls.from_request(request)
         self.form = self.make_form_from_request(request)
 
         if not self.form.is_valid():
@@ -61,6 +60,7 @@ class AuthenticateView(View):
 
         self.cleaned_data = self.form.clean()
         self.device_session = DeviceSession.objects.create_from_token(self.cleaned_data['device_token'])
+        print(self.device_session.auth_token)
         self.device_session.save()
 
         return self.respond_authenticated()

@@ -26,7 +26,7 @@ class DeviceSessionManager(models.Manager):
         if not self.is_valid_token(token):
             return
 
-        session = DeviceSession.objects.create(token=token, auth_token=generate_auth_token())
+        session = self.create(token=token, auth_token=generate_auth_token())
         return session
 
 

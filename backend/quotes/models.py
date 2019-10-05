@@ -5,7 +5,7 @@ from django.db import models
 from django.conf import settings
 from django.db.models.signals import post_save
 
-from api.models import PurchaseStatus, GooglePlayProduct, AppStoreProduct
+from api.models import DeviceSession, PurchaseStatus, GooglePlayProduct, AppStoreProduct
 
 
 
@@ -240,7 +240,8 @@ class ProfileManager(models.Manager):
         return Profile.objects.get(device_sessions__token__contains=device_session_token)
 
     def get_by_auth_token(self, auth_token):
-        return self.get_by_session(DeviceSession.objects.get(auth_token=auth_token))
+        session = DeviceSession.objects.get(auth_token=auth_token)
+        return self.get_by_session(session)
 
 
     def unlock_category(self, profile, quote_category):

@@ -79,7 +79,7 @@ class AchievementList(View):
 
 
 class QuotesAuthenticationForm(AuthenticationForm):
-    nickname = forms.CharField(label='user\'s nickname', max_length=256)
+    nickname = forms.CharField(label='user\'s nickname', max_length=256, required=False)
 
 
 class QuotesAuthenticateView(AuthenticateView):
@@ -87,9 +87,10 @@ class QuotesAuthenticateView(AuthenticateView):
         super(QuotesAuthenticateView, self).__init__(form_cls=QuotesAuthenticationForm, *args, **kwargs)
 
     def respond_authenticated(self):
-        print('YEAH!')
-        # profile = Profile.objects.create(nickname=self.cleaned_data['nickname'])
-        # profile.device_sessions.add(self.device_session)
-        # profile.save()
-        # Profile.objects.get()
-        # return
+        profile = Profile.objects.get_by_session(self.device_session)
+        profile.nickname = self.cleaned_data['nickname']
+        profile.save()
+
+        return JsonResponse({
+            'auth_token': self.device_session.auth_token
+        })
