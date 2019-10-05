@@ -12,7 +12,9 @@ from django.views.decorators.http import require_http_methods
 # from django.core.paginator import Paginator
 
 from django.urls import reverse
+from django import forms
 
+from api.views import AuthenticationForm, AuthenticateView
 
 
 def json_response(res_dict):
@@ -74,3 +76,12 @@ class AchievementList(View):
         }
 
         return json_response(res_dict)
+
+
+class QuotesAuthenticationForm(AuthenticationForm):
+    nickname = forms.CharField(label='user\'s nickname', max_length=256)
+
+
+class QuotesAuthenticateView(AuthenticateView):
+    def __init__(self, *args, **kwargs):
+        super(QuotesAuthenticateView, self).__init__(form_cls=QuotesAuthenticationForm, *args, **kwargs)

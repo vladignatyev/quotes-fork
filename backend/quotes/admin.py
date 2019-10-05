@@ -6,7 +6,7 @@ from .models import *
 class QuoteAdmin(admin.ModelAdmin):
     list_display = ('text', 'author', 'category')
 
-# 
+#
 # class SectionInline(admin.TabularInline):
 #     model = Section
 #     fields = ('title',)

@@ -1,5 +1,5 @@
 import re
-
+import hashlib
 from functools import lru_cache
 
 from django.conf import settings
@@ -7,32 +7,32 @@ from django.db import models
 
 from django.db.models.signals import post_save
 
+
 from .crypto import generate_secret
 
 
 class DeviceSessionManager(models.Manager):
-    # todo:
-    pass
-
-class DeviceSession(models.Model):
-    token = models.CharField("Токен идентификатор сессии", max_length=256)
-    timestamp = models.DateTimeField(auto_now_add=True)
-
-    @classmethod
-    def is_valid_token(cls, token, valid_chars=r'^[a-z|A-Z|0-9]{32}$'):
+    def is_valid_token(self, token, valid_chars=r'^[a-z|A-Z|0-9]{32}$'):
         is_empty = token == ''
         is_match_rules = re.match(valid_chars, token) is not None
 
         return not is_empty and is_match_rules
 
 
-    @classmethod
-    def create_from_token(cls, token):
-        if not cls.is_valid_token(token):
+    def create_from_token(self, token):
+        if not self.is_valid_token(token):
             return
+            
         session = DeviceSession.objects.create(token=token)
         session.save()
         return session
+
+
+class DeviceSession(models.Model):
+    token = models.CharField("Токен идентификатор сессии", max_length=256, unique=True)
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    objects = DeviceSessionManager()
 
     def __str__(self):
         return f'{self.token}'
@@ -156,14 +156,14 @@ def generate_signature(device_token, timestamp):
     shared_secret = get_shared_secret()
 
     h = hashlib.sha256()
-    h.update(shared_secret)
+    h.update(shared_secret.encode('utf-8'))
     masked_shared_secret = h.hexdigest()
 
-    sequence = [str(device_token), str(timestamp)].join('|')
+    sequence = f'{device_token}|{timestamp}'
 
     h2 = hashlib.sha256()
-    h2.update(masked_shared_secret)
-    h2.update(sequence)
+    h2.update(masked_shared_secret.encode('utf-8'))
+    h2.update(sequence.encode('utf-8'))
 
     signature = h2.hexdigest()
     return signature

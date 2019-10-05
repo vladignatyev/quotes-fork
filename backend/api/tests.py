@@ -1,16 +1,17 @@
 import json
 
 from django.test import TestCase
-from .models import DeviceSession, Credentials, get_shared_secret, get_server_secret
+from .models import DeviceSession, Credentials, get_shared_secret, get_server_secret, generate_signature
 from django.urls import reverse
 from django.utils import timezone
+
 
 
 class ModelTest(TestCase):
     def test_device_session_creation(self):
         test_token = 'abcdabcdabcdabcdabcdabcdabcdabcd'
 
-        obj = DeviceSession.create_from_token(token=test_token)
+        obj = DeviceSession.objects.create_from_token(token=test_token)
 
         self.assertIsNotNone(obj)
         self.assertEqual(obj.token, test_token)
@@ -19,7 +20,7 @@ class ModelTest(TestCase):
     def test_device_token_validation(self):
         invalid_token = 'invalid-token'
 
-        obj = DeviceSession.create_from_token(token=invalid_token)
+        obj = DeviceSession.objects.create_from_token(token=invalid_token)
 
         self.assertIsNone(obj)
 
@@ -85,21 +86,45 @@ class AuthenticationTest(TestCase):
 
         # Then
         self.assertEqual(401, response.status_code)
-    #
-    #
-    def test_authentication_new_user(self):
-        # from datetime import date
+
+    def test_giant_form_shouldnt_even_deserialize(self):
         # Given
-        payload = {
-            'device_token': 'sometesttoken',
-            'timestamp': timezone.now().strftime('%Y-%m-%dT%H:%M:%S%z'),
-            'nickname': 'Тестировщик',
-            'signature': 'some-sig'
+        device_token = 'cafe' * 10000
+        timestamp = timezone.now().strftime('%Y-%m-%dT%H:%M:%S%z')
+        nickname = 'Тестировщик'
+        signature = generate_signature(device_token, timestamp)
+
+        very_big_object = {
+            'device_token': device_token,
+            'timestamp': timestamp,
+            'signature': signature,
+            'nickname': nickname
         }
 
-        print(payload)
+        # When
+        response = self.post_data(very_big_object)
+
+        # Then
+        self.assertEqual(401, response.status_code)
+
+
+
+    def test_authentication_new_user(self):
+        # Given
+        device_token = 'sometesttoken'
+        timestamp = timezone.now().strftime('%Y-%m-%dT%H:%M:%S%z')
+        signature = generate_signature(device_token, timestamp)
+
+        payload = {
+            'device_token': device_token,
+            'timestamp': timestamp,
+            'nickname': 'Тестировщик',
+            'signature': signature
+        }
+
         # When
         response = self.post_data(payload)
 
         # Then
-        self.assertEqual(400, response.status_code)
+        self.assertEqual(200, response.status_code)
+        self.assertIsNotNone(response.content)

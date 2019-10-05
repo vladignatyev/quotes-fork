@@ -1,3 +1,9 @@
+import json
+
+import logging
+logger = logging.getLogger(__name__)
+
+
 from django.http import Http404
 from django.db import models
 
@@ -14,8 +20,6 @@ from django.views.decorators.http import require_http_methods
 from django.urls import reverse
 from django import forms
 
-import json
-
 
 from django.core.validators import RegexValidator
 
@@ -24,34 +28,44 @@ class TokenValidator(RegexValidator):
         super(TokenValidator, self).__init__(regex=r'^[a-zA-Z0-9]+$',
               message='Invalid token format')
 
+# todo: generalize and extract partially to the app module (nickname field!)
 
 class AuthenticationForm(forms.Form):
+    PAYLOAD_MAX_LENGTH = 512
+
     device_token = forms.CharField(label='device token', max_length=256, validators=[TokenValidator()])
     timestamp = forms.DateTimeField(label='timestamp', input_formats=['%Y-%m-%dT%H:%M:%S%z']) # 2019-09-04T08:30:00+0300
-    nickname = forms.CharField(label='user\'s nickname', max_length=256)
+    # nickname = forms.CharField(label='user\'s nickname', max_length=256)
     signature = forms.CharField(label='signature', max_length=256, validators=[TokenValidator()])
 
     @classmethod
     def from_request(cls, request):
-        data = request.POST.get('data', '{}')
-        deserialized = json.loads(data)
+        data = request.POST.get('data', '{}')[:cls.PAYLOAD_MAX_LENGTH]
+        try:
+            deserialized = json.loads(data)
+        except json.decoder.JSONDecodeError:
+            deserialized = None
         return cls(deserialized)
 
-    def clean(self):
-        cleaned_data = super().clean()
-        # cleaned_data['']
 
 class AuthenticateView(View):
-    def post(self, request, *args, **kwargs):
-        # print(request.POST['data'])
-        # print(**kwargs)
-        # print(request.headers)
+    def __init__(self, form_cls=AuthenticationForm, *args, **kwargs):
+        super(AuthenticateView, self).__init__(*args, **kwargs)
+        self.form_cls = AuthenticationForm
 
-        form = AuthenticationForm.from_request(request)# ()
-        if form.is_valid():
-            Credentials.objects.get()
-            # todo:
-            # authenticate
-            return HttpResponse(status=400)
-        else:
-            return HttpResponse(status=401)
+    def post(self, request, *args, **kwargs):
+        self.form = AuthenticationForm.from_request(request)
+
+        if not self.form.is_valid():
+            return self.invalid_response()
+
+        cleaned_data = self.form.clean()
+
+        self.device_session = DeviceSession.objects.create_from_token(cleaned_data['device_token'])
+        return self.respond_authenticated()
+
+    def respond_authenticated(self):
+        return JsonResponse({})
+
+    def invalid_response(self):
+        return HttpResponse(status=401)
