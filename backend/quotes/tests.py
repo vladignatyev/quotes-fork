@@ -227,7 +227,7 @@ class QuotesAuthenticateTest(TestCase):
         }
 
         # When
-        response = self.client.post(url, {'data': json.dumps(payload, ensure_ascii=False)})
+        response = self.client.post(url, json.dumps(payload, ensure_ascii=False), content_type='application/json')
 
         # Then
         self.assertEqual(200, response.status_code)

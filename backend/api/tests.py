@@ -70,11 +70,12 @@ class AuthenticationTest(TestCase):
         self.factory = RequestFactory()
 
     def post_data(self, payload):
-        data_dict = {
-            'data': json.dumps(payload, ensure_ascii=False)
-        }
+        # data_dict = {
+        #     'data': json.dumps(payload, ensure_ascii=False)
+        # }
 
-        request = self.factory.post(self.FAKE_URL_PATH, data_dict)
+        data = json.dumps(payload, ensure_ascii=False)
+        request = self.factory.post(self.FAKE_URL_PATH, data, content_type='application/json')
         view = AuthenticateView()
         response = view.post(request)
         return response
