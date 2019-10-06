@@ -60,7 +60,6 @@ class AuthenticateView(View):
 
         self.cleaned_data = self.form.clean()
         self.device_session = DeviceSession.objects.create_from_token(self.cleaned_data['device_token'])
-        print(self.device_session.auth_token)
         self.device_session.save()
 
         return self.respond_authenticated()

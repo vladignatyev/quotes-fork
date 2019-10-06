@@ -40,9 +40,9 @@ class SectionDetail(View):
         return json_response(topic)
 
 
-class TopicDetail(View):
+class TopicDetail(BaseView):
     def get(self, request, *args, **kwargs):
-        topic = Topic.objects.get_flattened(pk=kwargs['pk'])
+        topic = Topic.objects.get_flattened(pk=kwargs['pk'], current_user=self.request.user_profile)
         return json_response(topic)
 
 
@@ -72,8 +72,18 @@ class TopicList(BaseView):
 
 
 class AchievementList(BaseView):
+    fields = ('icon', 'title', 'received_text', 'description_text')
+
+    def flattened(self, iterable):
+        result = [ None ] * len(iterable)
+
+        for i, o in enumerate(iterable):
+            result[i] = model_to_dict(o.achievement, fields=self.fields)
+            result[i]['received_at'] = o.received_at.strftime('%Y-%m-%dT%H:%M:%S%z')
+        return result
+
     def get(self, request, *args, **kwargs):
-        achievements = list(Achievement.objects.filter(opened_by_users__in=[self.request.user_profile]))
+        achievements = self.flattened(AchievementReceiving.objects.filter(profile=self.request.user_profile))
 
         res_dict = {
             "objects": achievements,

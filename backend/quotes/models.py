@@ -5,6 +5,10 @@ from django.db import models
 from django.conf import settings
 from django.db.models.signals import post_save
 
+from django.forms.models import model_to_dict
+from django.urls import reverse
+
+
 from api.models import DeviceSession, PurchaseStatus, GooglePlayProduct, AppStoreProduct
 
 
@@ -50,10 +54,13 @@ class AchievementReceiving(models.Model):
     profile = models.ForeignKey('Profile', on_delete=models.CASCADE)
     received_at = models.DateTimeField(auto_now_add=True)
 
+    class Meta:
+        verbose_name = 'достижения vs юзеры'
+        verbose_name_plural = 'достижения vs юзеры'
 
+    def __str__(self):
+        return f'{self.profile} - {self.achievement}'
 
-from django.forms.models import model_to_dict
-from django.urls import reverse
 
 class TopicManager(models.Manager):
     topic_fields = ['title']
@@ -274,6 +281,9 @@ class Profile(models.Model):
     class Meta:
         verbose_name = 'профиль пользователя'
         verbose_name_plural = 'профили пользователей'
+
+    def __str__(self):
+        return f'#{self.pk} ({self.nickname})'
 
 
 class CategoryUnlockPurchase(models.Model):

@@ -34,6 +34,7 @@ admin.site.register(Section, SectionAdmin)
 admin.site.register(Topic, TopicAdmin)
 admin.site.register(QuoteAuthor)
 admin.site.register(Achievement)
+admin.site.register(AchievementReceiving)
 admin.site.register(GameBalance)
 
 class BalanceRechargeProductAdmin(admin.ModelAdmin):
