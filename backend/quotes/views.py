@@ -71,8 +71,9 @@ class TopicList(BaseView):
         return json_response(res_dict)
 
 
-class AchievementList(View):
+class AchievementList(BaseView):
     def get(self, request, *args, **kwargs):
+        achievements = list(Achievement.objects.filter(opened_by_users__in=[self.request.user_profile]))
 
         res_dict = {
             "objects": achievements,
@@ -93,6 +94,7 @@ class QuotesAuthenticateView(AuthenticateView):
     def respond_authenticated(self):
         profile = Profile.objects.get_by_session(self.device_session)
         profile.nickname = self.cleaned_data['nickname']
+        profile.settings = GameBalance.objects.get_actual_game_settings()
         profile.save()
 
         return JsonResponse({

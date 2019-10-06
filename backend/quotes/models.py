@@ -220,6 +220,13 @@ class GameBalance(models.Model):
 
     objects = GameBalanceManager()
 
+    class Meta:
+        verbose_name = 'игровой баланс'
+        verbose_name_plural = 'игровой баланс'
+
+    def __str__(self):
+        return f'{self.pk}) Монет в начале: {self.initial_profile_balance}, вознаграждение за прохождение левела {self.reward_per_level_completion}'
+
 
 
 class ProfileManager(models.Manager):

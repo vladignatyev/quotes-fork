@@ -237,5 +237,6 @@ class QuotesAuthenticateTest(TestCase):
 
         profile = Profile.objects.get_by_auth_token(auth_token)
         self.assertEqual(nickname, profile.nickname)
+        self.assertEqual(GameBalance.objects.get_actual_game_settings(), profile.settings)
 
         self.assertEqual(1, len(Profile.objects.all()))

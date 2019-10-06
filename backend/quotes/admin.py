@@ -33,7 +33,8 @@ admin.site.register(QuoteCategory, QuoteCategoryAdmin)
 admin.site.register(Section, SectionAdmin)
 admin.site.register(Topic, TopicAdmin)
 admin.site.register(QuoteAuthor)
-
+admin.site.register(Achievement)
+admin.site.register(GameBalance)
 
 class BalanceRechargeProductAdmin(admin.ModelAdmin):
     list_display = ('admin_title', 'google_play_product',) # 'app_store_product')

@@ -26,4 +26,6 @@ urlpatterns = [
     path('topic/list/', TopicList.as_view(), name='topic-list'),
 
     path('section/<int:pk>/', SectionDetail.as_view(), name='section-detail'),
+
+    path('achievements/', AchievementList.as_view(), name='achievements-list'),
 ]
