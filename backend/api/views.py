@@ -59,6 +59,10 @@ class AuthenticateView(View):
             return self.invalid_response()
 
         self.cleaned_data = self.form.clean()
+
+        if not check_signature(self.cleaned_data['device_token'], self.cleaned_data['timestamp'].strftime('%Y-%m-%dT%H:%M:%S%z'), self.cleaned_data['signature']):
+            return self.invalid_response()
+
         self.device_session = DeviceSession.objects.create_from_token(self.cleaned_data['device_token'])
         self.device_session.save()
 

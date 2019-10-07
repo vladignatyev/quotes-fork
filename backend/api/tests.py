@@ -70,10 +70,6 @@ class AuthenticationTest(TestCase):
         self.factory = RequestFactory()
 
     def post_data(self, payload):
-        # data_dict = {
-        #     'data': json.dumps(payload, ensure_ascii=False)
-        # }
-
         data = json.dumps(payload, ensure_ascii=False)
         request = self.factory.post(self.FAKE_URL_PATH, data, content_type='application/json')
         view = AuthenticateView()
@@ -172,3 +168,6 @@ class AuthenticationTest(TestCase):
     def test_auth_token_shouldnt_be_none_or_empty(self):
         self.assertFalse(check_auth_token(None))
         self.assertFalse(check_auth_token(''))
+
+    def test_imrporper_signature(self):
+        self.assertFalse(check_signature('1', '2019-10-06T12:37:16+0000', '1'))

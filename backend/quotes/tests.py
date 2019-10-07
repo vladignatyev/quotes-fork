@@ -240,3 +240,25 @@ class QuotesAuthenticateTest(TestCase):
         self.assertEqual(GameBalance.objects.get_actual_game_settings(), profile.settings)
 
         self.assertEqual(1, len(Profile.objects.all()))
+
+    def test_should_respond_401(self):
+        # Given
+        url = reverse('quote-auth')
+
+        device_token = '1'
+        timestamp = '2019-10-06T12:37:16+0000'
+        signature = '1'
+        nickname = 'тестировщик-9b76..b814'
+
+        payload = {
+            'device_token': device_token,
+            'timestamp': timestamp,
+            'signature': signature,
+            'nickname': nickname
+        }
+
+        # When
+        response = self.client.post(url, json.dumps(payload, ensure_ascii=False), content_type='application/json')
+
+        # Then
+        self.assertEqual(401, response.status_code)
