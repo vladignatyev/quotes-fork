@@ -241,7 +241,7 @@ class QuotesAuthenticateTest(TestCase):
 
         self.assertEqual(1, len(Profile.objects.all()))
 
-    def test_should_respond_401(self):
+    def test_should_respond_401_for_broken_case(self):
         # Given
         url = reverse('quote-auth')
 
@@ -258,6 +258,29 @@ class QuotesAuthenticateTest(TestCase):
         }
 
         # When
+        response = self.client.post(url, json.dumps(payload, ensure_ascii=False), content_type='application/json')
+
+        # Then
+        self.assertEqual(401, response.status_code)
+
+    def test_should_respond_401_not_500_to_make_vadim_confident_about_his_mobile_client(self):
+        # Given
+        url = reverse('quote-auth')
+
+        device_token = 'sometesttoken'
+        timestamp = timezone.now().strftime('%Y-%m-%dT%H:%M:%S%z')
+        signature = generate_signature(device_token, timestamp)
+        nickname = 'Тестировщик'
+
+        payload = {
+            'device_token': device_token,
+            'timestamp': timestamp,
+            'signature': signature,
+            'nickname': nickname
+        }
+
+        # When
+        response = self.client.post(url, json.dumps(payload, ensure_ascii=False), content_type='application/json')
         response = self.client.post(url, json.dumps(payload, ensure_ascii=False), content_type='application/json')
 
         # Then

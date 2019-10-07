@@ -15,6 +15,8 @@ from django.views.generic import ListView, View, DetailView
 from django.forms.models import model_to_dict
 from django.views.decorators.http import require_http_methods
 
+from django.db.utils import IntegrityError
+
 # from django.core.paginator import Paginator
 
 from django.urls import reverse
@@ -63,8 +65,11 @@ class AuthenticateView(View):
         if not check_signature(self.cleaned_data['device_token'], self.cleaned_data['timestamp'].strftime('%Y-%m-%dT%H:%M:%S%z'), self.cleaned_data['signature']):
             return self.invalid_response()
 
-        self.device_session = DeviceSession.objects.create_from_token(self.cleaned_data['device_token'])
-        self.device_session.save()
+        try:
+            self.device_session = DeviceSession.objects.create_from_token(self.cleaned_data['device_token'])
+            self.device_session.save()
+        except IntegrityError:
+            return self.invalid_response()
 
         return self.respond_authenticated()
 
