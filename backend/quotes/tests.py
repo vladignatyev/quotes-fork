@@ -285,3 +285,111 @@ class QuotesAuthenticateTest(TestCase):
 
         # Then
         self.assertEqual(401, response.status_code)
+
+
+class AuthenticatedTestCase(TestCase):
+    def setUp(self):
+        '''
+        Receiving auth token during normal HTTP flow.
+        '''
+        url = reverse('quote-auth')
+
+        device_token = 'sometesttoken'
+        timestamp = timezone.now().strftime('%Y-%m-%dT%H:%M:%S%z')
+        signature = generate_signature(device_token, timestamp)
+        nickname = 'Tester'
+
+        payload = {
+            'device_token': device_token,
+            'timestamp': timestamp,
+            'signature': signature,
+            'nickname': nickname
+        }
+
+        # When
+        response = self.client.post(url, json.dumps(payload, ensure_ascii=False), content_type='application/json')
+        self.assertEqual(200, response.status_code)
+        self.auth_token = json.loads(response.content)['auth_token']
+
+
+    def tearDown(self):
+        pass
+
+    def auth(self):
+        ''' Helper for passing auth token to the view '''
+        return {'HTTP_X-Client-Auth': self.auth_token}
+
+
+class QuoteSplit(TestCase):
+    def test_split_normal(self):
+        self.assertEqual(['And', 'what', 'is', 'the', 'use', 'of', 'a', 'book',
+                          'without', 'pictures', 'or', 'conversations?'],
+                          quote_split('And what is the use of a book without pictures or conversations?'))
+        self.assertEqual(['I', 'suppose', 'I', 'ought', 'to', 'eat', 'or',
+                          'drink', 'something', 'or', 'other;', 'but', 'the',
+                          'great', 'question', 'is', '‘What?’'], quote_split('I suppose I ought to eat or drink something or other; but the great question is ‘What?’'))
+
+    def test_split_special(self):
+        self.assertEqual(['And what is the use of', 'a book without', 'pictures or conversations', '?'],
+                          quote_split('And what is the use of ^a book without ^pictures or conversations^?'))
+
+
+    def test_unicode_normal(self):
+        self.assertEqual(['改善', 'means', 'improvement.'], quote_split('改善 means improvement.'))
+        self.assertEqual(['Кайдзен', 'означает', 'совершенствование.'], quote_split('Кайдзен означает совершенствование.'))
+
+    def test_unicode_special(self):
+        self.assertEqual(['改善', 'means improvement.'], quote_split('改善^ means improvement.'))
+        self.assertEqual(['Кайдзен', 'означает совершенствование.'], quote_split('Кайдзен ^означает совершенствование.^'))
+
+
+class LevelsListTest(AuthenticatedTestCase):
+    def test_get_levels_list_for_free_category(self):
+        # Given
+        topic = Topic.objects.create(title='Test topic',
+                                     hidden=False)
+        section = Section.objects.create(title='Test section',
+                                         topic=topic)
+
+        category = QuoteCategory.objects.create(
+            section=section,
+            title='Test category',
+            is_payable=False
+        )
+
+        authors_name = 'Lewis Carroll'
+        author = QuoteAuthor.objects.create(name=authors_name)
+
+        q = [
+            'And what is the use of a book without pictures or conversations?',
+            'How funny it’ll seem to come out among the people that walk with their heads downwards!',
+            'Oh, how I wish I could shut up like a telescope!',
+            'I suppose I ought to eat or drink something or other; but the great question is ‘What?’',
+            'When I used to read fairy tales, I fancied that kind of thing never happened, and now here I am in the middle of one!',
+            'I’m older than you, and must know better.',
+            'The best way to explain it is to do it.'
+        ]
+
+        for t in q:
+            Quote.objects.create(text=t,
+                                 author=author,
+                                 category=category)
+
+        # When
+        url = reverse('levels-list', kwargs={'category_pk': category.pk})
+        response = self.client.get(url, **self.auth())
+
+        # Then
+        self.assertEqual(200, response.status_code)
+        content = json.loads(response.content)
+
+        self.assertEqual(len(content['objects']), len(q))
+        self.assertEqual(authors_name, content['objects'][0]['author'])
+
+        # only check that all keys present
+        for o in content['objects']:
+            fields = ('id', 'text', 'author',
+                      'category_complete_reward',
+                      'order', 'complete',
+                      'splitted')
+            self.assertEqual(set(fields), set(o.keys()))

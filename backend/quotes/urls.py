@@ -25,6 +25,8 @@ urlpatterns = [
     path('topic/<int:pk>/', TopicDetail.as_view(), name='topic-detail'),
     path('topic/list/', TopicList.as_view(), name='topic-list'),
 
+    path('levels/category/<int:category_pk>/', LevelsList.as_view(), name='levels-list'),
+
     path('section/<int:pk>/', SectionDetail.as_view(), name='section-detail'),
 
     path('achievements/', AchievementList.as_view(), name='achievements-list'),

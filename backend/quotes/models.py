@@ -11,6 +11,8 @@ from django.urls import reverse
 
 from api.models import DeviceSession, PurchaseStatus, GooglePlayProduct, AppStoreProduct
 
+import re
+
 
 
 def _truncate(text, length=50, suffix='...'):
@@ -136,6 +138,40 @@ class Section(models.Model):
     class Meta:
         verbose_name = 'раздел'
         verbose_name_plural = 'разделы'
+
+
+def quote_split(quote_item_text,
+                special_case_re=r'\s*\^\s*',
+                normal_case_re=r'\s+'):
+    if '^' in quote_item_text:
+        case = special_case_re
+    else:
+        case = normal_case_re
+    return list(filter(None, re.split(case, quote_item_text)))
+
+
+def get_levels(category_pk, profile):
+    def cleaned(queryset):
+        for item in queryset:
+            yield {
+                'id': item.id,
+                'text': item.text,
+                'author': item.author.name,
+                'category_complete_reward': item.category.bonus_reward,
+                'order': item.order_in_category,
+                'complete': False,
+                'splitted': quote_split(item.text)
+            }
+    try:
+        category = QuoteCategory.objects.get(pk=category_pk)
+    except QuoteCategory.DoesNotExist:
+        return None
+
+    if category.is_payable:
+        return cleaned(Quote.objects.filter(category=category,
+                                            category__available_to_users__contains=profile))
+    else:
+        return cleaned(Quote.objects.filter(category=category))
 
 
 class QuoteCategory(models.Model):

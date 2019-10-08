@@ -55,7 +55,6 @@ class TopicList(BaseView):
         for o in objects:
             o['uri'] = reverse('topic-detail', kwargs={'pk': o['id']})
 
-
         res_dict = {
             "objects": objects,
             "meta": {
@@ -68,6 +67,23 @@ class TopicList(BaseView):
             }
         }
 
+        return json_response(res_dict)
+
+
+class LevelsList(BaseView):
+    def get(self, request, *args, **kwargs):
+        category_pk = kwargs.get('category_pk', None)
+
+        levels = list(get_levels(category_pk=category_pk,
+                                 profile=self.request.user_profile))
+
+        if levels is None:
+            return HttpResponse(status=404)
+
+        res_dict = {
+            "objects": levels,
+            "meta": {}
+        }
         return json_response(res_dict)
 
 
