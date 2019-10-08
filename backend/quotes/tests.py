@@ -344,8 +344,7 @@ class QuoteSplit(TestCase):
 
 
 class LevelsListTest(AuthenticatedTestCase):
-    def test_get_levels_list_for_free_category(self):
-        # Given
+    def _create_content_hierarchy(self):
         topic = Topic.objects.create(title='Test topic',
                                      hidden=False)
         section = Section.objects.create(title='Test section',
@@ -360,6 +359,12 @@ class LevelsListTest(AuthenticatedTestCase):
         authors_name = 'Lewis Carroll'
         author = QuoteAuthor.objects.create(name=authors_name)
 
+        self.topic = topic
+        self.category = category
+        self.author = author
+
+
+    def _create_multiple_quotes(self, category, author):
         q = [
             'And what is the use of a book without pictures or conversations?',
             'How funny it’ll seem to come out among the people that walk with their heads downwards!',
@@ -374,17 +379,23 @@ class LevelsListTest(AuthenticatedTestCase):
             Quote.objects.create(text=t,
                                  author=author,
                                  category=category)
+        self.quotes_count = len(q)
+
+    def test_get_levels_list_for_free_category(self):
+        # Given
+        self._create_content_hierarchy()
+        self._create_multiple_quotes(category=self.category, author=self.author)
 
         # When
-        url = reverse('levels-list', kwargs={'category_pk': category.pk})
+        url = reverse('levels-list', kwargs={'category_pk': self.category.pk})
         response = self.client.get(url, **self.auth())
 
         # Then
         self.assertEqual(200, response.status_code)
         content = json.loads(response.content)
 
-        self.assertEqual(len(content['objects']), len(q))
-        self.assertEqual(authors_name, content['objects'][0]['author'])
+        self.assertEqual(len(content['objects']), self.quotes_count)
+        self.assertEqual(self.author.name, content['objects'][0]['author'])
 
         # only check that all keys present
         for o in content['objects']:
