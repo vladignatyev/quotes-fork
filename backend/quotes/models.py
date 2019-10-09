@@ -164,14 +164,14 @@ def get_levels(category_pk, profile):
             }
     try:
         category = QuoteCategory.objects.get(pk=category_pk)
+        levels = Quote.objects.filter(category=category)
     except QuoteCategory.DoesNotExist:
         return None
 
-    if category.is_payable:
-        return cleaned(Quote.objects.filter(category=category,
-                                            category__available_to_users__contains=profile))
+    if category.is_unlocked_by(profile) or not category.is_payable:
+        return cleaned(levels)
     else:
-        return cleaned(Quote.objects.filter(category=category))
+        return None
 
 
 class QuoteCategory(models.Model):
@@ -192,7 +192,11 @@ class QuoteCategory(models.Model):
 
     price_to_unlock = models.BigIntegerField('Стоимость открытия категории если она платная', default=0, blank=True)
 
-    available_to_users = models.ManyToManyField('Profile', verbose_name='Профили пользователей которым доступна категория', blank=True, through='CategoryUnlockPurchase', related_name='availability_to_profile')
+    available_to_users = models.ManyToManyField('Profile',
+                                                verbose_name='Профили пользователей которым доступна категория',
+                                                blank=True,
+                                                through='CategoryUnlockPurchase',
+                                                related_name='availability_to_profile')
     on_complete_achievement = models.ForeignKey(Achievement, on_delete=models.SET_NULL, null=True, blank=True, related_name='on_complete_achievement')
 
     complete_by_users = models.ManyToManyField('Profile',  verbose_name='Юзеры которые прошли категорию', blank=True, related_name='category_complete_by_users')
@@ -204,6 +208,27 @@ class QuoteCategory(models.Model):
     class Meta:
         verbose_name = 'категория'
         verbose_name_plural = 'категории'
+
+    def is_unlocked_by(self, profile):
+        return self.is_unlocked_for_cash(profile) or self.is_unlocked_for_coins(profile)
+
+    def is_unlocked_for_coins(self, profile):
+        try:
+            CategoryUnlockPurchase.objects.get(category_to_unlock=self,
+                                               profile=profile,
+                                               google_play_purchase__isnull=True)
+            return True
+        except CategoryUnlockPurchase.DoesNotExist:
+            return False
+
+    def is_unlocked_for_cash(self, profile):
+        try:
+            cup = CategoryUnlockPurchase.objects.get(category_to_unlock=self,
+                                                     profile=profile,
+                                                     google_play_purchase__isnull=False)
+            return cup.google_play_purchase.status == PurchaseStatus.VALID
+        except CategoryUnlockPurchase.DoesNotExist:
+            return False
 
 
 class Quote(models.Model):
@@ -292,7 +317,6 @@ class ProfileManager(models.Manager):
     def get_by_auth_token(self, auth_token):
         session = DeviceSession.objects.get(auth_token=auth_token)
         return self.get_by_session(session)
-
 
     def unlock_category(self, profile, quote_category):
         balance = profile.balance

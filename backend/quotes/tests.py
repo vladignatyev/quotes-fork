@@ -288,6 +288,8 @@ class QuotesAuthenticateTest(TestCase):
 
 
 class AuthenticatedTestCase(TestCase):
+    INITIAL_USER_BALANCE = 1000
+
     def setUp(self):
         '''
         Receiving auth token during normal HTTP flow.
@@ -306,10 +308,14 @@ class AuthenticatedTestCase(TestCase):
             'nickname': nickname
         }
 
-        # When
         response = self.client.post(url, json.dumps(payload, ensure_ascii=False), content_type='application/json')
         self.assertEqual(200, response.status_code)
         self.auth_token = json.loads(response.content)['auth_token']
+
+        self.profile = Profile.objects.get_by_auth_token(self.auth_token)
+        self.profile.balance = self.INITIAL_USER_BALANCE
+        self.profile.save()
+        self.device_session = self.profile.device_sessions.latest('pk')
 
 
     def tearDown(self):
@@ -374,12 +380,13 @@ class LevelsListTest(AuthenticatedTestCase):
             'I’m older than you, and must know better.',
             'The best way to explain it is to do it.'
         ]
+        self.quotes = []
 
         for t in q:
-            Quote.objects.create(text=t,
+            self.quotes += [Quote.objects.create(text=t,
                                  author=author,
-                                 category=category)
-        self.quotes_count = len(q)
+                                 category=category)]
+
 
     def test_get_levels_list_for_free_category(self):
         # Given
@@ -394,7 +401,7 @@ class LevelsListTest(AuthenticatedTestCase):
         self.assertEqual(200, response.status_code)
         content = json.loads(response.content)
 
-        self.assertEqual(len(content['objects']), self.quotes_count)
+        self.assertEqual(len(content['objects']), len(self.quotes))
         self.assertEqual(self.author.name, content['objects'][0]['author'])
 
         # only check that all keys present
@@ -404,3 +411,67 @@ class LevelsListTest(AuthenticatedTestCase):
                       'order', 'complete',
                       'splitted')
             self.assertEqual(set(fields), set(o.keys()))
+
+    def test_get_levels_list_for_payable_category_returns_402_if_category_locked_for_user(self):
+        # Given
+        self._create_content_hierarchy()
+        self._create_multiple_quotes(category=self.category, author=self.author)
+
+        self.category.is_payable = True
+        self.category.save()
+
+        # When
+        url = reverse('levels-list', kwargs={'category_pk': self.category.pk})
+        response = self.client.get(url, **self.auth())
+
+        # Then
+        self.assertEqual(402, response.status_code)
+
+    def test_get_levels_list_for_payable_category_returns_list_when_unlocked_for_coins(self):
+        # Given
+        self._create_content_hierarchy()
+        self._create_multiple_quotes(category=self.category, author=self.author)
+
+        self.category.is_payable = True
+        self.category.save()
+
+        # When
+        # Unlocking for coins
+        unlocked, _ = Profile.objects.unlock_category(self.profile, self.category)
+        self.assertTrue(unlocked)
+
+        url = reverse('levels-list', kwargs={'category_pk': self.category.pk})
+        response = self.client.get(url, **self.auth())
+
+        # Then
+        self.assertEqual(200, response.status_code)
+
+    def test_get_levels_list_for_payable_category_returns_list_when_unlocked_for_cash(self):
+        # Given
+        self._create_content_hierarchy()
+        self._create_multiple_quotes(category=self.category, author=self.author)
+
+        self.category.is_payable = True
+        self.category.save()
+
+        # When
+        # Unlocking for cash
+
+        # When
+        google_play_product = GooglePlayProduct.objects.create()
+        purchase = GooglePlayIAPPurchase.objects.create(product=google_play_product,
+                                                        device_session=self.device_session)
+
+        unlock_purchase = CategoryUnlockPurchase.objects.create(profile=self.profile,
+                                              category_to_unlock=self.category,
+                                              google_play_purchase=purchase)
+
+        purchase.status = PurchaseStatus.VALID  # manually 'validated' purchase
+        purchase.save()
+
+
+        url = reverse('levels-list', kwargs={'category_pk': self.category.pk})
+        response = self.client.get(url, **self.auth())
+
+        # Then
+        self.assertEqual(200, response.status_code)
