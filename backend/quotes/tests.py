@@ -122,7 +122,7 @@ class GameBalanceTest(TestCase):
         GameBalance.objects.create(initial_profile_balance=30)
 
         # When
-        game_settings = GameBalance.objects.get_actual_game_settings()
+        game_settings = GameBalance.objects.get_actual()
 
         # Then
         self.assertEqual(30, game_settings.initial_profile_balance)
@@ -237,7 +237,7 @@ class QuotesAuthenticateTest(TestCase):
 
         profile = Profile.objects.get_by_auth_token(auth_token)
         self.assertEqual(nickname, profile.nickname)
-        self.assertEqual(GameBalance.objects.get_actual_game_settings(), profile.settings)
+        self.assertEqual(GameBalance.objects.get_actual(), profile.settings)
 
         self.assertEqual(1, len(Profile.objects.all()))
 

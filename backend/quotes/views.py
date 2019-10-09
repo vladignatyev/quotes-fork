@@ -124,7 +124,6 @@ class QuotesAuthenticateView(AuthenticateView):
     def respond_authenticated(self):
         profile = Profile.objects.get_by_session(self.device_session)
         profile.nickname = self.cleaned_data['nickname']
-        profile.settings = GameBalance.objects.get_actual_game_settings()
         profile.save()
 
         return JsonResponse({

@@ -272,12 +272,11 @@ class BalanceRechargeProduct(models.Model):
 
 
 class GameBalanceManager(models.Manager):
-    def get_actual_game_settings(self):
+    def get_actual(self):
         try:
-            return GameBalance.objects.order_by('-pk')[0]
-        except IndexError:
+            return self.model.objects.latest('pk')
+        except self.model.DoesNotExist:
             game_settings = self.create(initial_profile_balance=0)
-            game_settings.save()
             return game_settings
 
 
@@ -301,7 +300,7 @@ class ProfileManager(models.Manager):
     def create(self, *args, **kwargs):
         profile = super(ProfileManager, self).create(*args, **kwargs)
 
-        game_settings = GameBalance.objects.get_actual_game_settings()
+        game_settings = GameBalance.objects.get_actual()
 
         profile.balance = kwargs.get('balance', game_settings.initial_profile_balance)
         profile.nickname = kwargs.get('nickname', '')

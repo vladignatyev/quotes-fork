@@ -8,6 +8,7 @@ def create_profile_on_new_device_session(sender, instance, created, **kwargs):
     session = instance
     profile = Profile.objects.create()
     profile.device_sessions.set([session,])
+    profile.settings = GameBalance.objects.get_actual()
     profile.save()
 
 
