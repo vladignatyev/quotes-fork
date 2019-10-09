@@ -76,6 +76,8 @@ class LevelsList(BaseView):
 
         query_result = get_levels(category_pk=category_pk,
                                   profile=self.request.user_profile)
+        if query_result == False:
+            return HttpResponse(status=404)
         if query_result is None:
             return HttpResponse(status=402)
 
@@ -89,6 +91,17 @@ class LevelsList(BaseView):
             "meta": {}
         }
         return json_response(res_dict)
+
+
+class LevelCompleteView(BaseView):
+    def post(self, request, *args, **kwargs):
+        level_pk = kwargs.get('level_pk', None)
+
+        try:
+            quote = Quote.objects.get(pk=level_pk)
+            quote.mark_complete(profile=self.request.user_profile)
+        except Quote.DoesNotExist:
+            return HttpResponse(status=404)
 
 
 class AchievementList(BaseView):
@@ -121,10 +134,13 @@ class QuotesAuthenticateView(AuthenticateView):
     def __init__(self, *args, **kwargs):
         super(QuotesAuthenticateView, self).__init__(form_cls=QuotesAuthenticationForm, *args, **kwargs)
 
-    def respond_authenticated(self):
+    def mixin_nickname(self):
         profile = Profile.objects.get_by_session(self.device_session)
         profile.nickname = self.cleaned_data['nickname']
         profile.save()
+
+    def respond_authenticated(self):
+        self.mixin_nickname()
 
         return JsonResponse({
             'auth_token': self.device_session.auth_token

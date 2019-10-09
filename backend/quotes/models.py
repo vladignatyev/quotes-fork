@@ -34,7 +34,6 @@ class QuoteAuthor(models.Model):
         verbose_name_plural = 'авторы цитат'
 
 
-
 class Achievement(models.Model):
     icon = models.CharField("Имя иконки в приложении", max_length=256)
     title = models.CharField(max_length=256)
@@ -101,6 +100,16 @@ class TopicManager(models.Manager):
         return flat_topic
 
 
+# TODO: extract it as a base class for rewardable models: Topic, Section, QuoteCategory, Quote
+class RewardableEntity(models.Model):
+    class Meta:
+        abstract = True
+
+    on_complete_achievement = models.ForeignKey(Achievement, on_delete=models.SET_NULL, null=True, blank=True)
+    bonus_reward = models.BigIntegerField(default=0, verbose_name='Бонус монет за прохождение')
+    complete_by_users = models.ManyToManyField('Profile', verbose_name='Юзеры которые прошли и должны получить вознаграждение', blank=True,
+                                                          related_name="%(app_label)s_%(class)s_complete_by_users",
+                                                          related_query_name="%(app_label)s_%(class)s_complete_by_users_objs")
 
 
 class Topic(models.Model):
@@ -151,27 +160,26 @@ def quote_split(quote_item_text,
 
 
 def get_levels(category_pk, profile):
-    def cleaned(queryset):
-        for item in queryset:
-            yield {
+    try:
+        category = QuoteCategory.objects.get(pk=category_pk)
+        levels = Quote.objects.filter(category=category)
+        complete_levels = get_levels_complete_by_profile(profile, category)
+    except QuoteCategory.DoesNotExist:
+        return False
+
+    if category.is_unlocked_by(profile) or not category.is_payable:
+        result = []
+        for item in levels:
+            result += [{
                 'id': item.id,
                 'text': item.text,
                 'author': item.author.name,
                 'category_complete_reward': item.category.bonus_reward,
                 'order': item.order_in_category,
-                'complete': False,
+                'complete': item in complete_levels,
                 'splitted': quote_split(item.text)
-            }
-    try:
-        category = QuoteCategory.objects.get(pk=category_pk)
-        levels = Quote.objects.filter(category=category)
-    except QuoteCategory.DoesNotExist:
-        return None
-
-    if category.is_unlocked_by(profile) or not category.is_payable:
-        return cleaned(levels)
-    else:
-        return None
+            }]
+        return result
 
 
 class QuoteCategory(models.Model):
@@ -231,12 +239,47 @@ class QuoteCategory(models.Model):
             return False
 
 
+def get_levels_complete_by_profile(profile, category=None):
+    if category is not None:
+        return Quote.objects.filter(complete_by_users=profile,
+                                    category=category)
+    else:
+        return Quote.objects.filter(complete_by_users=profile)
+
+def is_category_complete_by_user(profile, category):
+    pass
+
+def is_section_complete_by_user(profile, section):
+    pass
+
+
+class UserEvents:
+    LEVEL_COMPLETE = 'level_complete'
+    CATEGORY_COMPLETE = 'category_complete'
+
+    RECEIVED_PER_LEVEL_REWARD = 'received_per_level_reward'
+    RECEIVED_PER_CATEGORY_REWARD = 'received_per_category_reward'
+    RECEIVED_PER_SECTION_REWARD = 'received_per_section_reward'
+    RECEIVED_PER_TOPIC_REWARD = 'received_per_topic_reward'
+
+    RECEIVED_CATEGORY_ACHIEVEMENT = 'received_category_achievement'
+    RECEIVED_SECTION_ACHIEVEMENT = 'received_section_achievement'
+    RECEIVED_TOPIC_ACHIEVEMENT = 'received_topic_achievement'
+
+    RECEIVED_GENERAL_ACHIEVEMENT = 'received_general_achievement'
+
+    @classmethod
+    def new(cls, name, param):
+        return (name, param)
+
+
 class Quote(models.Model):
     text = models.CharField("Текст цитаты", max_length=256)
     author = models.ForeignKey(QuoteAuthor, on_delete=models.SET_NULL, null=True)
     category = models.ForeignKey(QuoteCategory, on_delete=models.SET_NULL, null=True)
 
     order_in_category = models.BigIntegerField('Порядковый номер уровня в категории', default=0, blank=True)
+    complete_by_users = models.ManyToManyField('Profile',  verbose_name='Юзеры которые прошли уровень', blank=True, related_name='quote_complete_by_users')
 
     def __str__(self):
         return _truncate(self.text)
@@ -244,6 +287,62 @@ class Quote(models.Model):
     class Meta:
         verbose_name = 'цитата'
         verbose_name_plural = 'цитаты'
+
+    def mark_complete(self, profile, solution=None):
+        '''
+        solution parameter is unused for now
+        '''
+
+        # mark progress
+        self.complete_by_users.add(profile)
+        self.save()
+
+        # user_events = [(UserEvents.LEVEL_COMPLETE,)]
+        user_events = [UserEvents.new(UserEvents.LEVEL_COMPLETE, None)]
+        return user_events + handle_level_complete(self, profile)
+
+
+def handle_level_complete(quote, profile):
+    # reward for level completion
+    game_settings = GameBalance.objects.get_actual()
+    per_level_reward = game_settings.reward_per_level_completion
+    profile.balance = profile.balance + per_level_reward
+    profile.save()
+
+    user_events = [UserEvents.new(UserEvents.RECEIVED_PER_LEVEL_REWARD, per_level_reward)]
+
+    if is_category_complete_by_user(profile, quote.category):
+        user_events += handle_category_complete(quote, profile, quote.category)
+
+    return user_events
+
+def handle_category_complete(quote, profile, category):
+    category.complete_by_users.add(profile)
+    category.save()
+    user_events = [UserEvents.new(UserEvents.CATEGORY_COMPLETE, category.pk)]
+
+    if category.bonus_reward > 0:
+        profile.balance = profile.balance + category.bonus_reward
+        profile.save()
+        user_events += [UserEvents.new(UserEvents.RECEIVED_PER_CATEGORY_REWARD,
+                                       category.bonus_reward)]
+
+    if category.on_complete_achievement:
+        AchievementReceiving.create(achievement=category.on_complete_achievement,
+                                    profile=profile)
+        user_events += [UserEvents.new(UserEvents.RECEIVED_ACHIEVEMENT, category.on_complete_achievement.pk)]
+
+    if is_section_complete_by_user(profile, category.section):
+        user_events += handle_section_complete(quote, profile, category, section)
+
+    return user_events
+
+def handle_section_complete(quote, profile, category, section):
+
+    return []
+
+def handle_topic_complete(quote, profile):
+    return []
 
 
 class ProductManager(models.Manager):
@@ -273,6 +372,7 @@ class BalanceRechargeProduct(models.Model):
 
 class GameBalanceManager(models.Manager):
     def get_actual(self):
+        # TODO: implement LRU Cache in a manner it has been done in `api` module
         try:
             return self.model.objects.latest('pk')
         except self.model.DoesNotExist:

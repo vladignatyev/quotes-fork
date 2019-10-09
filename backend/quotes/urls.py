@@ -27,6 +27,8 @@ urlpatterns = [
 
     path('levels/category/<int:category_pk>/', LevelsList.as_view(), name='levels-list'),
 
+    path('level/<int:level_pk>/complete', LevelCompleteView.as_view(), name='level'),
+
     path('section/<int:pk>/', SectionDetail.as_view(), name='section-detail'),
 
     path('achievements/', AchievementList.as_view(), name='achievements-list'),

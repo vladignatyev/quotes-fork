@@ -370,7 +370,10 @@ class LevelsListTest(AuthenticatedTestCase):
         self.author = author
 
 
-    def _create_multiple_quotes(self, category, author):
+    def _create_multiple_quotes(self, category=None, author=None):
+        category = category or self.category
+        author = author or self.author
+
         q = [
             'And what is the use of a book without pictures or conversations?',
             'How funny it’ll seem to come out among the people that walk with their heads downwards!',
@@ -427,6 +430,14 @@ class LevelsListTest(AuthenticatedTestCase):
         # Then
         self.assertEqual(402, response.status_code)
 
+    def test_nonexisting_category_cause_404(self):
+        # When
+        url = reverse('levels-list', kwargs={'category_pk': 123456})
+        response = self.client.get(url, **self.auth())
+
+        # Then
+        self.assertEqual(404, response.status_code)
+
     def test_get_levels_list_for_payable_category_returns_list_when_unlocked_for_coins(self):
         # Given
         self._create_content_hierarchy()
@@ -455,9 +466,7 @@ class LevelsListTest(AuthenticatedTestCase):
         self.category.save()
 
         # When
-        # Unlocking for cash
-
-        # When
+        # Unlocking for purchase
         google_play_product = GooglePlayProduct.objects.create()
         purchase = GooglePlayIAPPurchase.objects.create(product=google_play_product,
                                                         device_session=self.device_session)
@@ -475,3 +484,73 @@ class LevelsListTest(AuthenticatedTestCase):
 
         # Then
         self.assertEqual(200, response.status_code)
+
+
+class LevelProgressTestCase(LevelsListTest):
+    def test_marking_user_complete_will_update_balance(self):
+        # Given
+        self._create_content_hierarchy()
+        self._create_multiple_quotes()
+        self.assertEqual(0, len(list(Quote.objects.filter(complete_by_users=self.profile))))
+
+        # When
+        self.quotes[0].mark_complete(self.profile)
+        self.quotes[5].mark_complete(self.profile)
+
+        # Then
+        complete = Quote.objects.filter(complete_by_users=self.profile)
+        self.assertIn(self.quotes[0], complete)
+        self.assertIn(self.quotes[5], complete)
+        self.assertNotIn(self.quotes[1], complete)
+        self.assertNotIn(self.quotes[2], complete)
+        self.assertNotIn(self.quotes[3], complete)
+
+    def test_getter_for_levels_complete(self):
+        # Given
+        self._create_content_hierarchy()
+        self._create_multiple_quotes()
+
+        # When
+        self.quotes[3].mark_complete(self.profile)
+
+        # Then
+        complete = get_levels_complete_by_profile(self.profile, self.category)
+        self.assertIn(self.quotes[3], complete)
+
+        self.assertNotIn(self.quotes[0], complete)
+        self.assertNotIn(self.quotes[1], complete)
+        self.assertNotIn(self.quotes[2], complete)
+        self.assertNotIn(self.quotes[5], complete)
+
+    def test_getter_for_levels_complete2(self):
+        # Given
+        self._create_content_hierarchy()
+        self._create_multiple_quotes()
+
+        # When
+        self.quotes[3].mark_complete(self.profile)
+
+        # Then
+        complete = get_levels_complete_by_profile(self.profile)
+        self.assertIn(self.quotes[3], complete)
+
+        self.assertNotIn(self.quotes[0], complete)
+        self.assertNotIn(self.quotes[1], complete)
+        self.assertNotIn(self.quotes[2], complete)
+        self.assertNotIn(self.quotes[5], complete)
+
+    def test_complete_should_reward_user(self):
+        # Given
+        self._create_content_hierarchy()
+        self._create_multiple_quotes()
+        game_settings = GameBalance.objects.get_actual()
+
+        expected_reward = game_settings.reward_per_level_completion
+        profile_balance = self.profile.balance
+
+        # When
+        self.quotes[0].mark_complete(self.profile)
+        profile_updated = Profile.objects.get(pk=self.profile.pk)
+
+        # Then
+        self.assertEqual(profile_balance + expected_reward, profile_updated.balance)
