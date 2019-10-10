@@ -1,3 +1,4 @@
+from django.apps import apps
 from django.db import models
 
 from .events import UserEvents
@@ -38,8 +39,9 @@ class RewardableEntity(models.Model):
         return user_events
 
     def process_achievements(self, profile):
-        AchievementReceiving.create(achievement=self.on_complete_achievement,
-                                    profile=profile)
+        AchievementReceiving = apps.get_model('quotes.AchievementReceiving')
+        AchievementReceiving.objects.create(achievement=self.on_complete_achievement,
+                                            profile=profile)
         return [UserEvents.new(self.achievement_event_name,
                                self.on_complete_achievement.pk)]
 

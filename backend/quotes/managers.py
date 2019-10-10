@@ -95,3 +95,25 @@ class ProfileManager(models.Manager):
         profile.balance = new_balance
         quote_category.available_to_users.add(profile)
         return (True,'')
+
+class QuoteManager(models.Manager):
+    def get_all_levels_in_category(self, category):
+        return self.filter(category=category)
+
+    def get_all_levels_in_section(self, section):
+        return self.filter(category__section=section)
+
+    def get_all_levels_in_topic(self, topic):
+        return self.filter(category__section__topic=topic)
+
+    def get_levels_complete_by_profile(self, profile):
+        return self.filter(complete_by_users=profile)
+
+    def get_levels_complete_by_profile_in_category(self, profile, category):
+        return self.get_levels_complete_by_profile(profile).filter(category=category)
+
+    def get_levels_complete_by_profile_in_section(self, profile, section):
+        return self.get_levels_complete_by_profile(profile).filter(category__section=section)
+
+    def get_levels_complete_by_profile_in_topic(self, profile, topic):
+        return self.get_levels_complete_by_profile(profile).filter(category__section__topic=topic)

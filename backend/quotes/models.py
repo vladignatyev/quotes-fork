@@ -77,7 +77,9 @@ class Topic(RewardableEntity):
     reward_event_name = UserEvents.RECEIVED_PER_TOPIC_REWARD
 
     def is_completion_condition_met_by(self, profile):
-        pass # todo
+        levels_complete = Quote.objects.get_levels_complete_by_profile_in_topic(profile, self).count()
+        levels_total = Quote.objects.get_all_levels_in_topic(self).count()
+        return levels_complete == levels_total
 
 
 class Section(RewardableEntity):
@@ -96,11 +98,13 @@ class Section(RewardableEntity):
     reward_event_name = UserEvents.RECEIVED_PER_SECTION_REWARD
 
     def is_completion_condition_met_by(self, profile):
-        pass # todo
+        levels_complete = Quote.objects.get_levels_complete_by_profile_in_section(profile, self).count()
+        levels_total = Quote.objects.get_all_levels_in_section(self).count()
+        return levels_complete == levels_total
 
     def handle_complete(self, profile):
         user_events = super(Section, self).handle_complete(profile)
-        if self.topic.is_completion_condition_met_by(profile):
+        if self.topic.is_completion_condition_met_by(profile) == True:
             user_events += self.topic.handle_complete(profile)
         return user_events
 
@@ -120,7 +124,7 @@ def get_levels(category_pk, profile):
     try:
         category = QuoteCategory.objects.get(pk=category_pk)
         levels = Quote.objects.filter(category=category)
-        complete_levels = get_levels_complete_by_profile(profile, category)
+        complete_levels = Quote.objects.get_levels_complete_by_profile_in_category(profile, category)
     except QuoteCategory.DoesNotExist:
         return False
 
@@ -201,21 +205,19 @@ class QuoteCategory(RewardableEntity):
             return False
 
     def is_completion_condition_met_by(self, profile):
-        pass # todo
+        levels_complete, levels_total = self.get_progress(profile)
+        return levels_complete == levels_total
+
+    def get_progress(self, profile):
+        levels_complete = Quote.objects.get_levels_complete_by_profile_in_category(profile, self).count()
+        levels_total = Quote.objects.get_all_levels_in_category(self).count()
+        return (levels_complete, levels_total)
 
     def handle_complete(self, profile):
         user_events = super(QuoteCategory, self).handle_complete(profile)
-        if self.section.is_completion_condition_met_by(profile):
+        if self.section.is_completion_condition_met_by(profile) == True:
             user_events += self.section.handle_complete(profile)
         return user_events
-
-
-def get_levels_complete_by_profile(profile, category=None):
-    if category is None:
-        return Quote.objects.filter(complete_by_users=profile)
-    else:
-        return Quote.objects.filter(complete_by_users=profile,
-                                    category=category)
 
 
 class Quote(RewardableEntity):
@@ -231,6 +233,8 @@ class Quote(RewardableEntity):
     class Meta:
         verbose_name = 'цитата'
         verbose_name_plural = 'цитаты'
+
+    objects = QuoteManager()
 
     complete_event_name = UserEvents.LEVEL_COMPLETE
     achievement_event_name = UserEvents.RECEIVED_LEVEL_ACHIEVEMENT
@@ -251,7 +255,7 @@ class Quote(RewardableEntity):
 
         user_events = self.handle_complete(profile)
 
-        if self.category.is_completion_condition_met_by(profile):
+        if self.category.is_completion_condition_met_by(profile) == True:
             user_events += self.category.handle_complete(profile)
 
         return user_events

@@ -518,7 +518,7 @@ class LevelProgressTestCase(AuthenticatedTestCase, ContentMixin):
         self.quotes[3].mark_complete(self.profile)
 
         # Then
-        complete = get_levels_complete_by_profile(self.profile, self.category)
+        complete = Quote.objects.get_levels_complete_by_profile_in_category(self.profile, self.category)
         self.assertIn(self.quotes[3], complete)
 
         self.assertNotIn(self.quotes[0], complete)
@@ -535,7 +535,7 @@ class LevelProgressTestCase(AuthenticatedTestCase, ContentMixin):
         # Then
         self.assertIn((UserEvents.LEVEL_COMPLETE, 4), events)
 
-        complete = get_levels_complete_by_profile(self.profile)
+        complete = Quote.objects.get_levels_complete_by_profile(self.profile)
         self.assertIn(self.quotes[3], complete)
 
         self.assertNotIn(self.quotes[0], complete)
@@ -592,6 +592,27 @@ class LevelProgressTestCase(AuthenticatedTestCase, ContentMixin):
             events += self.quotes[i].mark_complete(self.profile)
 
         # Then
-        self.assertIn((UserEvents.TOPIC_COMPLETE, self.topic.pk), events)
-        self.assertIn((UserEvents.SECTION_COMPLETE, self.section.pk), events)
         self.assertIn((UserEvents.CATEGORY_COMPLETE, self.category.pk), events)
+        self.assertIn((UserEvents.SECTION_COMPLETE, self.section.pk), events)
+        self.assertIn((UserEvents.TOPIC_COMPLETE, self.topic.pk), events)
+
+        self.assertIn((UserEvents.RECEIVED_PER_TOPIC_REWARD, 1000), events)
+        self.assertIn((UserEvents.RECEIVED_PER_SECTION_REWARD, 100), events)
+        self.assertIn((UserEvents.RECEIVED_PER_CATEGORY_REWARD, 10), events)
+
+        level_rewards = list(UserEvents.filter_by_name(UserEvents.RECEIVED_PER_LEVEL_REWARD, events))
+        self.assertEqual(7, len(level_rewards))
+        self.assertEqual(35, sum(list(zip(*level_rewards))[1]))
+
+        section_rewards = list(UserEvents.filter_by_name(UserEvents.RECEIVED_PER_SECTION_REWARD, events))
+        self.assertEqual(1, len(section_rewards))
+        self.assertEqual(100, sum(list(zip(*section_rewards))[1]))
+
+        topic_rewards = list(UserEvents.filter_by_name(UserEvents.RECEIVED_PER_TOPIC_REWARD, events))
+        self.assertEqual(1, len(topic_rewards))
+        self.assertEqual(1000, sum(list(zip(*topic_rewards))[1]))
+
+        topic_achievements = list(UserEvents.filter_by_name(UserEvents.RECEIVED_TOPIC_ACHIEVEMENT, events))
+        self.assertEqual(1, len(topic_achievements))
+        achievement_pk = topic_achievements[0][1]
+        self.assertEqual(achievement_pk, topic_achievement.pk)
