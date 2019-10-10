@@ -17,27 +17,11 @@ from django import forms
 from api.views import AuthenticationForm, AuthenticateView, SafeView
 
 
-def json_response(res_dict):
-    return JsonResponse(res_dict, json_dumps_params={'indent': 4, 'ensure_ascii': False})
-
+from .utils import json_response
 
 class BaseView(SafeView):
     def mixin_authorized(self, request):
         request.user_profile = Profile.objects.get_by_session(request.device_session)
-
-
-class RestDetailView(View):
-    pass # todo: extract base class for all serializable detail views
-
-class RestListView(View):
-    pass # todo: extract base class for all serializable list views
-
-
-
-class SectionDetail(View):
-    def get(self, request, *args, **kwargs):
-        section = Section.objects.get(pk=kwargs['pk'])
-        return json_response(topic)
 
 
 class TopicDetail(BaseView):
@@ -99,7 +83,16 @@ class LevelCompleteView(BaseView):
 
         try:
             quote = Quote.objects.get(pk=level_pk)
-            quote.mark_complete(profile=self.request.user_profile)
+            events = quote.mark_complete(profile=self.request.user_profile)
+
+            res_dict = {
+                "objects": events,
+                "meta": {}
+            }
+
+            return json_response(res_dict)
+        except Quote.NoAccess:
+            return HttpResponse(status=402)
         except Quote.DoesNotExist:
             return HttpResponse(status=404)
 
@@ -115,8 +108,32 @@ class AchievementList(BaseView):
             result[i]['received_at'] = o.received_at.strftime('%Y-%m-%dT%H:%M:%S%z')
         return result
 
+    def filter(self):
+        return AchievementReceiving.objects.filter(profile=self.request.user_profile)
+
     def get(self, request, *args, **kwargs):
-        achievements = self.flattened(AchievementReceiving.objects.filter(profile=self.request.user_profile))
+        achievements = self.flattened(self.filter())
+
+        res_dict = {
+            "objects": achievements,
+            "meta": {}
+        }
+
+        return json_response(res_dict)
+
+
+class AllAchievementList(BaseView):
+    fields = ('icon', 'title', 'received_text', 'description_text')
+
+    def flattened(self, iterable):
+        result = [ None ] * len(iterable)
+
+        for i, o in enumerate(iterable):
+            result[i] = model_to_dict(o, fields=self.fields)
+        return result
+
+    def get(self, request, *args, **kwargs):
+        achievements = self.flattened(Achievement.objects.all())
 
         res_dict = {
             "objects": achievements,
@@ -134,13 +151,13 @@ class QuotesAuthenticateView(AuthenticateView):
     def __init__(self, *args, **kwargs):
         super(QuotesAuthenticateView, self).__init__(form_cls=QuotesAuthenticationForm, *args, **kwargs)
 
-    def mixin_nickname(self):
+    def add_nickname_to_profile(self):
         profile = Profile.objects.get_by_session(self.device_session)
         profile.nickname = self.cleaned_data['nickname']
         profile.save()
 
     def respond_authenticated(self):
-        self.mixin_nickname()
+        self.add_nickname_to_profile()
 
         return JsonResponse({
             'auth_token': self.device_session.auth_token

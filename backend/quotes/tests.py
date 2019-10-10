@@ -349,7 +349,7 @@ class QuoteSplit(TestCase):
         self.assertEqual(['Кайдзен', 'означает совершенствование.'], quote_split('Кайдзен ^означает совершенствование.^'))
 
 
-class LevelsListTest(AuthenticatedTestCase):
+class ContentMixin:
     def _create_content_hierarchy(self):
         topic = Topic.objects.create(title='Test topic',
                                      hidden=False)
@@ -366,6 +366,7 @@ class LevelsListTest(AuthenticatedTestCase):
         author = QuoteAuthor.objects.create(name=authors_name)
 
         self.topic = topic
+        self.section = section
         self.category = category
         self.author = author
 
@@ -391,6 +392,8 @@ class LevelsListTest(AuthenticatedTestCase):
                                  category=category)]
 
 
+
+class LevelsListTest(AuthenticatedTestCase, ContentMixin):
     def test_get_levels_list_for_free_category(self):
         # Given
         self._create_content_hierarchy()
@@ -486,11 +489,14 @@ class LevelsListTest(AuthenticatedTestCase):
         self.assertEqual(200, response.status_code)
 
 
-class LevelProgressTestCase(LevelsListTest):
-    def test_marking_user_complete_will_update_balance(self):
-        # Given
+class LevelProgressTestCase(AuthenticatedTestCase, ContentMixin):
+    def setUp(self):
+        super(LevelProgressTestCase, self).setUp()
         self._create_content_hierarchy()
         self._create_multiple_quotes()
+
+    def test_marking_user_complete_will_update_balance(self):
+        # Given
         self.assertEqual(0, len(list(Quote.objects.filter(complete_by_users=self.profile))))
 
         # When
@@ -507,8 +513,6 @@ class LevelProgressTestCase(LevelsListTest):
 
     def test_getter_for_levels_complete(self):
         # Given
-        self._create_content_hierarchy()
-        self._create_multiple_quotes()
 
         # When
         self.quotes[3].mark_complete(self.profile)
@@ -524,13 +528,13 @@ class LevelProgressTestCase(LevelsListTest):
 
     def test_getter_for_levels_complete2(self):
         # Given
-        self._create_content_hierarchy()
-        self._create_multiple_quotes()
 
         # When
-        self.quotes[3].mark_complete(self.profile)
+        events = self.quotes[3].mark_complete(self.profile)
 
         # Then
+        self.assertIn((UserEvents.LEVEL_COMPLETE, 4), events)
+
         complete = get_levels_complete_by_profile(self.profile)
         self.assertIn(self.quotes[3], complete)
 
@@ -541,16 +545,53 @@ class LevelProgressTestCase(LevelsListTest):
 
     def test_complete_should_reward_user(self):
         # Given
-        self._create_content_hierarchy()
-        self._create_multiple_quotes()
         game_settings = GameBalance.objects.get_actual()
 
         expected_reward = game_settings.reward_per_level_completion
         profile_balance = self.profile.balance
 
         # When
-        self.quotes[0].mark_complete(self.profile)
+        events = self.quotes[0].mark_complete(self.profile)
         profile_updated = Profile.objects.get(pk=self.profile.pk)
 
         # Then
         self.assertEqual(profile_balance + expected_reward, profile_updated.balance)
+
+        self.assertIn((UserEvents.RECEIVED_PER_LEVEL_REWARD, expected_reward), events)
+
+    def test_complex_case(self):
+        # Given
+        category_achievement = Achievement.objects.create(
+            icon='test',
+            title='category test achievement',
+        )
+        self.category.bonus_reward = 10
+        self.category.on_complete_achievement = category_achievement
+        self.category.save()
+
+        section_achievement = Achievement.objects.create(
+            icon='test',
+            title='section test achievement',
+        )
+
+        self.section.bonus_reward = 100
+        self.section.on_complete_achievement = section_achievement
+        self.section.save()
+
+        topic_achievement = Achievement.objects.create(
+            icon='test',
+            title='topic test achievement',
+        )
+        self.topic.bonus_reward = 1000
+        self.topic.on_complete_achievement = topic_achievement
+        self.topic.save()
+
+        # When
+        events = []
+        for i in range(0, len(self.quotes)):
+            events += self.quotes[i].mark_complete(self.profile)
+
+        # Then
+        self.assertIn((UserEvents.TOPIC_COMPLETE, self.topic.pk), events)
+        self.assertIn((UserEvents.SECTION_COMPLETE, self.section.pk), events)
+        self.assertIn((UserEvents.CATEGORY_COMPLETE, self.category.pk), events)

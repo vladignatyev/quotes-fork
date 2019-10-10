@@ -1,0 +1,53 @@
+adduser quotes
+# quotes / hyU8y9UdpUk82Bp4K7hQmenu
+
+usermod -aG sudo quotes
+
+mkdir -p /home/quotes/.ssh
+touch /home/quotes/.ssh/authorized_keys
+
+chown -R quotes:quotes /home/quotes/
+chown root:root /home/quotes
+
+chmod 700 /home/quotes/.ssh
+chmod 644 /home/quotes/.ssh/authorized_keys
+
+
+ssh-keygen -a 1000 -b 4096 -C "" -E sha256 -o -t rsa
+
+apt install sudo libpq-dev postgresql postgresql-contrib nginx
+
+sudo -u postgres psql
+
+create database quotesdev;
+create user quotes with password 'quotes';
+alter role quotes set client_encoding to 'utf8';
+ALTER ROLE quotes SET default_transaction_isolation TO 'read committed';
+ALTER ROLE quotes SET timezone TO 'UTC';
+GRANT ALL PRIVILEGES ON DATABASE quotesdev TO quotes;
+
+
+sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt/ `lsb_release -cs`-pgdg main" >> /etc/apt/sources.list.d/pgdg.list'
+wget -q https://www.postgresql.org/media/keys/ACCC4CF8.asc -O - | sudo apt-key add -
+
+apt upgrade
+apt install python3.6-dev
+
+apt install python3-pip
+
+
+
+
+[Unit]
+Description=gunicorn daemon
+After=network.target
+
+[Service]
+User=quotes
+Group=www-data
+Environment=DJANGO_SETTINGS_MODULE=backend.devsettings
+WorkingDirectory=/home/quotes/quotes/backend
+ExecStart=/usr/local/bin/gunicorn --access-logfile - --workers 3 --bind unix:/home/quotes/quotes/backend/quotes.sock backend.wsgi:application
+
+[Install]
+WantedBy=multi-user.target

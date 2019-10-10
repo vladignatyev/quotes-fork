@@ -1,0 +1,97 @@
+from django.apps import apps
+from django.db import models
+
+from django.forms.models import model_to_dict
+
+
+from api.models import DeviceSession, GooglePlayProduct, AppStoreProduct
+
+
+class TopicManager(models.Manager):
+    topic_fields = ['title']
+    section_fields = ['title', 'id', 'on_complete_achievement']
+    category_fields = ['title', 'id', 'on_complete_achievement', 'icon',
+                       'is_payable', 'price_to_unlock',
+                       'is_event', 'event_due_date', 'event_title', 'event_icon',
+                       'event_description', 'event_win_achievement']
+
+
+    def get_flattened(self, pk, current_user=None):
+        '''
+        Flattens hierahical models under Topic into lists,
+        mark categories opened/payable depending on user payments,
+        adds progress values to every category
+        '''
+        # todo: implement filtering by available_to_users==current_user
+        # Perform requests
+        topic = self.get(pk=pk)
+
+        sections = apps.get_model('quotes.Section').objects.filter(topic__pk=pk).all()
+        categories = apps.get_model('quotes.QuoteCategory').objects.filter(section__topic=topic).all()
+
+        flat_topic = model_to_dict(topic, fields=self.topic_fields)
+        flat_topic['sections'] = [ model_to_dict(section, fields=self.section_fields) for section in sections ]
+        flat_topic['uri'] = reverse('topic-detail', kwargs={'pk': topic.pk})
+
+        for category in categories:
+            for section in flat_topic['sections']:
+                section['uri'] = reverse('section-detail', kwargs={'pk': section['id']})
+                if category.section.id == section['id']:
+                    categories_per_section = section.get('categories', [])
+                    categories_per_section += [model_to_dict(category)]
+                    section['categories'] = categories_per_section
+
+        return flat_topic
+
+
+class ProductManager(models.Manager):
+    def get_by_store_product(self, store_product):
+        if type(store_product) is GooglePlayProduct:
+            return apps.get_model('quotes.BalanceRechargeProduct').objects.get(google_play_product=store_product)
+        elif type(store_product) is AppStoreProduct:
+            return apps.get_model('quotes.BalanceRechargeProduct').objects.get(app_store_product=store_product)
+        else:
+            raise Error('Unknown product type.')
+
+
+class GameBalanceManager(models.Manager):
+    def get_actual(self):
+        # TODO: implement LRU Cache in a manner it has been done in `api` module
+        try:
+            return self.model.objects.latest('pk')
+        except self.model.DoesNotExist:
+            game_settings = self.create(initial_profile_balance=0)
+            return game_settings
+
+
+class ProfileManager(models.Manager):
+    def create(self, *args, **kwargs):
+        profile = super(ProfileManager, self).create(*args, **kwargs)
+
+        game_settings = apps.get_model('quotes.GameBalance').objects.get_actual()
+
+        profile.balance = kwargs.get('balance', game_settings.initial_profile_balance)
+        profile.nickname = kwargs.get('nickname', '')
+
+        return profile
+
+    def get_by_session(self, device_session):
+        return self.get(device_sessions__pk__contains=device_session.pk)
+
+    def get_by_token(self, device_session_token):
+        return self.get(device_sessions__token__contains=device_session_token)
+
+    def get_by_auth_token(self, auth_token):
+
+        session = DeviceSession.objects.get(auth_token=auth_token)
+        return self.get_by_session(session)
+
+    def unlock_category(self, profile, quote_category):
+        balance = profile.balance
+        price = quote_category.price_to_unlock
+        new_balance = balance - price
+        if new_balance < 0:
+            return (False, 'Not enough funds.')
+        profile.balance = new_balance
+        quote_category.available_to_users.add(profile)
+        return (True,'')
