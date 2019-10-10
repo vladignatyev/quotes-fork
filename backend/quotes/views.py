@@ -99,6 +99,19 @@ class LevelCompleteView(BaseView):
             return HttpResponse(status=404)
 
 
+class ProfileView(BaseView):
+    fields = ('id', 'balance', 'nickname', 'settings__initial_profile_balance',
+              'settings__reward_per_level_completion', 'settings__reward_per_doubleup')
+    
+    def get(self, request, *args, **kwargs):
+        flat_profile = model_to_dict(self.request.user_profile, fields=self.fields)
+        res_dict = {
+            "objects": [flat_profile],
+            "meta": {}
+        }
+        return json_response(res_dict)
+
+
 class AchievementList(BaseView):
     fields = ('icon', 'title', 'received_text', 'description_text')
 

@@ -8,7 +8,7 @@ from ..models import _truncate
 
 from api.models import *
 
-from .common import AuthenticatedTestCase, GameBalanceMixin
+from .common import GameBalanceMixin, ContentMixin
 
 
 
@@ -194,82 +194,6 @@ class ProfileCategoryPurchaseUnlock(GameBalanceMixin):
         self.assertIn(profile, category.available_to_users.all())
 
 
-class QuotesAuthenticateTest(TestCase):
-    def test_should_create_profile(self):
-        # Given
-        url = reverse('quote-auth')
-
-        device_token = 'sometesttoken'
-        timestamp = timezone.now().strftime('%Y-%m-%dT%H:%M:%S%z')
-        signature = generate_signature(device_token, timestamp)
-        nickname = 'Тестировщик'
-
-        payload = {
-            'device_token': device_token,
-            'timestamp': timestamp,
-            'signature': signature,
-            'nickname': nickname
-        }
-
-        # When
-        response = self.client.post(url, json.dumps(payload, ensure_ascii=False), content_type='application/json')
-
-        # Then
-        self.assertEqual(200, response.status_code)
-
-        payload = json.loads(response.content)
-        auth_token = payload['auth_token']
-
-        profile = Profile.objects.get_by_auth_token(auth_token)
-        self.assertEqual(nickname, profile.nickname)
-        self.assertEqual(GameBalance.objects.get_actual(), profile.settings)
-
-        self.assertEqual(1, len(Profile.objects.all()))
-
-    def test_should_respond_401_for_broken_case(self):
-        # Given
-        url = reverse('quote-auth')
-
-        device_token = '1'
-        timestamp = '2019-10-06T12:37:16+0000'
-        signature = '1'
-        nickname = 'тестировщик-9b76..b814'
-
-        payload = {
-            'device_token': device_token,
-            'timestamp': timestamp,
-            'signature': signature,
-            'nickname': nickname
-        }
-
-        # When
-        response = self.client.post(url, json.dumps(payload, ensure_ascii=False), content_type='application/json')
-
-        # Then
-        self.assertEqual(401, response.status_code)
-
-    def test_should_respond_401_not_500_to_make_vadim_confident_about_his_mobile_client(self):
-        # Given
-        url = reverse('quote-auth')
-
-        device_token = 'sometesttoken'
-        timestamp = timezone.now().strftime('%Y-%m-%dT%H:%M:%S%z')
-        signature = generate_signature(device_token, timestamp)
-        nickname = 'Тестировщик'
-
-        payload = {
-            'device_token': device_token,
-            'timestamp': timestamp,
-            'signature': signature,
-            'nickname': nickname
-        }
-
-        # When
-        response = self.client.post(url, json.dumps(payload, ensure_ascii=False), content_type='application/json')
-        response = self.client.post(url, json.dumps(payload, ensure_ascii=False), content_type='application/json')
-
-        # Then
-        self.assertEqual(401, response.status_code)
 
 
 class QuoteSplit(TestCase):
@@ -295,153 +219,11 @@ class QuoteSplit(TestCase):
         self.assertEqual(['Кайдзен', 'означает совершенствование.'], quote_split('Кайдзен ^означает совершенствование.^'))
 
 
-class ContentMixin:
-    def _create_content_hierarchy(self):
-        topic = Topic.objects.create(title='Test topic',
-                                     hidden=False)
-        section = Section.objects.create(title='Test section',
-                                         topic=topic)
-
-        category = QuoteCategory.objects.create(
-            section=section,
-            title='Test category',
-            is_payable=False
-        )
-
-        authors_name = 'Lewis Carroll'
-        author = QuoteAuthor.objects.create(name=authors_name)
-
-        self.topic = topic
-        self.section = section
-        self.category = category
-        self.author = author
-
-
-    def _create_multiple_quotes(self, category=None, author=None):
-        category = category or self.category
-        author = author or self.author
-
-        q = [
-            'And what is the use of a book without pictures or conversations?',
-            'How funny it’ll seem to come out among the people that walk with their heads downwards!',
-            'Oh, how I wish I could shut up like a telescope!',
-            'I suppose I ought to eat or drink something or other; but the great question is ‘What?’',
-            'When I used to read fairy tales, I fancied that kind of thing never happened, and now here I am in the middle of one!',
-            'I’m older than you, and must know better.',
-            'The best way to explain it is to do it.'
-        ]
-
-        quotes = []
-
-        for t in q:
-            quotes += [Quote.objects.create(text=t,
-                                 author=author,
-                                 category=category)]
-
-        if category == self.category:
-            self.quotes = quotes
-
-        return quotes
 
 
 
-class LevelsListTest(AuthenticatedTestCase, ContentMixin):
-    def test_get_levels_list_for_free_category(self):
-        # Given
-        self._create_content_hierarchy()
-        self._create_multiple_quotes(category=self.category, author=self.author)
 
-        # When
-        url = reverse('levels-list', kwargs={'category_pk': self.category.pk})
-        response = self.client.get(url, **self.auth())
-
-        # Then
-        self.assertEqual(200, response.status_code)
-        content = json.loads(response.content)
-
-        self.assertEqual(len(content['objects']), len(self.quotes))
-        self.assertEqual(self.author.name, content['objects'][0]['author'])
-
-        # only check that all keys present
-        for o in content['objects']:
-            fields = ('id', 'text', 'author',
-                      'reward',
-                      'order', 'complete',
-                      'splitted')
-            self.assertEqual(set(fields), set(o.keys()))
-
-    def test_get_levels_list_for_payable_category_returns_402_if_category_locked_for_user(self):
-        # Given
-        self._create_content_hierarchy()
-        self._create_multiple_quotes(category=self.category, author=self.author)
-
-        self.category.is_payable = True
-        self.category.save()
-
-        # When
-        url = reverse('levels-list', kwargs={'category_pk': self.category.pk})
-        response = self.client.get(url, **self.auth())
-
-        # Then
-        self.assertEqual(402, response.status_code)
-
-    def test_nonexisting_category_cause_404(self):
-        # When
-        url = reverse('levels-list', kwargs={'category_pk': 123456})
-        response = self.client.get(url, **self.auth())
-
-        # Then
-        self.assertEqual(404, response.status_code)
-
-    def test_get_levels_list_for_payable_category_returns_list_when_unlocked_for_coins(self):
-        # Given
-        self._create_content_hierarchy()
-        self._create_multiple_quotes(category=self.category, author=self.author)
-
-        self.category.is_payable = True
-        self.category.save()
-
-        # When
-        # Unlocking for coins
-        unlocked, _ = Profile.objects.unlock_category(self.profile, self.category)
-        self.assertTrue(unlocked)
-
-        url = reverse('levels-list', kwargs={'category_pk': self.category.pk})
-        response = self.client.get(url, **self.auth())
-
-        # Then
-        self.assertEqual(200, response.status_code)
-
-    def test_get_levels_list_for_payable_category_returns_list_when_unlocked_for_cash(self):
-        # Given
-        self._create_content_hierarchy()
-        self._create_multiple_quotes(category=self.category, author=self.author)
-
-        self.category.is_payable = True
-        self.category.save()
-
-        # When
-        # Unlocking for purchase
-        google_play_product = GooglePlayProduct.objects.create()
-        purchase = GooglePlayIAPPurchase.objects.create(product=google_play_product,
-                                                        device_session=self.device_session)
-
-        unlock_purchase = CategoryUnlockPurchase.objects.create(profile=self.profile,
-                                              category_to_unlock=self.category,
-                                              google_play_purchase=purchase)
-
-        purchase.status = PurchaseStatus.VALID  # manually 'validated' purchase
-        purchase.save()
-
-
-        url = reverse('levels-list', kwargs={'category_pk': self.category.pk})
-        response = self.client.get(url, **self.auth())
-
-        # Then
-        self.assertEqual(200, response.status_code)
-
-
-class LevelProgressTestCase(AuthenticatedTestCase, ContentMixin):
+class LevelProgressTestCase(ContentMixin):
     def setUp(self):
         super(LevelProgressTestCase, self).setUp()
         self._create_content_hierarchy()

@@ -5,7 +5,7 @@ from django.urls import reverse
 from django.utils import timezone
 
 from api.models import *
-from ..models import Profile, GameBalance
+from ..models import *
 
 
 class GameBalanceMixin(TestCase):
@@ -18,6 +18,55 @@ class GameBalanceMixin(TestCase):
     def tearDown(self):
         super(GameBalanceMixin, self).tearDown()
         self._gamebalance.delete()
+
+
+class ContentMixin:
+    def _create_content_hierarchy(self):
+        topic = Topic.objects.create(title='Test topic',
+                                     hidden=False)
+        section = Section.objects.create(title='Test section',
+                                         topic=topic)
+
+        category = QuoteCategory.objects.create(
+            section=section,
+            title='Test category',
+            is_payable=False
+        )
+
+        authors_name = 'Lewis Carroll'
+        author = QuoteAuthor.objects.create(name=authors_name)
+
+        self.topic = topic
+        self.section = section
+        self.category = category
+        self.author = author
+
+
+    def _create_multiple_quotes(self, category=None, author=None):
+        category = category or self.category
+        author = author or self.author
+
+        q = [
+            'And what is the use of a book without pictures or conversations?',
+            'How funny it’ll seem to come out among the people that walk with their heads downwards!',
+            'Oh, how I wish I could shut up like a telescope!',
+            'I suppose I ought to eat or drink something or other; but the great question is ‘What?’',
+            'When I used to read fairy tales, I fancied that kind of thing never happened, and now here I am in the middle of one!',
+            'I’m older than you, and must know better.',
+            'The best way to explain it is to do it.'
+        ]
+
+        quotes = []
+
+        for t in q:
+            quotes += [Quote.objects.create(text=t,
+                                 author=author,
+                                 category=category)]
+
+        if category == self.category:
+            self.quotes = quotes
+
+        return quotes
 
 
 

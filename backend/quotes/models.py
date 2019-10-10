@@ -142,7 +142,7 @@ def get_levels(category_pk, profile):
     if not category.is_available_to_user(profile):
         return
 
-    levels = get_all_levels_in_category(category_pk)#
+    levels = get_all_levels_in_category(category_pk)
     complete_levels = get_levels_complete_by_profile_in_category(profile.pk, category_pk)
 
     result = []

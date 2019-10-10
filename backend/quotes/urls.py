@@ -29,7 +29,7 @@ urlpatterns = [
 
     path('level/<int:level_pk>/complete', LevelCompleteView.as_view(), name='level-complete'),
 
-    # path('section/<int:pk>/', SectionDetail.as_view(), name='section-detail'),
+    path('profile/', ProfileView.as_view(), name='profile-view'),
 
     path('achievements/', AchievementList.as_view(), name='achievements-list'),
     path('achievements/all/', AllAchievementList.as_view(), name='achievements-list-all'),
