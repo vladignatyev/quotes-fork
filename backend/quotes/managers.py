@@ -16,18 +16,19 @@ class TopicManager(models.Manager):
                        'event_description', 'event_win_achievement']
 
 
-    def get_flattened(self, pk, current_user=None):
+    def get_flattened(self, topic, profile):
         '''
         Flattens hierahical models under Topic into lists,
         mark categories opened/payable depending on user payments,
         adds progress values to every category
         '''
-        # todo: implement filtering by available_to_users==current_user
-        # Perform requests
-        topic = self.get(pk=pk)
+        Section = apps.get_model('quotes.Section')
+        QuoteCategory = apps.get_model('quotes.QuoteCategory')
+        CategoryUnlockPurchase = apps.get_model('quotes.CategoryUnlockPurchase')
 
-        sections = apps.get_model('quotes.Section').objects.filter(topic__pk=pk).all()
-        categories = apps.get_model('quotes.QuoteCategory').objects.filter(section__topic=topic).all()
+        sections = Section.objects.filter(topic__pk=pk).all()
+        categories = QuoteCategory.objects.filter(section__topic=topic).all()
+
 
         flat_topic = model_to_dict(topic, fields=self.topic_fields)
         flat_topic['sections'] = [ model_to_dict(section, fields=self.section_fields) for section in sections ]
@@ -38,7 +39,9 @@ class TopicManager(models.Manager):
                 section['uri'] = reverse('section-detail', kwargs={'pk': section['id']})
                 if category.section.id == section['id']:
                     categories_per_section = section.get('categories', [])
-                    categories_per_section += [model_to_dict(category)]
+                    flat_category = model_to_dict(category)
+                    # flat_category['is_locked'] =
+                    categories_per_section += [flat_category]
                     section['categories'] = categories_per_section
 
         return flat_topic

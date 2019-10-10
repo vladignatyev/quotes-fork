@@ -124,21 +124,31 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
-
 STATIC_URL = '/static/'
 
-
-# QUOTE_LANGUAGES = [
-#     ('EN', 'Английский'),
-#     ('RU', 'Русский'),
-# ]
+# API Version for API URLs
 #
 API_VERSION = 1
 
-REST_FRAMEWORK = {
-    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 10
+
+import os
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler'
+        },
+    },
+    'loggers': {
+        # 'django': {
+        #     'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO'),
+        #     'handlers': ['console']
+        # },
+        'quotes': {
+            'handlers': ['console'],
+            'level': os.getenv('QUOTES_LOG_LEVEL', 'INFO'),
+            'propagate': True
+        }
+    },
 }
-
-
-QUOTES_INITIAL_PROFILE_BALANCE = 40

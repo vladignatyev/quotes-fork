@@ -413,7 +413,7 @@ class LevelsListTest(AuthenticatedTestCase, ContentMixin):
         # only check that all keys present
         for o in content['objects']:
             fields = ('id', 'text', 'author',
-                      'category_complete_reward',
+                      'reward',
                       'order', 'complete',
                       'splitted')
             self.assertEqual(set(fields), set(o.keys()))

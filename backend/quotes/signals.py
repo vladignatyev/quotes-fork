@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 from .models import *
 
 
@@ -11,6 +14,9 @@ def create_profile_on_new_device_session(sender, instance, created, **kwargs):
     profile.settings = GameBalance.objects.get_actual()
     profile.save()
 
+    logger.debug('Created profile with device session: %s', session)
+    logger.debug('Profile: %s', profile)
+
 
 # TODO: - extract core logic: find responsible for processing purchase and then call him to process a purchase
 # TODO: - guarantee that every purchase has been processed
@@ -21,13 +27,18 @@ def recharge_profile_on_purchase(sender, instance, created, **kwargs):
         return
     purchase = instance
 
+    logger.debug('New valid purchase: %s', purchase)
+
     try:
         app_product = BalanceRechargeProduct.objects.get_by_store_product(purchase.product)
 
-        profile_to_recharge = Profile.objects.get_by_session(purchase.device_session)
-        profile_to_recharge.balance = profile_to_recharge.balance + app_product.balance_recharge
-        profile_to_recharge.save()
+        profile = Profile.objects.get_by_session(purchase.device_session)
+        profile.balance = profile.balance + app_product.balance_recharge
+        profile.save()
+
+        logger.debug('Profile recharged: %s', profile)
     except BalanceRechargeProduct.DoesNotExist:
+        logger.debug('Balance recharge doesnot exist by store product: %s', purchase.product)
         pass  # purchase related to another Product/Purchase model, so skipping
 
 
@@ -37,14 +48,17 @@ def unlock_category_on_purchase(sender, instance, created, **kwargs):
     if instance.status != PurchaseStatus.VALID:
         return
     purchase = instance
+    logger.debug('New valid purchase: %s', purchase)
 
     session = purchase.device_session
 
     try:
-        unlock_category_purchase = CategoryUnlockPurchase.objects.get(google_play_purchase=purchase)
+        unlock = CategoryUnlockPurchase.objects.get(google_play_purchase=purchase)
 
-        profile_to_unlock_for = unlock_category_purchase.profile
-        unlock_category_purchase.category_to_unlock.available_to_users.add(profile_to_unlock_for)
-        unlock_category_purchase.save()
+        profile = unlock.profile
+        unlock.category_to_unlock.available_to_users.add(profile)
+        unlock.save()
+        logger.debug('Profile unlocking category: %s %s', profile, unlock.category_to_unlock.pk)
     except CategoryUnlockPurchase.DoesNotExist:
+        logger.debug('CategoryUnlockPurchase.DoesNotExist: Google Play Purchase %s', purchase.pk)
         pass

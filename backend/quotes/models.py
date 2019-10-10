@@ -1,4 +1,7 @@
 import re
+import logging
+logger = logging.getLogger(__name__)
+
 
 from django.utils import timezone
 
@@ -17,6 +20,12 @@ from .utils import _truncate
 from .rewardable import RewardableEntity
 
 from .managers import *
+
+
+from functools import lru_cache
+
+
+
 
 
 class QuoteAuthor(models.Model):
@@ -121,26 +130,26 @@ def quote_split(quote_item_text,
 
 
 def get_levels(category_pk, profile):
-    try:
-        category = QuoteCategory.objects.get(pk=category_pk)
-        levels = Quote.objects.filter(category=category)
-        complete_levels = Quote.objects.get_levels_complete_by_profile_in_category(profile, category)
-    except QuoteCategory.DoesNotExist:
-        return False
+    category = QuoteCategory.objects.get(pk=category_pk)
+    if not category.is_available_to_user(profile):
+        return
 
-    if category.is_unlocked_by(profile) or not category.is_payable:
-        result = []
-        for item in levels:
-            result += [{
-                'id': item.id,
-                'text': item.text,
-                'author': item.author.name,
-                'category_complete_reward': item.category.bonus_reward,
-                'order': item.order_in_category,
-                'complete': item in complete_levels,
-                'splitted': quote_split(item.text)
-            }]
-        return result
+    levels = Quote.objects.filter(category=category)
+    complete_levels = Quote.objects.get_levels_complete_by_profile_in_category(profile, category)
+
+    result = []
+    for item in levels:
+        flat_item = {
+            'id': item.id,
+            'text': item.text,
+            'author': item.author.name,
+            'reward': item.get_reward(profile),
+            'order': item.order_in_category,
+            'complete': item in complete_levels,
+            'splitted': quote_split(item.text)
+        }
+        result += [flat_item]
+    return result
 
 
 class QuoteCategory(RewardableEntity):
@@ -184,25 +193,20 @@ class QuoteCategory(RewardableEntity):
         return not self.is_payable or self.is_unlocked_by(profile)
 
     def is_unlocked_by(self, profile):
-        return self.is_unlocked_for_cash(profile) or self.is_unlocked_for_coins(profile)
-
-    def is_unlocked_for_coins(self, profile):
         try:
-            CategoryUnlockPurchase.objects.get(category_to_unlock=self,
-                                               profile=profile,
-                                               google_play_purchase__isnull=True)
+            unlock = get_unlock_for_category_and_profile(self.pk, profile.pk)
+        except CategoryUnlockPurchase.DoesNotExist:
+            return False
+
+        return self.is_unlocked_for_cash(profile, unlock) or self.is_unlocked_for_coins(profile, unlock)
+
+    def is_unlocked_for_coins(self, profile, unlock):
+        if not unlock.google_play_purchase:
             return True
-        except CategoryUnlockPurchase.DoesNotExist:
-            return False
 
-    def is_unlocked_for_cash(self, profile):
-        try:
-            cup = CategoryUnlockPurchase.objects.get(category_to_unlock=self,
-                                                     profile=profile,
-                                                     google_play_purchase__isnull=False)
-            return cup.google_play_purchase.status == PurchaseStatus.VALID
-        except CategoryUnlockPurchase.DoesNotExist:
-            return False
+    def is_unlocked_for_cash(self, profile, unlock):
+        if unlock.google_play_purchase:
+            return unlock.google_play_purchase.status == PurchaseStatus.VALID
 
     def is_completion_condition_met_by(self, profile):
         levels_complete, levels_total = self.get_progress(profile)
@@ -219,6 +223,16 @@ class QuoteCategory(RewardableEntity):
             user_events += self.section.handle_complete(profile)
         return user_events
 
+
+@lru_cache(maxsize=2 ** 16)
+def get_unlock_for_category_and_profile(category_pk, profile_pk):
+    return CategoryUnlockPurchase.objects.get(category_to_unlock=category_pk,
+                                              profile=profile_pk)
+
+def clean_unlock_cache(*args, **kwargs):
+    logger.debug('`get_unlock_for_category_and_profile` %s', get_unlock_for_category_and_profile.cache_info())
+
+    get_unlock_for_category_and_profile.cache_clear()
 
 class Quote(RewardableEntity):
     text = models.CharField("Текст цитаты", max_length=256)

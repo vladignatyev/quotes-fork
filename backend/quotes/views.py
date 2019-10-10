@@ -58,10 +58,12 @@ class LevelsList(BaseView):
     def get(self, request, *args, **kwargs):
         category_pk = kwargs.get('category_pk', None)
 
-        query_result = get_levels(category_pk=category_pk,
-                                  profile=self.request.user_profile)
-        if query_result == False:
+        try:
+            query_result = get_levels(category_pk=category_pk,
+                                      profile=self.request.user_profile)
+        except QuoteCategory.DoesNotExist:
             return HttpResponse(status=404)
+
         if query_result is None:
             return HttpResponse(status=402)
 
