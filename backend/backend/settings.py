@@ -132,6 +132,11 @@ API_VERSION = 1
 
 
 import os
+import logging
+
+LOGGING_FORMAT = '%(asctime)-15s [%(levelname)s] %(name)s:  %(message)s'
+logging.basicConfig(format=LOGGING_FORMAT)
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,

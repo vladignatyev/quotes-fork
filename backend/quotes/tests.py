@@ -384,12 +384,18 @@ class ContentMixin:
             'I’m older than you, and must know better.',
             'The best way to explain it is to do it.'
         ]
-        self.quotes = []
+
+        quotes = []
 
         for t in q:
-            self.quotes += [Quote.objects.create(text=t,
+            quotes += [Quote.objects.create(text=t,
                                  author=author,
                                  category=category)]
+
+        if category == self.category:
+            self.quotes = quotes
+
+        return quotes
 
 
 
@@ -518,24 +524,7 @@ class LevelProgressTestCase(AuthenticatedTestCase, ContentMixin):
         self.quotes[3].mark_complete(self.profile)
 
         # Then
-        complete = Quote.objects.get_levels_complete_by_profile_in_category(self.profile, self.category)
-        self.assertIn(self.quotes[3], complete)
-
-        self.assertNotIn(self.quotes[0], complete)
-        self.assertNotIn(self.quotes[1], complete)
-        self.assertNotIn(self.quotes[2], complete)
-        self.assertNotIn(self.quotes[5], complete)
-
-    def test_getter_for_levels_complete2(self):
-        # Given
-
-        # When
-        events = self.quotes[3].mark_complete(self.profile)
-
-        # Then
-        self.assertIn((UserEvents.LEVEL_COMPLETE, 4), events)
-
-        complete = Quote.objects.get_levels_complete_by_profile(self.profile)
+        complete = get_levels_complete_by_profile_in_category(self.profile, self.category)
         self.assertIn(self.quotes[3], complete)
 
         self.assertNotIn(self.quotes[0], complete)
@@ -626,3 +615,38 @@ class LevelProgressTestCase(AuthenticatedTestCase, ContentMixin):
         self.assertEqual(1, len(category_achievements))
         achievement_pk = category_achievements[0][1]
         self.assertEqual(achievement_pk, category_achievement.pk)
+
+
+    def test_complex_case_multiple_categories(self):
+        # Given
+
+        section2 = Section.objects.create(title='Test section #2',
+                                         topic=self.topic)
+
+        category2 = QuoteCategory.objects.create(
+            section=section2,
+            title='Test category2',
+            is_payable=False
+        )
+
+        category3 = QuoteCategory.objects.create(
+            section=section2,
+            title='Test category3',
+            is_payable=False
+        )
+
+        quotes2 = self._create_multiple_quotes(category=category2)
+        quotes3 = self._create_multiple_quotes(category=category3)
+
+        # When
+        events = []
+        for i in range(0,len(quotes2)):
+            events += quotes2[i].mark_complete(self.profile)
+
+        for i in range(0, len(quotes3)):
+            events += quotes3[i].mark_complete(self.profile)
+
+        self.assertIn((UserEvents.CATEGORY_COMPLETE, category2.pk), events)
+        self.assertIn((UserEvents.CATEGORY_COMPLETE, category3.pk), events)
+        self.assertIn((UserEvents.SECTION_COMPLETE, section2.pk), events)
+        self.assertNotIn((UserEvents.TOPIC_COMPLETE, self.topic.pk), events)

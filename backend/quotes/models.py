@@ -86,9 +86,16 @@ class Topic(RewardableEntity):
     reward_event_name = UserEvents.RECEIVED_PER_TOPIC_REWARD
 
     def is_completion_condition_met_by(self, profile):
-        levels_complete = Quote.objects.get_levels_complete_by_profile_in_topic(profile, self).count()
-        levels_total = Quote.objects.get_all_levels_in_topic(self).count()
+        levels_complete, levels_total = get_progress_profile_in_topic(profile.pk, self.pk)
+        # levels_complete = get_levels_complete_by_profile_in_topic(profile, self).count()
+        # levels_total = get_all_levels_in_topic(self).count()
         return levels_complete == levels_total
+
+    def handle_complete(self, profile):
+        # clean_get_progress_profile_in_category_cache()
+        return super(Topic, self).handle_complete(profile)
+
+
 
 
 class Section(RewardableEntity):
@@ -107,11 +114,12 @@ class Section(RewardableEntity):
     reward_event_name = UserEvents.RECEIVED_PER_SECTION_REWARD
 
     def is_completion_condition_met_by(self, profile):
-        levels_complete = Quote.objects.get_levels_complete_by_profile_in_section(profile, self).count()
-        levels_total = Quote.objects.get_all_levels_in_section(self).count()
+        levels_complete, levels_total = get_progress_profile_in_section(profile.pk, self.pk)
         return levels_complete == levels_total
 
     def handle_complete(self, profile):
+        # clean_get_progress_profile_in_category_cache()
+
         user_events = super(Section, self).handle_complete(profile)
         if self.topic.is_completion_condition_met_by(profile) == True:
             user_events += self.topic.handle_complete(profile)
@@ -134,8 +142,8 @@ def get_levels(category_pk, profile):
     if not category.is_available_to_user(profile):
         return
 
-    levels = Quote.objects.filter(category=category)
-    complete_levels = Quote.objects.get_levels_complete_by_profile_in_category(profile, category)
+    levels = get_all_levels_in_category(category.pk)#
+    complete_levels = get_levels_complete_by_profile_in_category(profile, category)
 
     result = []
     for item in levels:
@@ -210,18 +218,95 @@ class QuoteCategory(RewardableEntity):
 
     def is_completion_condition_met_by(self, profile):
         levels_complete, levels_total = self.get_progress(profile)
+        logger.debug('Category id %s complete condition: (%s, %s)', self.pk, levels_complete, levels_total)
+
         return levels_complete == levels_total
 
     def get_progress(self, profile):
-        levels_complete = Quote.objects.get_levels_complete_by_profile_in_category(profile, self).count()
-        levels_total = Quote.objects.get_all_levels_in_category(self).count()
-        return (levels_complete, levels_total)
+        return get_progress_profile_in_category(profile.pk, self.pk)
 
     def handle_complete(self, profile):
         user_events = super(QuoteCategory, self).handle_complete(profile)
+
+        logger.debug('Category id %s complete by profile %s', self.pk, profile.pk)
+
         if self.section.is_completion_condition_met_by(profile) == True:
             user_events += self.section.handle_complete(profile)
         return user_events
+
+
+
+
+
+# Profile Progress cacheable
+@lru_cache(maxsize=2**16)
+def get_progress_profile_in_topic(profile_pk, topic_pk):
+    levels_complete = Quote.objects.filter(complete_by_users=profile_pk).filter(category__section__topic=topic_pk).count()
+    levels_total = get_all_levels_in_topic_count(topic_pk)
+    return (levels_complete, levels_total)
+
+@lru_cache(maxsize=2**16)
+def get_progress_profile_in_section(profile_pk, section_pk):
+    levels_complete = Quote.objects.filter(complete_by_users=profile_pk).filter(category__section=section_pk).count()
+    levels_total = get_all_levels_in_section_count(section_pk)
+    return (levels_complete, levels_total)
+
+@lru_cache(maxsize=2**16)
+def get_progress_profile_in_category(profile_pk, category_pk):
+    levels_complete = Quote.objects.filter(complete_by_users=profile_pk).filter(category=category_pk).count()
+    levels_total = get_all_levels_in_category_count(category_pk)
+    return (levels_complete, levels_total)
+
+
+def clean_profile_progress_cache(profile):
+    # todo: clean only per-profile cache
+    # todo: find alternatives to lru_cache that support cache clearing by hash, like Redis/Memcached but without 3rd party server
+    logger.debug('Profile Cache report:')
+    logger.debug('\tget_progress_profile_in_topic: %s', get_progress_profile_in_topic.cache_info())
+    logger.debug('\tget_progress_profile_in_section: %s', get_progress_profile_in_section.cache_info())
+    logger.debug('\tget_progress_profile_in_category: %s', get_progress_profile_in_category.cache_info())
+
+    get_progress_profile_in_topic.cache_clear()
+    get_progress_profile_in_section.cache_clear()
+    get_progress_profile_in_category.cache_clear()
+
+
+
+def get_levels_complete_by_profile_in_category(profile, category):
+    return Quote.objects.filter(category=category).filter(complete_by_users=profile)
+
+
+# Content cacheable
+@lru_cache(maxsize=2**16)
+def get_all_levels_in_category(category_pk):
+    return list(Quote.objects.filter(category=category_pk).all())
+
+@lru_cache(maxsize=2**16)
+def get_all_levels_in_category_count(category_pk):
+    return Quote.objects.filter(category=category_pk).count()
+
+@lru_cache(maxsize=2**16)
+def get_all_levels_in_section_count(section_pk):
+    return Quote.objects.filter(category__section=section_pk).count()
+
+@lru_cache(maxsize=2**16)
+def get_all_levels_in_topic_count(topic_pk):
+    return Quote.objects.filter(category__section__topic=topic_pk).count()
+# --
+
+
+def clean_content_cache(*args, **kwargs):
+    # logger.debug('Content Cache report:')
+    # logger.debug('\tget_all_levels_in_category: %s', get_all_levels_in_category.cache_info())
+    # logger.debug('\tget_all_levels_in_category_count: %s', get_all_levels_in_category_count.cache_info())
+    # logger.debug('\tget_all_levels_in_section_count: %s', get_all_levels_in_section_count.cache_info())
+    # logger.debug('\tget_all_levels_in_topic_count: %s', get_all_levels_in_topic_count.cache_info())
+
+    get_all_levels_in_category.cache_clear()
+    get_all_levels_in_category_count.cache_clear()
+    get_all_levels_in_section_count.cache_clear()
+    get_all_levels_in_topic_count.cache_clear()
+
 
 
 @lru_cache(maxsize=2 ** 16)
@@ -248,8 +333,6 @@ class Quote(RewardableEntity):
         verbose_name = 'цитата'
         verbose_name_plural = 'цитаты'
 
-    objects = QuoteManager()
-
     complete_event_name = UserEvents.LEVEL_COMPLETE
     achievement_event_name = UserEvents.RECEIVED_LEVEL_ACHIEVEMENT
     reward_event_name = UserEvents.RECEIVED_PER_LEVEL_REWARD
@@ -267,7 +350,11 @@ class Quote(RewardableEntity):
         if not self.category.is_available_to_user(profile):
             raise self.NoAccess('The user have the category locked and he cannot complete this level.')
 
+        logger.debug('Level id %s complete by profile %s', self.pk, profile.pk)
+
         user_events = self.handle_complete(profile)
+
+        clean_profile_progress_cache(profile=profile)
 
         if self.category.is_completion_condition_met_by(profile) == True:
             user_events += self.category.handle_complete(profile)

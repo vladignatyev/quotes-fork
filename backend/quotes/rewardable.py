@@ -21,9 +21,6 @@ class RewardableEntity(models.Model):
     def get_reward(self, profile):
         return self.bonus_reward
 
-    def is_completion_condition_met_by(self, profile):
-        return False
-
     def handle_complete(self, profile):
         self.complete_by_users.add(profile)
         self.save()
