@@ -168,7 +168,6 @@ class ProfileCategoryPurchaseUnlock(GameBalanceMixin):
         session = DeviceSession.objects.create()
         session.save()
 
-        GameBalance.objects.create(initial_profile_balance=0)
         profile = Profile.objects.get_by_session(device_session=session)
 
         category = QuoteCategory.objects.create(title='Тестовая платная категория',
@@ -182,6 +181,7 @@ class ProfileCategoryPurchaseUnlock(GameBalanceMixin):
         google_play_purchase.save()
 
         purchase = CategoryUnlockPurchase.objects.create(profile=profile,
+                                              type=CategoryUnlockTypes.UNLOCK_BY_PURCHASE,
                                               category_to_unlock=category,
                                               google_play_purchase=google_play_purchase)
         purchase.save()
@@ -194,6 +194,51 @@ class ProfileCategoryPurchaseUnlock(GameBalanceMixin):
         self.assertIn(profile, category.available_to_users.all())
 
 
+class CategoryModelUnlock(GameBalanceMixin):
+    def test_should_unlock_locked(self):
+        # Given
+        PRICE_TO_UNLOCK = 10
+
+        session = DeviceSession.objects.create()
+        session.save()
+
+        profile = Profile.objects.get_by_session(device_session=session)
+        self.assertTrue(profile.balance > PRICE_TO_UNLOCK)
+
+        category = QuoteCategory.objects.create(title='Тестовая платная категория',
+                                                is_payable=True,
+                                                price_to_unlock=PRICE_TO_UNLOCK)
+
+        unlock = CategoryUnlockPurchase.objects.create(profile=profile,
+                                              type=CategoryUnlockTypes.UNLOCK_FOR_COINS,
+                                              category_to_unlock=category)
+
+        # When
+        unlock.do_unlock()
+
+        # Then
+        self.assertIn(profile, category.available_to_users.all())
+
+    def test_should_raise_insufficient_funds_exception(self):
+        # Given
+        PRICE_TO_UNLOCK = 10E8 # huge amount
+
+        session = DeviceSession.objects.create()
+        session.save()
+
+        profile = Profile.objects.get_by_session(device_session=session)
+
+        category = QuoteCategory.objects.create(title='Тестовая платная категория',
+                                                is_payable=True,
+                                                price_to_unlock=PRICE_TO_UNLOCK)
+
+        unlock = CategoryUnlockPurchase.objects.create(profile=profile,
+                                              type=CategoryUnlockTypes.UNLOCK_FOR_COINS,
+                                              category_to_unlock=category)
+
+        # When
+        with self.assertRaises(CategoryUnlockPurchase.InsufficientFunds):
+            unlock.do_unlock()
 
 
 class QuoteSplit(TestCase):

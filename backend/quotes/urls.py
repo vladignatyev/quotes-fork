@@ -26,11 +26,18 @@ urlpatterns = [
     path('topic/list/', TopicList.as_view(), name='topic-list'),
 
     path('levels/category/<int:category_pk>/', LevelsList.as_view(), name='levels-list'),
-
     path('level/<int:level_pk>/complete', LevelCompleteView.as_view(), name='level-complete'),
+
+    path('category/<int:category_pk>/unlock', CategoryUnlockView.as_view(), name='category-unlock'),
 
     path('profile/', ProfileView.as_view(), name='profile-view'),
 
     path('achievements/', AchievementList.as_view(), name='achievements-list'),
     path('achievements/all/', AllAchievementList.as_view(), name='achievements-list-all'),
+    #
+    # path('purchase/coins/', PurchaseCoinsView.as_view(), name='purchase-coins-view'),
+    # path('purchase/unlock/', PurchaseUnlockView.as_view(), name='purchase-unlock-view'),
+    # path('purchase/status/', PurchaseStatusView.as_view(), name='purchase-status-view'),
+
+
 ]

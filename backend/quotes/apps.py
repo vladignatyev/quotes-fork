@@ -22,4 +22,5 @@ class QuotesConfig(AppConfig):
         post_save.connect(clean_content_cache, sender='quotes.Topic')
         post_save.connect(clean_content_cache, sender='quotes.Section')
         post_save.connect(clean_content_cache, sender='quotes.QuoteCategory')
+        post_save.connect(clean_unlock_cache, sender='quotes.QuoteCategory')
         post_save.connect(clean_content_cache, sender='quotes.Quote')

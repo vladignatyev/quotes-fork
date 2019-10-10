@@ -171,6 +171,7 @@ class LevelsListTest(AuthenticatedTestCase, ContentMixin):
                                                         device_session=self.device_session)
 
         unlock_purchase = CategoryUnlockPurchase.objects.create(profile=self.profile,
+                                              type=CategoryUnlockTypes.UNLOCK_BY_PURCHASE,
                                               category_to_unlock=self.category,
                                               google_play_purchase=purchase)
 
@@ -185,21 +186,7 @@ class LevelsListTest(AuthenticatedTestCase, ContentMixin):
         self.assertEqual(200, response.status_code)
 
 
-class ViewTest(AuthenticatedTestCase):
-
-
-#     path('topic/<int:pk>/', TopicDetail.as_view(), name='topic-detail'),
-#     path('topic/list/', TopicList.as_view(), name='topic-list'),
-#
-#     path('levels/category/<int:category_pk>/', LevelsList.as_view(), name='levels-list'),
-#
-#     path('level/<int:level_pk>/complete', LevelCompleteView.as_view(), name='level-complete'),
-#
-#     path('profile/', ProfileView.as_view(), name='profile-view'),
-#
-#     path('achievements/', AchievementList.as_view(), name='achievements-list'),
-#     path('achievements/all/', AllAchievementList.as_view(), name='achievements-list-all'),
-# ]
+class ProfileAndAchievementsViewTest(AuthenticatedTestCase):
     def test_profile_view_present(self):
         # Given
         url = reverse('profile-view')
@@ -242,3 +229,47 @@ class ViewTest(AuthenticatedTestCase):
         response = self.client.get(url, **self.auth())
         self.assertEqual(200, response.status_code)
         self.assertEqual(10, len(json.loads(response.content)['objects']))
+
+
+class CategoryUnlockTest(AuthenticatedTestCase, ContentMixin):
+    def test_should_unlock_locked_category(self):
+        # Given
+        price_coins = 10
+        initial_balance = 1000
+
+        self._create_content_hierarchy()
+        self._create_multiple_quotes(category=self.category, author=self.author)
+        self.category.is_payable = True
+        self.category.price_to_unlock = price_coins
+        self.category.save()
+
+        self.assertFalse(self.category.is_available_to_user(self.profile))
+        self.assertEqual(initial_balance, self.profile.balance)
+
+        url = reverse('category-unlock', kwargs={'category_pk': self.category.pk})
+
+        # When
+        response = self.client.post(url, **self.auth())
+
+        # Then
+        updated_profile = Profile.objects.get(pk=self.profile.pk)
+        updated_category = QuoteCategory.objects.get(pk=self.category.pk)
+
+        self.assertTrue(updated_category.is_available_to_user(updated_profile))
+        self.assertEqual(initial_balance - price_coins, updated_profile.balance)
+
+        #
+        # # Then
+        # self.assertEqual(200, response.status_code)
+        # content = json.loads(response.content)
+        #
+        # self.assertEqual(len(content['objects']), len(self.quotes))
+        # self.assertEqual(self.author.name, content['objects'][0]['author'])
+        #
+        # # only check that all keys present
+        # for o in content['objects']:
+        #     fields = ('id', 'text', 'author',
+        #               'reward',
+        #               'order', 'complete',
+        #               'splitted')
+        #     self.assertEqual(set(fields), set(o.keys()))

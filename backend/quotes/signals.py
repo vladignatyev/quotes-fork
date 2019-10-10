@@ -54,11 +54,12 @@ def unlock_category_on_purchase(sender, instance, created, **kwargs):
 
     try:
         unlock = CategoryUnlockPurchase.objects.get(google_play_purchase=purchase)
-
-        profile = unlock.profile
-        unlock.category_to_unlock.available_to_users.add(profile)
-        unlock.save()
-        logger.debug('Profile unlocking category: %s %s', profile, unlock.category_to_unlock.pk)
+        unlock.do_unlock()
+        #
+        # profile = unlock.profile
+        # unlock.category_to_unlock.available_to_users.add(profile)
+        # unlock.save()
+        # logger.debug('Profile unlocking category: %s %s', profile, unlock.category_to_unlock.pk)
     except CategoryUnlockPurchase.DoesNotExist:
         logger.debug('CategoryUnlockPurchase.DoesNotExist: Google Play Purchase %s', purchase.pk)
         pass

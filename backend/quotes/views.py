@@ -102,7 +102,7 @@ class LevelCompleteView(BaseView):
 class ProfileView(BaseView):
     fields = ('id', 'balance', 'nickname', 'settings__initial_profile_balance',
               'settings__reward_per_level_completion', 'settings__reward_per_doubleup')
-    
+
     def get(self, request, *args, **kwargs):
         flat_profile = model_to_dict(self.request.user_profile, fields=self.fields)
         res_dict = {
@@ -111,6 +111,36 @@ class ProfileView(BaseView):
         }
         return json_response(res_dict)
 
+
+class PurchaseCoinsView(BaseView):
+    def post(self, request, *args, **kwargs):
+        pass
+
+
+class PurchaseUnlockView(BaseView):
+    def post(self, request, *args, **kwargs):
+        pass
+
+class PurchaseStatusView(BaseView):
+    def get(self, request, *args, **kwargs):
+        pass
+
+class CategoryUnlockView(BaseView):
+    def post(self, request, *args, **kwargs):
+        category = QuoteCategory.objects.get(pk=kwargs['category_pk'])
+
+        try:
+            unlock = CategoryUnlockPurchase.objects.create(type=CategoryUnlockTypes.UNLOCK_FOR_COINS,
+                                                  profile=self.request.user_profile,
+                                                  category_to_unlock=category)
+            unlock.do_unlock()
+        except CategoryUnlockPurchase.InsufficientFunds:
+            return HttpResponse(status=402)
+        except CategoryUnlockPurchase.AlreadyAvailable:
+            print('ere')
+            pass
+
+        return HttpResponse(status=200)
 
 class AchievementList(BaseView):
     fields = ('icon', 'title', 'received_text', 'description_text')
