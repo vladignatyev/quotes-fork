@@ -616,3 +616,13 @@ class LevelProgressTestCase(AuthenticatedTestCase, ContentMixin):
         self.assertEqual(1, len(topic_achievements))
         achievement_pk = topic_achievements[0][1]
         self.assertEqual(achievement_pk, topic_achievement.pk)
+
+        section_achievements = list(UserEvents.filter_by_name(UserEvents.RECEIVED_SECTION_ACHIEVEMENT, events))
+        self.assertEqual(1, len(section_achievements))
+        achievement_pk = section_achievements[0][1]
+        self.assertEqual(achievement_pk, section_achievement.pk)
+
+        category_achievements = list(UserEvents.filter_by_name(UserEvents.RECEIVED_CATEGORY_ACHIEVEMENT, events))
+        self.assertEqual(1, len(category_achievements))
+        achievement_pk = category_achievements[0][1]
+        self.assertEqual(achievement_pk, category_achievement.pk)
