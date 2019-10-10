@@ -142,8 +142,8 @@ def get_levels(category_pk, profile):
     if not category.is_available_to_user(profile):
         return
 
-    levels = get_all_levels_in_category(category.pk)#
-    complete_levels = get_levels_complete_by_profile_in_category(profile, category)
+    levels = get_all_levels_in_category(category_pk)#
+    complete_levels = get_levels_complete_by_profile_in_category(profile.pk, category_pk)
 
     result = []
     for item in levels:
@@ -235,45 +235,102 @@ class QuoteCategory(RewardableEntity):
         return user_events
 
 
+from datetime import datetime, timedelta
+
+class ProfilesDataStorage:
+    TTL = 2 * 60 # seconds
+
+    profiles = {}
+    profiles_ttl = {}
+
+    @classmethod
+    def get_bucket(cls, profile_pk):
+        profile_bucket = cls.profiles.get(profile_pk, None)
+        if profile_bucket is None:
+            cls.profiles[profile_pk] = {}
+
+        cls.profiles_ttl[profile_pk] = datetime.now()
+        cls.update_ttl()
+        return cls.profiles[profile_pk]
+
+    @classmethod
+    def clear_bucket(cls, profile_pk):
+        cls.profiles.pop(profile_pk, None)
+        cls.profiles_ttl.pop(profile_pk, None)
+
+    @classmethod
+    def update_ttl(cls):
+        items = list(cls.profiles_ttl.items())
+        lt = datetime.now() - timedelta(seconds=cls.TTL)
+        for k, t in items:
+            if t < lt:
+                cls.clear_bucket(k)
+
+    @classmethod
+    def get_levels_complete_by_profile_in_category(cls, profile_pk, category_pk):
+        bucket = cls.get_bucket(profile_pk)
+
+        key = f'get_levels_complete_by_profile_in_category({profile_pk}, {category_pk})'
+
+        result = bucket.get(key, None)
+        if not result:
+            result = list(Quote.objects.filter(complete_by_users=profile_pk).filter(category=category_pk).all())
+            bucket[key] = result
+
+        return result
+
+    @classmethod
+    def get_levels_complete_by_profile_in_section_count(cls, profile_pk, section_pk):
+        bucket = cls.get_bucket(profile_pk)
+
+        key = f'get_levels_complete_by_profile_in_section_count({profile_pk}, {section_pk})'
+
+        result = bucket.get(key, None)
+        if not result:
+            result = Quote.objects.filter(complete_by_users=profile_pk).filter(category__section=section_pk).count()
+            bucket[key] = result
+
+        return result
+
+    @classmethod
+    def get_levels_complete_by_profile_in_topic_count(cls, profile_pk, topic_pk):
+        bucket = cls.get_bucket(profile_pk)
+
+        key = f'get_levels_complete_by_profile_in_topic_count({profile_pk}, {topic_pk})'
+
+        result = bucket.get(key, None)
+        if not result:
+            result = Quote.objects.filter(complete_by_users=profile_pk).filter(category__section__topic=topic_pk).count()
+            bucket[key] = result
+
+        return result
 
 
 
-# Profile Progress cacheable
-@lru_cache(maxsize=2**16)
+
+
 def get_progress_profile_in_topic(profile_pk, topic_pk):
-    levels_complete = Quote.objects.filter(complete_by_users=profile_pk).filter(category__section__topic=topic_pk).count()
+    levels_complete = ProfilesDataStorage.get_levels_complete_by_profile_in_topic_count(profile_pk, topic_pk)
     levels_total = get_all_levels_in_topic_count(topic_pk)
     return (levels_complete, levels_total)
 
-@lru_cache(maxsize=2**16)
 def get_progress_profile_in_section(profile_pk, section_pk):
-    levels_complete = Quote.objects.filter(complete_by_users=profile_pk).filter(category__section=section_pk).count()
+    levels_complete = ProfilesDataStorage.get_levels_complete_by_profile_in_section_count(profile_pk, section_pk)
     levels_total = get_all_levels_in_section_count(section_pk)
     return (levels_complete, levels_total)
 
-@lru_cache(maxsize=2**16)
 def get_progress_profile_in_category(profile_pk, category_pk):
-    levels_complete = Quote.objects.filter(complete_by_users=profile_pk).filter(category=category_pk).count()
+    levels_complete = len(ProfilesDataStorage.get_levels_complete_by_profile_in_category(profile_pk, category_pk))
     levels_total = get_all_levels_in_category_count(category_pk)
     return (levels_complete, levels_total)
 
 
+def get_levels_complete_by_profile_in_category(profile_pk, category_pk):
+    return ProfilesDataStorage.get_levels_complete_by_profile_in_category(profile_pk, category_pk)
+
+
 def clean_profile_progress_cache(profile):
-    # todo: clean only per-profile cache
-    # todo: find alternatives to lru_cache that support cache clearing by hash, like Redis/Memcached but without 3rd party server
-    logger.debug('Profile Cache report:')
-    logger.debug('\tget_progress_profile_in_topic: %s', get_progress_profile_in_topic.cache_info())
-    logger.debug('\tget_progress_profile_in_section: %s', get_progress_profile_in_section.cache_info())
-    logger.debug('\tget_progress_profile_in_category: %s', get_progress_profile_in_category.cache_info())
-
-    get_progress_profile_in_topic.cache_clear()
-    get_progress_profile_in_section.cache_clear()
-    get_progress_profile_in_category.cache_clear()
-
-
-
-def get_levels_complete_by_profile_in_category(profile, category):
-    return Quote.objects.filter(category=category).filter(complete_by_users=profile)
+    ProfilesDataStorage.clear_bucket(profile.pk)
 
 
 # Content cacheable

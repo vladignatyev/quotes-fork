@@ -3,31 +3,16 @@ import json
 from django.conf import settings
 from django.test import TestCase
 
-from .models import *
+from ..models import *
+from ..models import _truncate
+
 from api.models import *
 
-
-class UtilsTest(TestCase):
-    def test_truncate(self):
-        from .models import _truncate
-
-        self.assertEqual('Карл у Кла˚˚˚', _truncate('Карл у Клары украл коралы', length=10, suffix='˚˚˚'))
-        self.assertEqual('Карл у Клары украл коралы', _truncate('Карл у Клары украл коралы', length=100, suffix='˚˚˚'))
+from .common import AuthenticatedTestCase, GameBalanceMixin
 
 
-class GameBalanceTestCase(TestCase):
-    TEST_INITIAL_PROFILE_BALANCE = 20
 
-    def setUp(self):
-        super(GameBalanceTestCase, self).setUp()
-        self._gamebalance = GameBalance.objects.create(initial_profile_balance=self.TEST_INITIAL_PROFILE_BALANCE)
-
-    def tearDown(self):
-        super(GameBalanceTestCase, self).tearDown()
-        self._gamebalance.delete()
-
-
-class ProfileTest(GameBalanceTestCase):
+class ProfileTest(GameBalanceMixin):
     def test_autocreate_profile_when_new_device_session_created(self):
         # Given
         self.assertEqual(0, len(Profile.objects.all()))
@@ -128,7 +113,7 @@ class GameBalanceTest(TestCase):
         self.assertEqual(30, game_settings.initial_profile_balance)
 
 
-class ProfileCategoryUnlocking(GameBalanceTestCase):
+class ProfileCategoryUnlocking(GameBalanceMixin):
     def test_should_unlock_category_for_given_profile(self):
         # Given
         INITIAL_BALANCE = 30
@@ -175,7 +160,7 @@ class ProfileCategoryUnlocking(GameBalanceTestCase):
         self.assertNotIn(profile, category.available_to_users.all())
 
 
-class ProfileCategoryPurchaseUnlock(GameBalanceTestCase):
+class ProfileCategoryPurchaseUnlock(GameBalanceMixin):
     def test_should_unlock_after_purchase_validated(self):
         # Given
         PRICE_TO_UNLOCK = 10E8 # ANY
@@ -285,45 +270,6 @@ class QuotesAuthenticateTest(TestCase):
 
         # Then
         self.assertEqual(401, response.status_code)
-
-
-class AuthenticatedTestCase(TestCase):
-    INITIAL_USER_BALANCE = 1000
-
-    def setUp(self):
-        '''
-        Receiving auth token during normal HTTP flow.
-        '''
-        url = reverse('quote-auth')
-
-        device_token = 'sometesttoken'
-        timestamp = timezone.now().strftime('%Y-%m-%dT%H:%M:%S%z')
-        signature = generate_signature(device_token, timestamp)
-        nickname = 'Tester'
-
-        payload = {
-            'device_token': device_token,
-            'timestamp': timestamp,
-            'signature': signature,
-            'nickname': nickname
-        }
-
-        response = self.client.post(url, json.dumps(payload, ensure_ascii=False), content_type='application/json')
-        self.assertEqual(200, response.status_code)
-        self.auth_token = json.loads(response.content)['auth_token']
-
-        self.profile = Profile.objects.get_by_auth_token(self.auth_token)
-        self.profile.balance = self.INITIAL_USER_BALANCE
-        self.profile.save()
-        self.device_session = self.profile.device_sessions.latest('pk')
-
-
-    def tearDown(self):
-        pass
-
-    def auth(self):
-        ''' Helper for passing auth token to the view '''
-        return {'HTTP_X-Client-Auth': self.auth_token}
 
 
 class QuoteSplit(TestCase):
