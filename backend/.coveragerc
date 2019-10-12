@@ -1,0 +1,17 @@
+[run]
+branch = True
+
+omit =
+    quotes/migrations/*
+    api/migrations/*
+    backend/wsgi.py
+    backend/settings.py
+    api/urls.py
+    quotes/urls.py
+    manage.py
+    quotes/tests/*
+    quotes/events.py
+    api/tests.py
+
+[report]
+skip_covered = True

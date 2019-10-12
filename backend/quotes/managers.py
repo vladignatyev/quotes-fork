@@ -41,6 +41,9 @@ class TopicManager(models.Manager):
                     categories_per_section = section.get('categories', [])
                     flat_category = model_to_dict(category)
                     flat_category['is_locked'] = category.is_available_to_user(profile)
+                    levels_complete, levels_total = category.get_progress(profile)
+                    flat_category['progress_levels_total'] = levels_total
+                    flat_category['progress_levels_complete'] = levels_complete
                     categories_per_section += [flat_category]
                     section['categories'] = categories_per_section
 

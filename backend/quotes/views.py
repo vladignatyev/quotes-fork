@@ -81,6 +81,7 @@ class LevelCompleteView(BaseView):
 
         try:
             quote = Quote.objects.get(pk=level_pk)
+            # todo: future: if not quote.solved(solution): return HttpResponse(status=422)
             events = quote.mark_complete(profile=self.request.user_profile)
 
             res_dict = {

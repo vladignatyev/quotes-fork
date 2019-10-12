@@ -24,10 +24,3 @@ class UserEvents:
     @classmethod
     def new(cls, name, param):
         return (name, param)
-
-    @classmethod
-    def filter_by_name(cls, name, events=[]):
-        for event in events:
-            event_name, _ = event
-            if event_name == name:
-                yield event
