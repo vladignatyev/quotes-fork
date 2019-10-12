@@ -569,3 +569,54 @@ class PurchaseUnlockViewTest(AuthenticatedTestCase, ContentMixin):
         #
         # # Then
         self.assertEqual(404, response.status_code)
+
+
+class PurchaseProductsListViewTest(AuthenticatedTestCase, ContentMixin):
+    def test_present(self):
+        # Given
+        url = reverse('purchase-products-list')
+
+        # When
+        response = self.client.get(url, **self.auth())
+
+        # Then
+        self.assertEqual(200, response.status_code)
+
+    def test_should_return_relevant_info(self):
+        # Given
+        url = reverse('purchase-products-list')
+
+        GooglePlayProduct = apps.get_model('api.GooglePlayProduct')
+        generic_product1 = GooglePlayProduct.objects.create(sku='test sku1')
+        generic_product2 = GooglePlayProduct.objects.create(sku='test sku2')
+        generic_product3 = GooglePlayProduct.objects.create(sku='test sku3')
+
+        recharge1 = BalanceRechargeProduct.objects.create(admin_title='10 coins',
+                                              balance_recharge=10,
+                                              google_play_product=GooglePlayProduct.objects.create(sku='test sku4'))
+
+        recharge2 = BalanceRechargeProduct.objects.create(admin_title='1000 coins',
+                                              balance_recharge=1000,
+                                              google_play_product=GooglePlayProduct.objects.create(sku='test sku5'))
+
+
+        # When
+        response = self.client.get(url, **self.auth())
+
+        # Then
+        self.assertEqual(200, response.status_code)
+
+        response_objects = json.loads(response.content)['objects']
+        recharge_products = response_objects['recharge_products']
+        other_products = response_objects['other_products']
+
+        self.assertEqual(2, len(recharge_products))
+        self.assertEqual(3, len(other_products))
+
+        for o in recharge_products:
+            fields = ('id', 'balance_recharge', 'admin_title', 'sku')
+            self.assertEqual(set(fields), set(o.keys()))
+
+        for o in other_products:
+            fields = ('id', 'sku')
+            self.assertEqual(set(fields), set(o.keys()))

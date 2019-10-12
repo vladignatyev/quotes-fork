@@ -357,7 +357,13 @@ class BalanceRechargeProduct(models.Model):
         verbose_name_plural = 'продукты'
 
     def get_flat(self):
-        return model_to_dict(self, fields=('id', 'admin_title', 'balance_recharge', 'google_play_product__sku'))
+        flat = model_to_dict(self, fields=('id', 'admin_title', 'balance_recharge'))
+        try:
+            flat['sku'] = self.google_play_product.sku
+        except ValueError:
+            flat['sku'] = ''
+        flat['id'] = self.id
+        return flat
 
 
 class GameBalance(models.Model):
