@@ -20,11 +20,10 @@ from .utils import _truncate
 from .rewardable import RewardableEntity
 
 from .managers import *
+from .storage import get_profiles_storage
 
 
 from functools import lru_cache
-
-
 
 
 
@@ -87,15 +86,10 @@ class Topic(RewardableEntity):
 
     def is_completion_condition_met_by(self, profile):
         levels_complete, levels_total = get_progress_profile_in_topic(profile.pk, self.pk)
-        # levels_complete = get_levels_complete_by_profile_in_topic(profile, self).count()
-        # levels_total = get_all_levels_in_topic(self).count()
         return levels_complete == levels_total
 
     def handle_complete(self, profile):
-        # clean_get_progress_profile_in_category_cache()
         return super(Topic, self).handle_complete(profile)
-
-
 
 
 class Section(RewardableEntity):
@@ -118,8 +112,6 @@ class Section(RewardableEntity):
         return levels_complete == levels_total
 
     def handle_complete(self, profile):
-        # clean_get_progress_profile_in_category_cache()
-
         user_events = super(Section, self).handle_complete(profile)
         if self.topic.is_completion_condition_met_by(profile) == True:
             user_events += self.topic.handle_complete(profile)
@@ -235,102 +227,31 @@ class QuoteCategory(RewardableEntity):
         return user_events
 
 
-from datetime import datetime, timedelta
-
-class ProfilesDataStorage:
-    TTL = 2 * 60 # seconds
-
-    profiles = {}
-    profiles_ttl = {}
-
-    @classmethod
-    def get_bucket(cls, profile_pk):
-        profile_bucket = cls.profiles.get(profile_pk, None)
-        if profile_bucket is None:
-            cls.profiles[profile_pk] = {}
-
-        cls.profiles_ttl[profile_pk] = datetime.now()
-        cls.update_ttl()
-        return cls.profiles[profile_pk]
-
-    @classmethod
-    def clear_bucket(cls, profile_pk):
-        cls.profiles.pop(profile_pk, None)
-        cls.profiles_ttl.pop(profile_pk, None)
-
-    @classmethod
-    def update_ttl(cls):
-        items = list(cls.profiles_ttl.items())
-        lt = datetime.now() - timedelta(seconds=cls.TTL)
-        for k, t in items:
-            if t < lt:
-                cls.clear_bucket(k)
-
-    @classmethod
-    def get_levels_complete_by_profile_in_category(cls, profile_pk, category_pk):
-        bucket = cls.get_bucket(profile_pk)
-
-        key = f'get_levels_complete_by_profile_in_category({profile_pk}, {category_pk})'
-
-        result = bucket.get(key, None)
-        if not result:
-            result = list(Quote.objects.filter(complete_by_users=profile_pk).filter(category=category_pk).all())
-            bucket[key] = result
-
-        return result
-
-    @classmethod
-    def get_levels_complete_by_profile_in_section_count(cls, profile_pk, section_pk):
-        bucket = cls.get_bucket(profile_pk)
-
-        key = f'get_levels_complete_by_profile_in_section_count({profile_pk}, {section_pk})'
-
-        result = bucket.get(key, None)
-        if not result:
-            result = Quote.objects.filter(complete_by_users=profile_pk).filter(category__section=section_pk).count()
-            bucket[key] = result
-
-        return result
-
-    @classmethod
-    def get_levels_complete_by_profile_in_topic_count(cls, profile_pk, topic_pk):
-        bucket = cls.get_bucket(profile_pk)
-
-        key = f'get_levels_complete_by_profile_in_topic_count({profile_pk}, {topic_pk})'
-
-        result = bucket.get(key, None)
-        if not result:
-            result = Quote.objects.filter(complete_by_users=profile_pk).filter(category__section__topic=topic_pk).count()
-            bucket[key] = result
-
-        return result
-
-
 
 
 
 def get_progress_profile_in_topic(profile_pk, topic_pk):
-    levels_complete = ProfilesDataStorage.get_levels_complete_by_profile_in_topic_count(profile_pk, topic_pk)
+    levels_complete = get_profiles_storage().get_levels_complete_by_profile_in_topic_count(profile_pk, topic_pk)
     levels_total = get_all_levels_in_topic_count(topic_pk)
     return (levels_complete, levels_total)
 
 def get_progress_profile_in_section(profile_pk, section_pk):
-    levels_complete = ProfilesDataStorage.get_levels_complete_by_profile_in_section_count(profile_pk, section_pk)
+    levels_complete = get_profiles_storage().get_levels_complete_by_profile_in_section_count(profile_pk, section_pk)
     levels_total = get_all_levels_in_section_count(section_pk)
     return (levels_complete, levels_total)
 
 def get_progress_profile_in_category(profile_pk, category_pk):
-    levels_complete = len(ProfilesDataStorage.get_levels_complete_by_profile_in_category(profile_pk, category_pk))
+    levels_complete = len(get_profiles_storage().get_levels_complete_by_profile_in_category(profile_pk, category_pk))
     levels_total = get_all_levels_in_category_count(category_pk)
     return (levels_complete, levels_total)
 
 
 def get_levels_complete_by_profile_in_category(profile_pk, category_pk):
-    return ProfilesDataStorage.get_levels_complete_by_profile_in_category(profile_pk, category_pk)
+    return get_profiles_storage().get_levels_complete_by_profile_in_category(profile_pk, category_pk)
 
 
 def clean_profile_progress_cache(profile):
-    ProfilesDataStorage.clear_bucket(profile.pk)
+    get_profiles_storage().clear_bucket(profile.pk)
 
 
 # Content cacheable
@@ -523,7 +444,3 @@ class CategoryUnlockPurchase(models.Model):
                 self.save()
             else:
                 raise self.InvalidPurchaseStatus('Tried to unlock category, but the status of IAP purchase was invalid.')
-    # 
-    # def save(self, *args, **kwargs):
-    #     super(CategoryUnlockPurchase, self).save(*args, **kwargs)
-    #     clean_unlock_cache()

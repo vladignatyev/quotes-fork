@@ -34,7 +34,7 @@ urlpatterns = [
 
     path('achievements/', AchievementList.as_view(), name='achievements-list'),
     path('achievements/all/', AllAchievementList.as_view(), name='achievements-list-all'),
-    #
+
     # path('purchase/coins/', PurchaseCoinsView.as_view(), name='purchase-coins-view'),
     # path('purchase/unlock/', PurchaseUnlockView.as_view(), name='purchase-unlock-view'),
     # path('purchase/status/', PurchaseStatusView.as_view(), name='purchase-status-view'),
