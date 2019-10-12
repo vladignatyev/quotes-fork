@@ -620,3 +620,7 @@ class PurchaseProductsListViewTest(AuthenticatedTestCase, ContentMixin):
         for o in other_products:
             fields = ('id', 'sku')
             self.assertEqual(set(fields), set(o.keys()))
+
+        recharge2_item = list(filter(lambda o: o['balance_recharge'] == 1000, recharge_products))[0]
+        self.assertEqual(recharge2_item['admin_title'], recharge2.admin_title)
+        self.assertEqual(recharge2_item['sku'], recharge2.google_play_product.sku)
