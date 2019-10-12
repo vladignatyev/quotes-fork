@@ -425,3 +425,147 @@ class PurchaseCoinsViewTest(AuthenticatedTestCase, ContentMixin):
         # Then
         IAPPurchase = apps.get_model('api.GooglePlayIAPPurchase')
         self.assertEqual(1, IAPPurchase.objects.filter(product=google_play_product).count())
+
+
+class PurchaseUnlockViewTest(AuthenticatedTestCase, ContentMixin):
+    def test_present(self):
+        # Given
+        url = reverse('purchase-unlock-view')
+
+        # When
+        response = self.client.post(url, **self.auth())
+
+        # Then
+        self.assertEqual(400, response.status_code)
+
+    def test_should_create_required_objects(self):
+        # Given
+        self._create_content_hierarchy()
+        self._create_multiple_quotes(category=self.category, author=self.author)
+
+        url = reverse('purchase-unlock-view')
+
+        google_play_product = GooglePlayProduct.objects.create(sku='test sku')
+
+        self.category.is_payable = True
+        self.category.save()
+
+        params = {
+            'order_id': 'some-order-id-from-android',
+            'purchase_token': 'some-test-puchase-token-from-android',
+            'category_id': self.category.pk,
+            'google_play_product_id': google_play_product.id
+        }
+
+        # When
+        response = self.client.post(url, params, content_type='application/json', **self.auth())
+        #
+        # # Then
+        self.assertEqual(200, response.status_code)
+        purchase_id = json.loads(response.content)['purchase_id']
+        IAPPurchase = apps.get_model('api.GooglePlayIAPPurchase')
+
+        purchase = IAPPurchase.objects.get(id=purchase_id)
+        self.assertEqual('some-order-id-from-android', purchase.order_id)
+        self.assertEqual('some-test-puchase-token-from-android', purchase.purchase_token)
+
+
+    def test_should_avoid_dupes(self):
+        # Given
+        self._create_content_hierarchy()
+        self._create_multiple_quotes(category=self.category, author=self.author)
+
+        url = reverse('purchase-unlock-view')
+
+        google_play_product = GooglePlayProduct.objects.create(sku='test sku')
+
+        self.category.is_payable = True
+        self.category.save()
+
+        params = {
+            'order_id': 'some-order-id-from-android',
+            'purchase_token': 'some-test-puchase-token-from-android',
+            'category_id': self.category.pk,
+            'google_play_product_id': google_play_product.id
+        }
+
+        # When
+        response = self.client.post(url, params, content_type='application/json', **self.auth())
+        self.assertEqual(200, response.status_code)
+        purchase_id = json.loads(response.content)['purchase_id']
+
+        # When
+        for i in range(3):
+            self.client.post(url, params, content_type='application/json', **self.auth())
+
+        # Then
+        IAPPurchase = apps.get_model('api.GooglePlayIAPPurchase')
+        self.assertEqual(1, IAPPurchase.objects.filter(product=google_play_product).count())
+
+
+    def test_should_respond_422_if_category_is_free(self):
+        # Given
+        self._create_content_hierarchy()
+        self._create_multiple_quotes(category=self.category, author=self.author)
+
+        url = reverse('purchase-unlock-view')
+
+        google_play_product = GooglePlayProduct.objects.create(sku='test sku')
+
+        params = {
+            'order_id': 'some-order-id-from-android',
+            'purchase_token': 'some-test-puchase-token-from-android',
+            'category_id': self.category.pk,
+            'google_play_product_id': google_play_product.id
+        }
+
+        # When
+        response = self.client.post(url, params, content_type='application/json', **self.auth())
+        #
+        # # Then
+        self.assertEqual(422, response.status_code)
+
+
+    def test_should_respond_404_if_category_doesnt_exist(self):
+        # Given
+        self._create_content_hierarchy()
+        self._create_multiple_quotes(category=self.category, author=self.author)
+
+        url = reverse('purchase-unlock-view')
+
+        google_play_product = GooglePlayProduct.objects.create(sku='test sku')
+
+        params = {
+            'order_id': 'some-order-id-from-android',
+            'purchase_token': 'some-test-puchase-token-from-android',
+            'category_id': 9999,
+            'google_play_product_id': google_play_product.id
+        }
+
+        # When
+        response = self.client.post(url, params, content_type='application/json', **self.auth())
+        #
+        # # Then
+        self.assertEqual(404, response.status_code)
+
+    def test_should_respond_404_if_google_play_product_doesnt_exist(self):
+        # Given
+        self._create_content_hierarchy()
+        self._create_multiple_quotes(category=self.category, author=self.author)
+
+        url = reverse('purchase-unlock-view')
+
+        # google_play_product = GooglePlayProduct.objects.create(sku='test sku')
+
+        params = {
+            'order_id': 'some-order-id-from-android',
+            'purchase_token': 'some-test-puchase-token-from-android',
+            'category_id': 9999,
+            'google_play_product_id': uuid.uuid4()
+        }
+
+        # When
+        response = self.client.post(url, params, content_type='application/json', **self.auth())
+        #
+        # # Then
+        self.assertEqual(404, response.status_code)

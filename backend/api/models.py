@@ -92,6 +92,7 @@ class Purchase(models.Model):
 
 
 class GooglePlayProduct(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     # according to: https://developer.android.com/google/play/billing/billing_library_overview
     sku = models.CharField('IAP SKU (Product ID)', max_length=256, blank=True)
 
