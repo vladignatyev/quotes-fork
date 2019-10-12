@@ -354,3 +354,74 @@ class PurchaseStatusTest(AuthenticatedTestCase, ContentMixin):
         # Then
         self.assertEqual(200, response.status_code)
         self.assertEqual(PurchaseStatus.INVALID, json.loads(response.content)['status'])
+
+
+class PurchaseCoinsViewTest(AuthenticatedTestCase, ContentMixin):
+    def test_present(self):
+        # Given
+        url = reverse('purchase-coins-view')
+
+        # When
+        response = self.client.post(url, **self.auth())
+
+        # Then
+        self.assertEqual(400, response.status_code)
+
+    def test_should_create_required_objects(self):
+        # Given
+        url = reverse('purchase-coins-view')
+
+        google_play_product = GooglePlayProduct.objects.create(sku='test sku')
+        app_product = BalanceRechargeProduct.objects.create(admin_title='10 монет',
+                                             balance_recharge=10,
+                                             google_play_product=google_play_product)
+
+
+
+        params = {
+            'balance_recharge': app_product.id,
+            'order_id': 'some-order-id-from-android',
+            'purchase_token': 'some-test-puchase-token-from-android'
+        }
+
+        # When
+        response = self.client.post(url, params, content_type='application/json', **self.auth())
+
+        # Then
+        self.assertEqual(200, response.status_code)
+        purchase_id = json.loads(response.content)['purchase_id']
+        IAPPurchase = apps.get_model('api.GooglePlayIAPPurchase')
+
+        purchase = IAPPurchase.objects.get(id=purchase_id)
+        self.assertEqual('some-order-id-from-android', purchase.order_id)
+        self.assertEqual('some-test-puchase-token-from-android', purchase.purchase_token)
+
+
+    def test_should_avoid_dupes(self):
+        # Given
+        url = reverse('purchase-coins-view')
+
+        google_play_product = GooglePlayProduct.objects.create(sku='test sku')
+        app_product = BalanceRechargeProduct.objects.create(admin_title='10 монет',
+                                             balance_recharge=10,
+                                             google_play_product=google_play_product)
+
+
+
+        params = {
+            'balance_recharge': app_product.id,
+            'order_id': 'some-order-id-from-android',
+            'purchase_token': 'some-test-puchase-token-from-android'
+        }
+
+        response = self.client.post(url, params, content_type='application/json', **self.auth())
+        self.assertEqual(200, response.status_code)
+        purchase_id = json.loads(response.content)['purchase_id']
+
+        # When
+        for i in range(3):
+            self.client.post(url, params, content_type='application/json', **self.auth())
+
+        # Then
+        IAPPurchase = apps.get_model('api.GooglePlayIAPPurchase')
+        self.assertEqual(1, IAPPurchase.objects.filter(product=google_play_product).count())

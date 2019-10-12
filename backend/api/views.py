@@ -35,7 +35,6 @@ class TokenValidator(RegexValidator):
 class AuthenticationForm(forms.Form):
     device_token = forms.CharField(label='device token', max_length=256, validators=[TokenValidator()])
     timestamp = forms.DateTimeField(label='timestamp', input_formats=['%Y-%m-%dT%H:%M:%S%z']) # 2019-09-04T08:30:00+0300
-    # nickname = forms.CharField(label='user\'s nickname', max_length=256)
     signature = forms.CharField(label='signature', max_length=256, validators=[TokenValidator()])
 
 

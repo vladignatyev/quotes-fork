@@ -1,3 +1,6 @@
+import uuid
+import json
+
 from django.db import models
 from django.apps import apps
 from django.http import Http404, HttpResponse, JsonResponse
@@ -109,14 +112,70 @@ class ProfileView(BaseView):
         return json_response(res_dict)
 
 
-class PurchaseCoinsView(BaseView):
+class GooglePlayIAPForm(forms.Form):
+    order_id = forms.CharField(label='Google Play Billing Order ID', max_length=256)
+    purchase_token = forms.CharField(label='Google Play Billing Purchase Token', max_length=256)
+
+class RechargeForm(GooglePlayIAPForm):
+    balance_recharge = forms.UUIDField(label='Related BalanceRechargeProduct ID')
+
+
+class FormBasedView(BaseView):
+    PAYLOAD_MAX_LENGTH = 512
+
+    form_cls = None
+
+    def make_form_from_request(self, request):
+        data = request.body[:self.PAYLOAD_MAX_LENGTH]
+        try:
+            deserialized = json.loads(data)
+        except json.decoder.JSONDecodeError:
+            deserialized = None
+        return self.form_cls(deserialized)
+
+
+class PurchaseCoinsView(FormBasedView):
+    form_cls = RechargeForm
+
+    def post(self, request, *args, **kwargs):
+        form = self.make_form_from_request(request)
+        if not form.is_valid():
+            return HttpResponse(status=400)
+
+        cleaned_data = form.clean()
+        Purchase = apps.get_model('api.GooglePlayIAPPurchase')
+
+        try:
+            existing_purchase = Purchase.objects.get(order_id=cleaned_data['order_id'],
+                                                  purchase_token=cleaned_data['purchase_token'])
+            res_dict = {
+                "purchase_id": existing_purchase.id
+            }
+            return json_response(res_dict)
+        except Purchase.DoesNotExist:
+            pass
+
+        try:
+            recharge = BalanceRechargeProduct.objects.get(id=cleaned_data['balance_recharge'])
+
+            purchase = Purchase.objects.create(product=recharge.google_play_product,
+                                               device_session=request.device_session,
+                                               order_id=cleaned_data['order_id'],
+                                               purchase_token=cleaned_data['purchase_token'])
+            res_dict = {
+                "purchase_id": purchase.id
+            }
+            return json_response(res_dict)
+        except BalanceRechargeProduct.DoesNotExist:
+            return HttpResponse(status=404)
+
+        return HttpResponse(status=400)
+
+
+class PurchaseUnlockView(FormBasedView):
     def post(self, request, *args, **kwargs):
         pass
 
-
-class PurchaseUnlockView(BaseView):
-    def post(self, request, *args, **kwargs):
-        pass
 
 class PurchaseStatusView(BaseView):
     # todo: move to API

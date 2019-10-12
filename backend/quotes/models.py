@@ -1,3 +1,5 @@
+import uuid
+
 import re
 import logging
 logger = logging.getLogger(__name__)
@@ -341,7 +343,8 @@ class Quote(RewardableEntity):
 
 
 class BalanceRechargeProduct(models.Model):
-    admin_title = models.CharField("Название для админки", max_length=256)
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    admin_title = models.CharField("Название", max_length=256)
     balance_recharge = models.IntegerField("Сумма пополнения баланса", default=1)
 
     google_play_product = models.ForeignKey('api.GooglePlayProduct', on_delete=models.SET_NULL, null=True, blank=True)
@@ -352,6 +355,9 @@ class BalanceRechargeProduct(models.Model):
     class Meta:
         verbose_name = 'IAP продукт'
         verbose_name_plural = 'продукты'
+
+    def get_flat(self):
+        return model_to_dict(self, fields=('id', 'admin_title', 'balance_recharge', 'google_play_product__sku'))
 
 
 class GameBalance(models.Model):
