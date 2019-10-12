@@ -327,3 +327,30 @@ class PurchaseStatusTest(AuthenticatedTestCase, ContentMixin):
         self.assertEqual(200, response.status_code)
         self.assertNotEqual(PurchaseStatus.VALID, json.loads(response.content)['status'])
         self.assertEqual(PurchaseStatus.DEFAULT, json.loads(response.content)['status'])
+
+    def test_should_return_actual_status2(self):
+        # Given
+        IAPPurchase = apps.get_model('api.GooglePlayIAPPurchase')
+        Product = apps.get_model('api.GooglePlayProduct')
+
+        product = Product.objects.create(sku='some-test-sku')
+
+        purchase = IAPPurchase.objects.create(
+            type=PurchaseTypes.PURCHASE,
+            device_session=self.device_session,
+            product=product,
+            purchase_token='some-test-puchase-token-from-android',
+            order_id='some-order-id-from-android'
+        )
+
+        purchase.status = PurchaseStatus.INVALID
+        purchase.save()
+
+        url = reverse('purchase-status-view', kwargs={'purchase_id': purchase.id})
+
+        # When
+        response = self.client.get(url, **self.auth())
+
+        # Then
+        self.assertEqual(200, response.status_code)
+        self.assertEqual(PurchaseStatus.INVALID, json.loads(response.content)['status'])
