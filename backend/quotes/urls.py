@@ -37,7 +37,7 @@ urlpatterns = [
 
     # path('purchase/coins/', PurchaseCoinsView.as_view(), name='purchase-coins-view'),
     # path('purchase/unlock/', PurchaseUnlockView.as_view(), name='purchase-unlock-view'),
-    # path('purchase/status/', PurchaseStatusView.as_view(), name='purchase-status-view'),
+    path('purchase/status/<uuid:purchase_id>/', PurchaseStatusView.as_view(), name='purchase-status-view'),
 
 
 ]

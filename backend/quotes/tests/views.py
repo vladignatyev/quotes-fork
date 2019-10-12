@@ -1,8 +1,11 @@
 import json
+import uuid
+
 
 from django.urls import reverse
 from django.test import TestCase
 from django.utils import timezone
+from django.apps import apps
 
 from api.models import *
 
@@ -252,24 +255,75 @@ class CategoryUnlockTest(AuthenticatedTestCase, ContentMixin):
         response = self.client.post(url, **self.auth())
 
         # Then
+        self.assertEqual(200, response.status_code)
         updated_profile = Profile.objects.get(pk=self.profile.pk)
         updated_category = QuoteCategory.objects.get(pk=self.category.pk)
 
         self.assertTrue(updated_category.is_available_to_user(updated_profile))
         self.assertEqual(initial_balance - price_coins, updated_profile.balance)
 
-        #
-        # # Then
-        # self.assertEqual(200, response.status_code)
-        # content = json.loads(response.content)
-        #
-        # self.assertEqual(len(content['objects']), len(self.quotes))
-        # self.assertEqual(self.author.name, content['objects'][0]['author'])
-        #
-        # # only check that all keys present
-        # for o in content['objects']:
-        #     fields = ('id', 'text', 'author',
-        #               'reward',
-        #               'order', 'complete',
-        #               'splitted')
-        #     self.assertEqual(set(fields), set(o.keys()))
+    def test_shouldnt_unlock_locked_category_if_not_enough_coins(self):
+        # Given
+        price_coins = 10
+        initial_balance = 1
+
+        self._create_content_hierarchy()
+        self._create_multiple_quotes(category=self.category, author=self.author)
+        self.category.is_payable = True
+        self.category.price_to_unlock = price_coins
+        self.category.save()
+        self.profile.balance = initial_balance
+        self.profile.save()
+
+        self.assertFalse(self.category.is_available_to_user(self.profile))
+        self.assertEqual(initial_balance, self.profile.balance)
+
+        url = reverse('category-unlock', kwargs={'category_pk': self.category.pk})
+
+        # When
+        response = self.client.post(url, **self.auth())
+        self.assertEqual(402, response.status_code)
+
+        # Then
+        updated_profile = Profile.objects.get(pk=self.profile.pk)
+        updated_category = QuoteCategory.objects.get(pk=self.category.pk)
+
+        self.assertTrue(updated_category.is_available_to_user(updated_profile))
+        self.assertEqual(initial_balance, updated_profile.balance)
+
+
+class PurchaseStatusTest(AuthenticatedTestCase, ContentMixin):
+    def test_present(self):
+        # Given
+        url = reverse('purchase-status-view', kwargs={'purchase_id': uuid.uuid4()})
+
+        # When
+        response = self.client.get(url, **self.auth())
+
+        # Then
+        self.assertEqual(404, response.status_code)
+
+    def test_should_return_actual_status(self):
+        # Given
+        IAPPurchase = apps.get_model('api.GooglePlayIAPPurchase')
+        Product = apps.get_model('api.GooglePlayProduct')
+
+        product = Product.objects.create(sku='some-test-sku')
+
+        purchase = IAPPurchase.objects.create(
+            type=PurchaseTypes.PURCHASE,
+            device_session=self.device_session,
+            product=product,
+            purchase_token='some-test-puchase-token-from-android',
+            order_id='some-order-id-from-android'
+        )
+
+        url = reverse('purchase-status-view', kwargs={'purchase_id': purchase.id})
+
+        # When
+        response = self.client.get(url, **self.auth())
+
+        # Then
+        self.assertEqual(200, response.status_code)
+        self.assertNotEqual(PurchaseStatus.VALID, json.loads(response.content)['status'])
+        self.assertEqual(PurchaseStatus.DEFAULT, json.loads(response.content)['status'])

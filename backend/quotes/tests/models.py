@@ -2,11 +2,14 @@ import json
 
 from django.conf import settings
 from django.test import TestCase
+from django.apps import apps
+
 
 from ..models import *
 from ..models import _truncate
 
 from api.models import *
+
 
 from .common import GameBalanceMixin, ContentMixin
 

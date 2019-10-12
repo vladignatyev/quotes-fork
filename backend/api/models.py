@@ -1,3 +1,4 @@
+import uuid
 import re
 import hashlib
 import hmac
@@ -55,7 +56,8 @@ class AppStoreIAPSubscription(models.Model):
 
 
 class PurchaseTypes:
-    DEFAULT = 'purchase'
+    DEFAULT = PURCHASE = 'purchase'
+    VIDEO = 'video'
 
     choices = (('video', 'Reward Video'),
                ('purchase', 'Purchase'))
@@ -64,13 +66,17 @@ class PurchaseTypes:
 class PurchaseStatus:
     DEFAULT = UNKNOWN = 'unknown'
     VALID = 'valid'
+    IN_PROGRESS = 'inprogress'
+    INVALID = 'invalid'
 
     choices = (('unknown', 'Unknown'),
                ('valid', 'Valid'),
+               ('inprogress', 'In progress'),
                ('invalid', 'Invalid'))
 
 
 class Purchase(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     type = models.CharField('Type: reward video or purchase', choices=PurchaseTypes.choices, default=PurchaseTypes.DEFAULT, max_length=16)
     status = models.CharField('Validation status', choices=PurchaseStatus.choices, default=PurchaseStatus.DEFAULT, max_length=16)
     device_session = models.ForeignKey(DeviceSession, on_delete=models.CASCADE, null=True)

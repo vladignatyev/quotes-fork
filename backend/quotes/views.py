@@ -1,18 +1,14 @@
-from django.http import Http404
 from django.db import models
-
-
-from .models import *
-
-from django.http import HttpResponse, JsonResponse
+from django.apps import apps
+from django.http import Http404, HttpResponse, JsonResponse
 from django.views.generic import ListView, View, DetailView
 from django.forms.models import model_to_dict
 from django.views.decorators.http import require_http_methods
-
-# from django.core.paginator import Paginator
-
 from django.urls import reverse
 from django import forms
+
+from .models import *
+
 
 from api.views import AuthenticationForm, AuthenticateView, SafeView
 
@@ -122,8 +118,21 @@ class PurchaseUnlockView(BaseView):
         pass
 
 class PurchaseStatusView(BaseView):
+    # todo: move to API
     def get(self, request, *args, **kwargs):
-        pass
+        purchase_id = kwargs['purchase_id']
+        Purchase = apps.get_model('api.GooglePlayIAPPurchase')
+
+        try:
+            purchase = Purchase.objects.get(id=purchase_id)
+            res_dict = {
+                "status": purchase.status
+            }
+            return json_response(res_dict)
+        except Purchase.DoesNotExist:
+            pass
+
+        raise Http404()
 
 class CategoryUnlockView(BaseView):
     def post(self, request, *args, **kwargs):
@@ -137,7 +146,6 @@ class CategoryUnlockView(BaseView):
         except CategoryUnlockPurchase.InsufficientFunds:
             return HttpResponse(status=402)
         except CategoryUnlockPurchase.AlreadyAvailable:
-            print('ere')
             pass
 
         return HttpResponse(status=200)
