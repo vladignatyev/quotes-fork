@@ -11,11 +11,11 @@ from ..models import _truncate
 from api.models import *
 
 
-from .common import GameBalanceMixin, ContentMixin
+from .common import GameBalanceMixin, ContentMixin, TimeAssert
 
 
 
-class ProfileTest(GameBalanceMixin):
+class ProfileTest(GameBalanceMixin, TimeAssert):
     def test_autocreate_profile_when_new_device_session_created(self):
         # Given
         self.assertEqual(0, len(Profile.objects.all()))
@@ -36,6 +36,63 @@ class ProfileTest(GameBalanceMixin):
 
         # Then
         self.assertEqual(1, len(Profile.objects.filter(device_sessions__pk__contains=session).all()))
+
+    def test_profile_last_active(self):
+        # Given
+        from datetime import datetime
+        now1 = datetime.now()
+
+        self.assertEqual(0, len(Profile.objects.all()))
+        session = DeviceSession.objects.create()
+
+        # When
+        session.save()
+        profile = Profile.objects.get_by_session(session)
+        profile_last_active = profile.last_active
+        profile.balance = 1000
+        profile.save()
+
+        now2 = datetime.now()
+        # Then
+        self.assertTime(profile_last_active, now1)
+        self.assertTime(profile.last_active, now2)
+
+
+    def test_profile_last_active2(self):
+        # Given
+        from datetime import datetime
+        import time
+
+        self.assertEqual(0, len(Profile.objects.all()))
+        session = DeviceSession.objects.create()
+
+        # When
+        session.save()
+        profile = Profile.objects.get_by_session(session)
+        now1 = datetime.now()
+        profile_last_active1 = profile.last_active
+        profile.save()
+
+        time.sleep(0.1)
+
+        now2 = datetime.now()
+        profile.save()
+        profile_last_active2 = Profile.objects.get(pk=profile.pk).last_active
+
+        time.sleep(0.1)
+
+        now3 = datetime.now()
+        profile.save()
+        profile_last_active3 = Profile.objects.get(pk=profile.pk).last_active
+
+        # Then
+        self.assertTime(profile_last_active1, now1)
+        self.assertTime(profile_last_active2, now2)
+        self.assertTime(profile_last_active3, now3)
+
+        self.assertTime(now2, now3, f=self.assertFalse)
+        self.assertTime(now1, now2, f=self.assertFalse)
+
 
     def test_should_have_default_balance(self):
         # Given

@@ -21,6 +21,7 @@ from .utils import json_response
 class BaseView(SafeView):
     def mixin_authorized(self, request):
         request.user_profile = Profile.objects.get_by_session(request.device_session)
+        request.user_profile.save()
 
 
 class TopicDetail(BaseView):
@@ -100,17 +101,18 @@ class LevelCompleteView(BaseView):
 
 
 class ProfileView(BaseView):
-    fields = ('id', 'balance', 'nickname', 'settings__initial_profile_balance',
-              'settings__reward_per_level_completion', 'settings__reward_per_doubleup')
-
     def get(self, request, *args, **kwargs):
-        flat_profile = model_to_dict(self.request.user_profile, fields=self.fields)
-        res_dict = {
-            "objects": [flat_profile],
-            "meta": {}
-        }
-        return json_response(res_dict)
+        try:
+            flat_profile = self.request.user_profile.get_flat()
 
+            res_dict = {
+                "objects": [flat_profile],
+                "meta": {}
+            }
+
+            return json_response(res_dict)
+        except ValueError:
+            return HttpResponse(status=404)
 
 class FormBasedView(BaseView):
     PAYLOAD_MAX_LENGTH = 512

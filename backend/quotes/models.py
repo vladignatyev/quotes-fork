@@ -392,6 +392,8 @@ class Profile(models.Model):
     balance = models.PositiveIntegerField(default=0)
     nickname = models.CharField(max_length=256, default='Пан Инкогнито')
 
+    last_active = models.DateTimeField(auto_now=True)
+
     settings = models.ForeignKey('GameBalance', on_delete=models.CASCADE, null=True, default=None)
 
     objects = ProfileManager()
@@ -402,6 +404,17 @@ class Profile(models.Model):
 
     def __str__(self):
         return f'#{self.pk} ({self.nickname})'
+
+    def get_flat(self):
+        return {
+            'id': self.pk,
+            'last_active': self.last_active.strftime('%Y-%m-%dT%H:%M:%S%z'),
+            'nickname': self.nickname,
+            'balance': self.balance,
+            'reward_per_level_completion': self.settings.reward_per_level_completion,
+            'reward_per_doubleup': self.settings.reward_per_doubleup,
+            'initial_profile_balance': self.settings.initial_profile_balance
+        }
 
 
 class CategoryUnlockTypes:

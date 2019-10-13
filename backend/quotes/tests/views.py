@@ -10,6 +10,7 @@ from django.apps import apps
 from api.models import *
 
 from ..models import *
+from ..views import BaseView
 
 from .common import AuthenticatedTestCase, ContentMixin
 
@@ -624,3 +625,54 @@ class PurchaseProductsListViewTest(AuthenticatedTestCase, ContentMixin):
         recharge2_item = list(filter(lambda o: o['balance_recharge'] == 1000, recharge_products))[0]
         self.assertEqual(recharge2_item['admin_title'], recharge2.admin_title)
         self.assertEqual(recharge2_item['sku'], recharge2.google_play_product.sku)
+
+
+class AnyEndpointAccessUpdatesLastActive(AuthenticatedTestCase):
+    FAKE_URL_PATH = '/some-fake-url/'
+
+    def test_last_active_post_requests(self):
+        # Given
+        from django.test import RequestFactory
+        factory = RequestFactory()
+
+        post_request = factory.post(self.FAKE_URL_PATH, **self.auth(), content_type='application/json')
+
+        view = BaseView()
+
+        # When
+        view.dispatch(post_request)
+        last_active1 = Profile.objects.get(pk=self.profile.pk).last_active
+
+        view.dispatch(post_request)
+        last_active2 = Profile.objects.get(pk=self.profile.pk).last_active
+
+        view.dispatch(post_request)
+        last_active3 = Profile.objects.get(pk=self.profile.pk).last_active
+
+        # Then
+        self.assertNotEqual(last_active1, last_active2)
+        self.assertNotEqual(last_active2, last_active3)
+        self.assertNotEqual(last_active1, last_active3)
+
+        self.assertTrue(last_active3 > last_active2)
+        self.assertTrue(last_active2 > last_active1)
+
+
+class ProfileView(AuthenticatedTestCase):
+    def test_should_return_profile_fields(self):
+# class ProfileView(BaseView):
+#     fields = ('id', 'balance', 'nickname', 'settings__initial_profile_balance',
+#               'settings__reward_per_level_completion', 'settings__reward_per_doubleup')
+        # Given
+        url = reverse('profile-view')
+
+        expected_fields = ('id', 'balance', 'last_active', 'nickname', 'initial_profile_balance',
+                           'reward_per_level_completion', 'reward_per_doubleup')
+
+        # When
+        response = self.client.get(url, **self.auth())
+
+        # Then
+        profile_flat = json.loads(response.content)['objects'][0]
+        self.assertEqual(set(profile_flat.keys()), set(expected_fields))
+        

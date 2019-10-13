@@ -8,6 +8,22 @@ from api.models import *
 from ..models import *
 
 
+class TimeAssert:
+    def assertTime(self, t1, t2, delta_microseconds=1E4, f=None):
+        _t1 = t1.timestamp()
+        _t2 = t2.timestamp()
+
+        if _t2 > _t1:
+            dt = _t2 - _t1
+        else:
+            dt = _t1 - _t2
+        dm = dt * 1E6
+        if f is None:
+            self.assertTrue(dm < delta_microseconds, f'dt is {dm} microseconds for t2={t2} and t1={t1}, but should be lesser than {delta_microseconds} microseconds')
+        else:
+            f(dm < delta_microseconds, f'dt is {dm} microseconds for t2={t2} and t1={t1}, but should be lesser than {delta_microseconds} microseconds')
+
+
 class GameBalanceMixin(TestCase):
     TEST_INITIAL_PROFILE_BALANCE = 20
 
