@@ -8,7 +8,7 @@ class RewardableEntity(models.Model):
     class Meta:
         abstract = True
 
-    on_complete_achievement = models.ForeignKey('Achievement', on_delete=models.SET_NULL, null=True, blank=True)
+    on_complete_achievement = models.ForeignKey('Achievement', verbose_name='Достижение выдаваемое при прохождении', on_delete=models.SET_NULL, null=True, blank=True)
     bonus_reward = models.BigIntegerField(default=0, verbose_name='Бонус монет за прохождение')
     complete_by_users = models.ManyToManyField('Profile', verbose_name='Юзеры которые прошли и должны получить вознаграждение', blank=True,
                                                           related_name="%(app_label)s_%(class)s_complete_by_users",

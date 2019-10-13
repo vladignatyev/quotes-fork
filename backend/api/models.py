@@ -39,7 +39,7 @@ class DeviceSession(models.Model):
     objects = DeviceSessionManager()
 
     def __str__(self):
-        return f'{self.token}'
+        return f'{self.token} @ {self.timestamp:%Y-%m-%d %H:%M:%S}'
 
 
 class PushSubscription(models.Model):
@@ -143,6 +143,9 @@ class Credentials(models.Model):
     class Meta:
         verbose_name = 'Credentials'
         verbose_name_plural = 'Credentials'
+
+    def __str__(self):
+        return f'{self.date_added:%Y-%m-%d %H:%M:%S}: {self.google_play_bundle_id} / {self.google_play_api_key} '
 
 
 @lru_cache(maxsize=1)

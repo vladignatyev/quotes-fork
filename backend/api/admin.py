@@ -4,7 +4,7 @@ from .models import *
 
 
 class DeviceSessionAdmin(admin.ModelAdmin):
-    pass
+    date_hierarchy = 'timestamp'
 
 
 class PushSubscriptionAdmin(admin.ModelAdmin):
@@ -28,7 +28,7 @@ class GooglePlayIAPPurchaseAdmin(admin.ModelAdmin):
 #
 
 class CredentialsAdmin(admin.ModelAdmin):
-    pass
+    date_hierarchy = 'date_added'
 
 
 class GooglePlayProductAdmin(admin.ModelAdmin):
@@ -39,10 +39,10 @@ class GooglePlayProductAdmin(admin.ModelAdmin):
 
 
 admin.site.register(DeviceSession, DeviceSessionAdmin)
-admin.site.register(PushSubscription, PushSubscriptionAdmin)
+# admin.site.register(PushSubscription, PushSubscriptionAdmin)
 
 admin.site.register(GooglePlayProduct, GooglePlayProductAdmin)
-admin.site.register(GooglePlayIAPSubscription, GooglePlayIAPSubscriptionAdmin)
+# admin.site.register(GooglePlayIAPSubscription, GooglePlayIAPSubscriptionAdmin)
 admin.site.register(GooglePlayIAPPurchase, GooglePlayIAPPurchaseAdmin)
 #
 # admin.site.register(AppStoreProduct, AppStoreProductAdmin)

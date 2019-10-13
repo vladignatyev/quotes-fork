@@ -42,9 +42,9 @@ class QuoteAuthor(models.Model):
 
 class Achievement(models.Model):
     icon = models.CharField("Имя иконки в приложении", max_length=256)
-    title = models.CharField(max_length=256)
-    received_text = models.TextField(default='')
-    description_text = models.TextField(default='')
+    title = models.CharField("Название", max_length=256)
+    received_text = models.TextField("Текст для юзера при вручении ему достижения", default='')
+    description_text = models.TextField("Описание достижения для юзера", default='')
 
     opened_by_users = models.ManyToManyField('Profile', verbose_name='Профили пользователей которые открыли ачивку', blank=True, through='AchievementReceiving')
 
@@ -71,7 +71,7 @@ class AchievementReceiving(models.Model):
 
 class Topic(RewardableEntity):
     title = models.CharField("Название Темы", max_length=256)
-    hidden = models.BooleanField(default=False)
+    hidden = models.BooleanField("Тема скрыта?", default=False)
 
     def __str__(self):
         return _truncate(f'{self.title}')
@@ -96,7 +96,7 @@ class Topic(RewardableEntity):
 
 class Section(RewardableEntity):
     title = models.CharField("Название Раздела", max_length=256)
-    topic = models.ForeignKey(Topic, on_delete=models.CASCADE)
+    topic = models.ForeignKey(Topic, verbose_name="Тема", on_delete=models.CASCADE)
 
     def __str__(self):
         return _truncate(f'{self.title}')
@@ -155,23 +155,23 @@ def get_levels(category_pk, profile):
 
 
 class QuoteCategory(RewardableEntity):
-    section = models.ForeignKey(Section, on_delete=models.CASCADE, default=None, null=True)
+    section = models.ForeignKey(Section, verbose_name="Раздел", on_delete=models.CASCADE, default=None, null=True)
     title = models.CharField("Название Категории", max_length=256)
-    icon = models.CharField(max_length=256, default='', blank=True)
+    icon = models.CharField("Название иконки", max_length=256, default='', blank=True)
 
     # Events
-    is_event = models.BooleanField(default=False)
-    event_due_date = models.DateTimeField(default=timezone.now, blank=True)
-    event_title = models.CharField(max_length=256, default='', blank=True)
-    event_icon = models.CharField(max_length=256, default='', blank=True)
-    event_description = models.TextField(default='', blank=True)
-    event_win_achievement = models.ForeignKey(Achievement, on_delete=models.SET_NULL, null=True, blank=True,
+    is_event = models.BooleanField("Это событие?", default=False)
+    event_due_date = models.DateTimeField("Дата окончания события", default=timezone.now, blank=True)
+    event_title = models.CharField("Название события", max_length=256, default='', blank=True)
+    event_icon = models.CharField("Иконка события", max_length=256, default='', blank=True)
+    event_description = models.TextField("Описание события для юзера", default='', blank=True)
+    event_win_achievement = models.ForeignKey(Achievement, verbose_name="Достижение, вручаемое при прохождении события", on_delete=models.SET_NULL, null=True, blank=True,
                                               related_name='on_event_complete_achievement')
 
     # Locked category
     is_payable = models.BooleanField('Категория платная?', default=False)
 
-    price_to_unlock = models.BigIntegerField('Стоимость открытия категории если она платная', default=0, blank=True)
+    price_to_unlock = models.BigIntegerField('Стоимость открытия категории() если она платная', default=0, blank=True)
 
     available_to_users = models.ManyToManyField('Profile',
                                                 verbose_name='Профили пользователей которым доступна категория',
@@ -301,8 +301,8 @@ def clean_unlock_cache(*args, **kwargs):
 
 class Quote(RewardableEntity):
     text = models.CharField("Текст цитаты", max_length=256)
-    author = models.ForeignKey(QuoteAuthor, on_delete=models.SET_NULL, null=True)
-    category = models.ForeignKey(QuoteCategory, on_delete=models.SET_NULL, null=True)
+    author = models.ForeignKey(QuoteAuthor, verbose_name="Автор", on_delete=models.SET_NULL, null=True)
+    category = models.ForeignKey(QuoteCategory, verbose_name="Категория", on_delete=models.SET_NULL, null=True)
 
     order_in_category = models.BigIntegerField('Порядковый номер уровня в категории', default=0, blank=True)
 
@@ -350,16 +350,18 @@ class Quote(RewardableEntity):
 
 class BalanceRechargeProduct(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    admin_title = models.CharField("Название", max_length=256)
+    admin_title = models.CharField("Название продукта для юзера", max_length=256)
     balance_recharge = models.IntegerField("Сумма пополнения баланса", default=1)
 
-    google_play_product = models.ForeignKey('api.GooglePlayProduct', on_delete=models.SET_NULL, null=True, blank=True)
+    google_play_product = models.ForeignKey('api.GooglePlayProduct',
+                                            verbose_name="Соответствующий продукт в Google Play",
+                                            on_delete=models.SET_NULL, null=True, blank=True)
     # app_store_product = models.ForeignKey('api.AppStoreProduct', on_delete=models.SET_NULL, null=True, blank=True)
 
     objects = ProductManager()
 
     class Meta:
-        verbose_name = 'IAP продукт'
+        verbose_name = 'Продукт «Начисление монеток»'
         verbose_name_plural = 'продукты'
 
     def get_flat(self):
@@ -373,9 +375,9 @@ class BalanceRechargeProduct(models.Model):
 
 
 class GameBalance(models.Model):
-    initial_profile_balance = models.BigIntegerField(default=0)
-    reward_per_level_completion = models.BigIntegerField(default=5)
-    reward_per_doubleup = models.BigIntegerField(default=5)
+    initial_profile_balance = models.BigIntegerField("Начальный баланс монет у юзера", default=0)
+    reward_per_level_completion = models.BigIntegerField("Вознаграждение за решение цитаты", default=5)
+    reward_per_doubleup = models.BigIntegerField("Вознаграждение за double-up", default=5)
 
     objects = GameBalanceManager()
 
@@ -388,13 +390,13 @@ class GameBalance(models.Model):
 
 
 class Profile(models.Model):
-    device_sessions = models.ManyToManyField('api.DeviceSession')
-    balance = models.PositiveIntegerField(default=0)
-    nickname = models.CharField(max_length=256, default='Пан Инкогнито')
+    device_sessions = models.ManyToManyField('api.DeviceSession', verbose_name="Сессии устройств")
+    balance = models.PositiveIntegerField("Баланс", default=0)
+    nickname = models.CharField("Никнейм", max_length=256, default='Пан Инкогнито')
 
-    last_active = models.DateTimeField(auto_now=True)
+    last_active = models.DateTimeField("Дата последней активности", auto_now=True)
 
-    settings = models.ForeignKey('GameBalance', on_delete=models.CASCADE, null=True, default=None)
+    settings = models.ForeignKey('GameBalance', verbose_name="Соответствующий объект Игрового баланса", on_delete=models.CASCADE, null=True, default=None)
 
     objects = ProfileManager()
 
@@ -437,13 +439,13 @@ class CategoryUnlockPurchase(models.Model):
     class AlreadyAvailable(Exception):
         pass
 
-    type = models.CharField(blank=False, max_length=32, choices=CategoryUnlockTypes.choices, default=CategoryUnlockTypes.NULL_UNLOCK)
-    profile = models.ForeignKey(Profile, on_delete=models.CASCADE)
-    category_to_unlock = models.ForeignKey(QuoteCategory, on_delete=models.CASCADE)
+    type = models.CharField("Тип анлока (за монеты или за покупку)", blank=False, max_length=32, choices=CategoryUnlockTypes.choices, default=CategoryUnlockTypes.NULL_UNLOCK)
+    profile = models.ForeignKey(Profile, verbose_name="Юзер", on_delete=models.CASCADE)
+    category_to_unlock = models.ForeignKey(QuoteCategory, verbose_name="Категория",  on_delete=models.CASCADE)
 
-    google_play_purchase = models.ForeignKey('api.GooglePlayIAPPurchase', on_delete=models.SET_NULL, null=True, blank=True)
+    google_play_purchase = models.ForeignKey('api.GooglePlayIAPPurchase', verbose_name="Соотв. покупка в Google Play", on_delete=models.SET_NULL, null=True, blank=True)
 
-    date_created = models.DateTimeField(auto_now_add=True)
+    date_created = models.DateTimeField("Дата создания", auto_now_add=True)
 
     class Meta:
         verbose_name = 'Покупка доступа к категории'
