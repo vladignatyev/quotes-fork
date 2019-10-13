@@ -39,7 +39,10 @@ class DeviceSession(models.Model):
     objects = DeviceSessionManager()
 
     def __str__(self):
-        return f'{self.token} @ {self.timestamp:%Y-%m-%d %H:%M:%S}'
+        # if self.timestamp:
+        #     return f'{self.token} @ {self.timestamp:%Y-%m-%d %H:%M:%S}'
+        # else:
+        return f'{self.token}'# @ {self.timestamp}'
 
 
 class PushSubscription(models.Model):

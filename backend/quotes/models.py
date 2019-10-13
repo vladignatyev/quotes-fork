@@ -57,9 +57,9 @@ class Achievement(models.Model):
 
 
 class AchievementReceiving(models.Model):
-    achievement = models.ForeignKey('Achievement', on_delete=models.CASCADE)
-    profile = models.ForeignKey('Profile', on_delete=models.CASCADE)
-    received_at = models.DateTimeField(auto_now_add=True)
+    achievement = models.ForeignKey('Achievement', verbose_name="Достижение", on_delete=models.CASCADE)
+    profile = models.ForeignKey('Profile', verbose_name="Профиль", on_delete=models.CASCADE)
+    received_at = models.DateTimeField("Когда получено достижение", auto_now_add=True)
 
     class Meta:
         verbose_name = 'достижения vs юзеры'
@@ -171,7 +171,7 @@ class QuoteCategory(RewardableEntity):
     # Locked category
     is_payable = models.BooleanField('Категория платная?', default=False)
 
-    price_to_unlock = models.BigIntegerField('Стоимость открытия категории() если она платная', default=0, blank=True)
+    price_to_unlock = models.BigIntegerField('Стоимость открытия категории если она платная', default=0, blank=True)
 
     available_to_users = models.ManyToManyField('Profile',
                                                 verbose_name='Профили пользователей которым доступна категория',
