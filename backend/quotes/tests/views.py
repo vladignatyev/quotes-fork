@@ -660,9 +660,6 @@ class AnyEndpointAccessUpdatesLastActive(AuthenticatedTestCase):
 
 class ProfileView(AuthenticatedTestCase):
     def test_should_return_profile_fields(self):
-# class ProfileView(BaseView):
-#     fields = ('id', 'balance', 'nickname', 'settings__initial_profile_balance',
-#               'settings__reward_per_level_completion', 'settings__reward_per_doubleup')
         # Given
         url = reverse('profile-view')
 
@@ -675,4 +672,3 @@ class ProfileView(AuthenticatedTestCase):
         # Then
         profile_flat = json.loads(response.content)['objects'][0]
         self.assertEqual(set(profile_flat.keys()), set(expected_fields))
-        
