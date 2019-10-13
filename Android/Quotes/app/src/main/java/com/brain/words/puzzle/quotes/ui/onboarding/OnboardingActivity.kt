@@ -1,5 +1,6 @@
 package com.brain.words.puzzle.quotes.ui.onboarding
 
+import android.app.AlertDialog
 import android.os.Bundle
 import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
@@ -8,6 +9,7 @@ import com.brain.words.puzzle.quotes.R
 import com.brain.words.puzzle.quotes.core.AppActivity
 import com.brain.words.puzzle.quotes.core.common.utils.Ime
 import com.brain.words.puzzle.quotes.databinding.OnboardingActivityBinding
+import com.brain.words.puzzle.quotes.ui.main.MainActivity
 import com.brain.words.puzzle.quotes.ui.onboarding.game.OnboardingGameFragment
 import com.brain.words.puzzle.quotes.ui.onboarding.login.LoginFragment
 import dagger.android.AndroidInjector
@@ -47,14 +49,28 @@ class OnboardingActivity : AppActivity(), HasAndroidInjector,
         }
     }
 
-    override fun onLoginCompleted() {
+    override fun onStart() {
+        super.onStart()
+        vm.state.successTrigger.subscribe {
+            startActivity(MainActivity.newIntent(this))
+        }.untilStopped()
+    }
+
+    override fun firstStepCompleted() {
+        setStatusBarColor(R.color.darkPurple)
         Ime.hide(binding.root)
         binding.pager.currentItem = 1
-        setStatusBarColor(R.color.darkPurple)
     }
 
     override fun onGameCompleted() {
-        binding.pager.currentItem = 1
+        AlertDialog
+            .Builder(this)
+            .setTitle("Ура!")
+            .setMessage("Молодец, ты прошел обучение. Забери свои 100 монет")
+            .setPositiveButton("Беру!") { _, _ ->
+                startActivity(MainActivity.newIntent(this))
+            }
+            .show()
         setStatusBarColor(R.color.darkIndigo)
     }
 

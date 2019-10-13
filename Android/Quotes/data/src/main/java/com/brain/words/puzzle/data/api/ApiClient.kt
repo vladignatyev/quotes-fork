@@ -4,5 +4,7 @@ import io.reactivex.Single
 
 interface ApiClient {
 
-    fun login(): Single<String>
+    fun login(
+        deviceId: String, timestamp: String, signature: String, nickname: String
+    ): Single<String>
 }

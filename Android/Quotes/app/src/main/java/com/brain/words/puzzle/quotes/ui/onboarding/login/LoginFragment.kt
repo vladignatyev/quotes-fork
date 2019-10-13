@@ -49,12 +49,12 @@ class LoginFragment : AppFragment() {
     override fun onStart() {
         super.onStart()
         vm.state.loginSuccess.subscribe {
-            listener.onLoginCompleted()
+            listener.firstStepCompleted()
         }.untilStopped()
     }
 
     interface Listener {
-        fun onLoginCompleted()
+        fun firstStepCompleted()
     }
 
     companion object {

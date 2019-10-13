@@ -8,10 +8,14 @@ import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProviders
 import com.brain.words.puzzle.quotes.R
 import com.brain.words.puzzle.quotes.core.AppFragment
+import com.brain.words.puzzle.quotes.core.manager.UserManager
 import com.brain.words.puzzle.quotes.databinding.MainGameFragmentBinding
 import javax.inject.Inject
 
 class GameFragment : AppFragment() {
+
+    @Inject
+    lateinit var userManager: UserManager
 
     @Inject
     lateinit var vmFactory: GameViewModel.Factory
@@ -39,6 +43,7 @@ class GameFragment : AppFragment() {
         viewModel = vm
         adapter = GameTopicPagerAdapter(childFragmentManager)
         topics.adapter = adapter
+        title.text = userManager.getUserName()
     }.root
 
     override fun onStart() {

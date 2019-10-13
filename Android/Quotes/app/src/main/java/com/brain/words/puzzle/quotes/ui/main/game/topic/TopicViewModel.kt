@@ -35,59 +35,47 @@ class TopicViewModel(
         sections.onNext(
             listOf(
                 SectionModel(
-                    "0", "Section 0", listOf(
-                        QuoteModel("0", "Category 0", "", ""),
-                        QuoteModel("0", "Category 1", "", ""),
-                        QuoteModel("0", "Category 2", "", ""),
-                        QuoteModel("0", "Category 3", "", ""),
-                        QuoteModel("0", "Category 4", "", ""),
-                        QuoteModel("0", "Category 5", "", ""),
-                        QuoteModel("0", "Category 6", "", ""),
-                        QuoteModel("0", "Category 7", "", "")
+                    "0", "Вожди", listOf(
+                        QuoteModel("0", "Сталин", "", ""),
+                        QuoteModel("0", "Напалеон", "", ""),
+                        QuoteModel("0", "Ленин", "", ""),
+                        QuoteModel("0", "Мао Цзэдун", "", "")
                     )
                 ), SectionModel(
-                    "1", "Section 1", listOf(
-                        QuoteModel("0", "Category 0", "", ""),
-                        QuoteModel("0", "Category 1", "", ""),
-                        QuoteModel("0", "Category 2", "", ""),
-                        QuoteModel("0", "Category 3", "", ""),
-                        QuoteModel("0", "Category 4", "", ""),
-                        QuoteModel("0", "Category 5", "", ""),
-                        QuoteModel("0", "Category 6", "", ""),
-                        QuoteModel("0", "Category 7", "", "")
+                    "1", "Философы", listOf(
+                        QuoteModel("0", "Конфуций", "", ""),
+                        QuoteModel("0", "Будда", "", ""),
+                        QuoteModel("0", "Ницше", "", ""),
+                        QuoteModel("0", "Сократ", "", ""),
+                        QuoteModel("0", "Платон", "", ""),
+                        QuoteModel("0", "Аристотель", "", "")
                     )
                 ), SectionModel(
-                    "2", "Section 2", listOf(
-                        QuoteModel("0", "Category 0", "", ""),
-                        QuoteModel("0", "Category 1", "", ""),
-                        QuoteModel("0", "Category 2", "", ""),
-                        QuoteModel("0", "Category 3", "", ""),
-                        QuoteModel("0", "Category 4", "", ""),
-                        QuoteModel("0", "Category 5", "", ""),
-                        QuoteModel("0", "Category 6", "", ""),
-                        QuoteModel("0", "Category 7", "", "")
+                    "2", "Русские Классики", listOf(
+                        QuoteModel("0", "Лермонтов", "", ""),
+                        QuoteModel("0", "Достоевский", "", ""),
+                        QuoteModel("0", "Гоголь", "", ""),
+                        QuoteModel("0", "Пушкин", "", ""),
+                        QuoteModel("0", "Чехов", "", ""),
+                        QuoteModel("0", "Булгаков", "", ""),
+                        QuoteModel("0", "Толстой", "", "")
                     )
                 ), SectionModel(
-                    "3", "Section 3", listOf(
-                        QuoteModel("0", "Category 0", "", ""),
-                        QuoteModel("0", "Category 1", "", ""),
-                        QuoteModel("0", "Category 2", "", ""),
-                        QuoteModel("0", "Category 3", "", ""),
-                        QuoteModel("0", "Category 4", "", ""),
-                        QuoteModel("0", "Category 5", "", ""),
-                        QuoteModel("0", "Category 6", "", ""),
-                        QuoteModel("0", "Category 7", "", "")
+                    "3", "Мировые Писатели", listOf(
+                        QuoteModel("0", "Шекспир", "", ""),
+                        QuoteModel("0", "Хемингуэй", "", ""),
+                        QuoteModel("0", "Джек Лондон", "", ""),
+                        QuoteModel("0", "Марк Твен", "", ""),
+                        QuoteModel("0", "Джордж Оруэлл", "", ""),
+                        QuoteModel("0", "Антуан де Сент-Экзюпери", "", "")
                     )
                 ), SectionModel(
-                    "4", "Section 4", listOf(
-                        QuoteModel("0", "Category 0", "", ""),
-                        QuoteModel("0", "Category 1", "", ""),
-                        QuoteModel("0", "Category 2", "", ""),
-                        QuoteModel("0", "Category 3", "", ""),
-                        QuoteModel("0", "Category 4", "", ""),
-                        QuoteModel("0", "Category 5", "", ""),
-                        QuoteModel("0", "Category 6", "", ""),
-                        QuoteModel("0", "Category 7", "", "")
+                    "4", "Политики", listOf(
+                        QuoteModel("0", "Франклин Рузвельт", "", ""),
+                        QuoteModel("0", "Маргарет Тетчер", "", ""),
+                        QuoteModel("0", "Владимир Путин", "", ""),
+                        QuoteModel("0", "Уинстон Черчилль", "", ""),
+                        QuoteModel("0", "Авраам Линкольн", "", "")
                     )
                 )
             )

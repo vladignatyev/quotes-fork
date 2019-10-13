@@ -12,8 +12,16 @@ class NetworkApiClient(
     private val networkStatusProvider: NetworkStatusProvider
 ) : ApiClient {
 
-    override fun login(): Single<String> = apiService.login()
-        .transform()
+    override fun login(
+        deviceId: String, timestamp: String, signature: String, nickname: String
+    ): Single<String> {
+        val body = HashMap<String, String>()
+        body["device_token"] = deviceId
+        body["timestamp"] = timestamp
+        body["signature"] = signature
+        body["nickname"] = nickname
+        return apiService.login(body).transform().map { it.auth_token }
+    }
 
     private fun <T> Single<Response<T>>.transform() =
         compose(

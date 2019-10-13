@@ -20,6 +20,11 @@
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
 
+# ====== BEGIN Project level ======
+-keep class com.brain.words.puzzle.** { *; }
+
+# ====== END Project level ======
+
 # ====== BEGIN OkHttp ======
 -dontwarn okhttp3.**
 -dontwarn okio.**

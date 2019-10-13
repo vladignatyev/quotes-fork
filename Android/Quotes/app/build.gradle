@@ -15,7 +15,9 @@ android {
         applicationId "com.brain.words.puzzle.quotes"
         minSdkVersion rootProject.ext.sdk.min
         targetSdkVersion rootProject.ext.sdk.target
-        buildConfigField "String", "API_URL", "\"https://app.com/\""
+//        buildConfigField "String", "API_URL", "\"http://alpha.quotes.com/api/v1/\""
+        buildConfigField "String", "API_URL", "\"http://51.158.180.71/api/v1/\""
+        buildConfigField "String", "SHARED_SECRET", "\"0f1109c3b6e8acaa45988b1bd783f13fbcde16125067d7f8f2bab16ffb22c0db\""
 
         multiDexEnabled true
         vectorDrawables.useSupportLibrary true
@@ -52,6 +54,7 @@ android {
 dependencies {
     implementation project(":data")
     implementation project(":game")
+    implementation project(":crypto")
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 

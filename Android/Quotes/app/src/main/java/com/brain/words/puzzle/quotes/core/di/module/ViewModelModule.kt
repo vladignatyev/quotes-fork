@@ -2,7 +2,7 @@ package com.brain.words.puzzle.quotes.core.di.module
 
 import com.brain.words.puzzle.data.api.ApiClient
 import com.brain.words.puzzle.quotes.core.Schedulers
-import com.brain.words.puzzle.quotes.core.manager.FirebaseManager
+import com.brain.words.puzzle.quotes.core.manager.UserManager
 import com.brain.words.puzzle.quotes.ui.main.MainViewModel
 import com.brain.words.puzzle.quotes.ui.main.game.GameViewModel
 import com.brain.words.puzzle.quotes.ui.main.game.topic.TopicViewModel
@@ -19,12 +19,10 @@ class ViewModelModule {
 
     @Provides
     @Singleton
-    fun welcomeViewModelFactory(
-        schedulers: Schedulers,
-        apiClient: ApiClient
+    fun onboardingViewModelFactory(
+        userManager: UserManager
     ) = OnboardingViewModel.Factory(
-        schedulers,
-        apiClient
+        userManager
     )
 
     @Provides
@@ -32,11 +30,11 @@ class ViewModelModule {
     fun loginViewModelFactory(
         schedulers: Schedulers,
         apiClient: ApiClient,
-        firebaseManager: FirebaseManager
+        userManager: UserManager
     ) = LoginViewModel.Factory(
         schedulers,
         apiClient,
-        firebaseManager
+        userManager
     )
 
     @Provides

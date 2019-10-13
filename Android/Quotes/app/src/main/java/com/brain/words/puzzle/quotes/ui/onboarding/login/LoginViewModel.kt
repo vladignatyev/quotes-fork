@@ -4,21 +4,24 @@ import androidx.databinding.ObservableBoolean
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.brain.words.puzzle.data.api.ApiClient
+import com.brain.words.puzzle.quotes.BuildConfig
 import com.brain.words.puzzle.quotes.core.AppViewModel
 import com.brain.words.puzzle.quotes.core.Schedulers
 import com.brain.words.puzzle.quotes.core.common.toFlowable
-import com.brain.words.puzzle.quotes.core.manager.FirebaseManager
+import com.brain.words.puzzle.quotes.core.ext.Digest
+import com.brain.words.puzzle.quotes.core.manager.UserManager
 import com.brain.words.puzzle.quotes.core.rx.NonNullObservableField
-import io.reactivex.Completable
 import io.reactivex.Flowable
 import io.reactivex.processors.BehaviorProcessor
 import io.reactivex.processors.PublishProcessor
-import java.util.concurrent.TimeUnit
+import timber.log.Timber
+import java.text.SimpleDateFormat
+import java.util.*
 
 class LoginViewModel(
     private val schedulers: Schedulers,
     private val apiClient: ApiClient,
-    private val firebaseManager: FirebaseManager
+    private val userManager: UserManager
 ) : AppViewModel() {
 
     private val loginSuccess = BehaviorProcessor.create<Unit>()
@@ -36,25 +39,35 @@ class LoginViewModel(
             .subscribe {
                 state.loginEnabled.set(it)
             }.untilCleared()
-
-        firebaseManager.deviceId
-            .subscribeOn(schedulers.io())
-            .observeOn(schedulers.ui())
-            .subscribe {
-                state.deviceId.set(it)
-            }.untilCleared()
     }
 
     fun login() {
-        val userName = state.nameText.get()
-
         state.loading.set(true)
 
-        Completable.timer(1, TimeUnit.SECONDS, schedulers.ui())
-            .subscribe {
+        val userName = state.nameText.get()
+        userManager.saveUserName(userName)
+
+        val timestamp =
+            SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ", Locale.getDefault()).format(Date())
+        val deviceId = UUID.randomUUID().toString().replace("-", "")
+
+        val maskedSecret = Digest.sha256(BuildConfig.SHARED_SECRET)
+        val secret = "${maskedSecret}$deviceId|$timestamp"
+        val signature = Digest.sha256(secret)
+
+        apiClient
+            .login(deviceId, timestamp, signature, userName)
+            .subscribeOn(schedulers.io())
+            .observeOn(schedulers.ui())
+            .subscribe({
                 state.loading.set(false)
+                userManager.saveSession(it)
                 loginSuccess.onNext(Unit)
-            }.untilCleared()
+            }, {
+                state.loading.set(false)
+                loginFailure.onNext(it.message)
+                Timber.w(it, "OnboardingViewModel login failed")
+            }).untilCleared()
     }
 
     data class State(
@@ -72,12 +85,12 @@ class LoginViewModel(
     class Factory(
         private val schedulers: Schedulers,
         private val apiClient: ApiClient,
-        private val firebaseManager: FirebaseManager
+        private val userManager: UserManager
     ) : ViewModelProvider.Factory {
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
             if (modelClass.isAssignableFrom(LoginViewModel::class.java)) {
                 @Suppress("UNCHECKED_CAST")
-                return LoginViewModel(schedulers, apiClient, firebaseManager) as T
+                return LoginViewModel(schedulers, apiClient, userManager) as T
             }
             throw IllegalArgumentException("Unknown ViewModel class")
         }

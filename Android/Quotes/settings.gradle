@@ -1,2 +1,2 @@
-include ':app', ':data', ':game'
+include ':app', ':data', ':game', ':crypto'
 rootProject.name='Quotes'

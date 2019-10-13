@@ -19,6 +19,7 @@ import com.brain.words.puzzle.game.utils.WrapperAdapterUtils
 import com.brain.words.puzzle.quotes.R
 import com.brain.words.puzzle.quotes.core.AppFragment
 import com.brain.words.puzzle.quotes.core.common.parentAs
+import com.brain.words.puzzle.quotes.core.manager.UserManager
 import com.brain.words.puzzle.quotes.core.ui.data.ExampleDataProvider
 import com.brain.words.puzzle.quotes.databinding.OnboardingGameFragmentBinding
 import io.reactivex.Completable
@@ -26,8 +27,11 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import nl.dionsegijn.konfetti.models.Shape
 import nl.dionsegijn.konfetti.models.Size
 import java.util.concurrent.TimeUnit
+import javax.inject.Inject
 
 class OnboardingGameFragment : AppFragment() {
+
+    @Inject lateinit var userManager: UserManager
 
     private lateinit var listener: Listener
 
@@ -55,7 +59,11 @@ class OnboardingGameFragment : AppFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         initGame()
-        binding().welcomeMsg.text = getString(R.string.welcome_aboard, "Vadim")
+    }
+
+    override fun onResume() {
+        super.onResume()
+        binding().welcomeMsg.text = getString(R.string.welcome_aboard, userManager.getUserName())
     }
 
     override fun onPause() {
@@ -158,7 +166,7 @@ class OnboardingGameFragment : AppFragment() {
     }
 
     private fun showSuccessDialog() {
-
+        listener.onGameCompleted()
     }
 
     interface Listener {

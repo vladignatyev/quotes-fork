@@ -28,11 +28,10 @@ class GameViewModel(
     override fun initialise() {
         categories.onNext(
             listOf(
-                TopicModel("", "Topic 1"),
-                TopicModel("", "Topic 2"),
-                TopicModel("", "Topic 3"),
-                TopicModel("", "Topic 4"),
-                TopicModel("", "Topic 5")
+                TopicModel("", "Афоризмы"),
+                TopicModel("", "Жизнь"),
+                TopicModel("", "Музыка"),
+                TopicModel("", "Кино")
             )
         )
     }
