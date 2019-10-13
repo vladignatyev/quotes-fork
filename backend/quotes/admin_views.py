@@ -18,11 +18,14 @@ class QuotePreview(View):
     template = 'admin/quote-preview.html'
 
     def get(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            raise Http404()
+
         quote_pk = kwargs.get('quote_pk', None)
         if quote_pk is None:
-            return Http404()
+            raise Http404()
         try:
             quote = Quote.objects.get(pk=quote_pk)
             return TemplateResponse(request, self.template, {'quote': quote})
         except Quote.DoesNotExist:
-            return Http404()
+            raise Http404()
