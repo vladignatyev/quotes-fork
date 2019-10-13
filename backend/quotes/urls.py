@@ -18,6 +18,7 @@ from django.urls import include, path
 from django.conf import settings
 
 from .views import *
+from .admin_views import *
 
 urlpatterns = [
     # Authorization backend
@@ -51,5 +52,7 @@ urlpatterns = [
     path('purchase/play/coins/', PurchaseCoinsView.as_view(), name='purchase-coins-view'),
     path('purchase/play/unlock/', PurchaseUnlockView.as_view(), name='purchase-unlock-view'),
     path('purchase/play/status/<uuid:purchase_id>/', PurchaseStatusView.as_view(), name='purchase-status-view'),
-    path('purchase/play/products/', PurchaseableProductsListView.as_view(), name='purchase-products-list')
+    path('purchase/play/products/', PurchaseableProductsListView.as_view(), name='purchase-products-list'),
+
+    path('quote/preview/<int:quote_pk>/', QuotePreview.as_view(), name='quote-preview')
 ]

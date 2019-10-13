@@ -4,7 +4,7 @@ import json
 from django.db import models
 from django.apps import apps
 from django.http import Http404, HttpResponse, JsonResponse
-from django.views.generic import ListView, View, DetailView
+# from django.views.generic import ListView, View, DetailView
 from django.forms.models import model_to_dict
 from django.views.decorators.http import require_http_methods
 from django.urls import reverse

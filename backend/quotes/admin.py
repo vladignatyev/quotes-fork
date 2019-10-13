@@ -5,6 +5,7 @@ from .models import *
 
 class QuoteAdmin(admin.ModelAdmin):
     list_display = ('text', 'author', 'category')
+    # change_form_template = 'quote-template.html'
 
 #
 # class SectionInline(admin.TabularInline):

@@ -306,6 +306,9 @@ class Quote(RewardableEntity):
 
     order_in_category = models.BigIntegerField('Порядковый номер уровня в категории', default=0, blank=True)
 
+    def get_absolute_url(self):
+        return reverse('quote-preview', args=[self.id])
+
     def __str__(self):
         return _truncate(self.text)
 
@@ -319,6 +322,9 @@ class Quote(RewardableEntity):
 
     class NoAccess(Exception):
         pass
+
+    def get_splitted(self):
+        return quote_split(self.text)
 
     def get_reward(self, profile):
         return profile.settings.reward_per_level_completion
