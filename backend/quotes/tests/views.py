@@ -190,15 +190,23 @@ class LevelsListTest(AuthenticatedTestCase, ContentMixin):
         self.assertEqual(200, response.status_code)
 
 
-class ProfileAndAchievementsViewTest(AuthenticatedTestCase):
-    def test_profile_view_present(self):
+class AllAchievementListViewTest(AuthenticatedTestCase):
+    def test_achievements_view_all_present(self):
         # Given
-        url = reverse('profile-view')
+        url = reverse('achievements-list-all')
+        achievements = []
+        for i in range(0,10):
+            achievements += [Achievement.objects.create(icon='default',
+                                                        title=f'some test achievement #{i}',
+                                                        received_text=f'you received {i}',
+                                                        description_text=f'you leaerned {i}')]
         # When
         response = self.client.get(url, **self.auth())
-        # Then
         self.assertEqual(200, response.status_code)
+        self.assertEqual(10, len(json.loads(response.content)['objects']))
 
+
+class AchievementListViewTest(AuthenticatedTestCase):
     def test_achievements_view_present(self):
         # Given
         url = reverse('achievements-list')
@@ -220,22 +228,9 @@ class ProfileAndAchievementsViewTest(AuthenticatedTestCase):
         self.assertEqual(200, response.status_code)
         self.assertEqual(1, len(json.loads(response.content)['objects']))
 
-    def test_achievements_view_all_present(self):
-        # Given
-        url = reverse('achievements-list-all')
-        achievements = []
-        for i in range(0,10):
-            achievements += [Achievement.objects.create(icon='default',
-                                                        title=f'some test achievement #{i}',
-                                                        received_text=f'you received {i}',
-                                                        description_text=f'you leaerned {i}')]
-        # When
-        response = self.client.get(url, **self.auth())
-        self.assertEqual(200, response.status_code)
-        self.assertEqual(10, len(json.loads(response.content)['objects']))
 
 
-class CategoryUnlockTest(AuthenticatedTestCase, ContentMixin):
+class CategoryUnlockViewTest(AuthenticatedTestCase, ContentMixin):
     def test_should_unlock_locked_category(self):
         # Given
         price_coins = 10
@@ -293,7 +288,7 @@ class CategoryUnlockTest(AuthenticatedTestCase, ContentMixin):
         self.assertEqual(initial_balance, updated_profile.balance)
 
 
-class PurchaseStatusTest(AuthenticatedTestCase, ContentMixin):
+class PurchaseStatusViewTest(AuthenticatedTestCase, ContentMixin):
     def test_present(self):
         # Given
         url = reverse('purchase-status-view', kwargs={'purchase_id': uuid.uuid4()})
@@ -572,7 +567,7 @@ class PurchaseUnlockViewTest(AuthenticatedTestCase, ContentMixin):
         self.assertEqual(404, response.status_code)
 
 
-class PurchaseProductsListViewTest(AuthenticatedTestCase, ContentMixin):
+class PurchaseableProductsListViewTest(AuthenticatedTestCase, ContentMixin):
     def test_present(self):
         # Given
         url = reverse('purchase-products-list')
@@ -658,7 +653,7 @@ class AnyEndpointAccessUpdatesLastActive(AuthenticatedTestCase):
         self.assertTrue(last_active2 > last_active1)
 
 
-class ProfileView(AuthenticatedTestCase):
+class ProfileViewTest(AuthenticatedTestCase):
     def test_should_return_profile_fields(self):
         # Given
         url = reverse('profile-view')
@@ -674,7 +669,7 @@ class ProfileView(AuthenticatedTestCase):
         self.assertEqual(set(profile_flat.keys()), set(expected_fields))
 
 
-class TopicDetailView(AuthenticatedTestCase, ContentMixin):
+class TopicDetailViewTest(AuthenticatedTestCase, ContentMixin):
     def test_should_present(self):
         # Given
         self._create_content_hierarchy()
@@ -721,3 +716,22 @@ class TopicListView(AuthenticatedTestCase, ContentMixin):
         self.assertEqual(1, len(response_objs))
         expected_fields = ['id', 'title', 'bonus_reward', 'on_complete_achievement', 'uri']
         self.assertEqual(set(expected_fields), set(response_objs[0].keys()))
+
+
+class LevelCompleteView(AuthenticatedTestCase, ContentMixin):
+    def test_should_present(self):
+        # Given
+        self._create_content_hierarchy()
+        self._create_multiple_quotes(category=self.category, author=self.author)
+
+        quote_ut = self.quotes[1]
+
+        url = reverse('level-complete', kwargs={'level_pk': quote_ut.pk })
+
+        response = self.client.post(url, **self.auth())
+
+        self.assertEqual(200, response.status_code)
+        response_objs = json.loads(response.content)['objects']
+
+        complete_levels = get_levels_complete_by_profile_in_category(self.profile.pk, self.category.pk)
+        self.assertEqual(quote_ut.pk, complete_levels[0].pk)

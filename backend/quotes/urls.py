@@ -25,13 +25,13 @@ urlpatterns = [
     path('auth/', QuotesAuthenticateView.as_view(), name='quote-auth'),
 
     # Topic's sections and categories list along with user progress and lock status
-    path('topic/<int:pk>/', TopicDetail.as_view(), name='topic-detail'),
+    path('topic/<int:pk>/', TopicDetailView.as_view(), name='topic-detail'),
 
     # Topics list
-    path('topic/list/', TopicList.as_view(), name='topic-list'),
+    path('topic/list/', TopicListView.as_view(), name='topic-list'),
 
     # Levels list in category
-    path('levels/category/<int:category_pk>/', LevelsList.as_view(), name='levels-list'),
+    path('levels/category/<int:category_pk>/', LevelsListView.as_view(), name='levels-list'),
 
     # Level complete postback
     path('level/<int:level_pk>/complete', LevelCompleteView.as_view(), name='level-complete'),
@@ -43,10 +43,10 @@ urlpatterns = [
     path('profile/', ProfileView.as_view(), name='profile-view'),
 
     # List of user achievements
-    path('achievements/', AchievementList.as_view(), name='achievements-list'),
+    path('achievements/', AchievementListView.as_view(), name='achievements-list'),
 
     # List of all existing achievements
-    path('achievements/all/', AllAchievementList.as_view(), name='achievements-list-all'),
+    path('achievements/all/', AllAchievementListView.as_view(), name='achievements-list-all'),
 
     # Google Play purchases
     path('purchase/play/coins/', PurchaseCoinsView.as_view(), name='purchase-coins-view'),

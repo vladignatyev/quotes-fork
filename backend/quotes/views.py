@@ -24,7 +24,7 @@ class BaseView(SafeView):
         request.user_profile.save()
 
 
-class TopicDetail(BaseView):
+class TopicDetailView(BaseView):
     def get(self, request, *args, **kwargs):
         try:
             topic = Topic.objects.get(pk=kwargs['pk'], hidden=False)
@@ -37,7 +37,7 @@ class TopicDetail(BaseView):
             raise Http404()
 
 
-class TopicList(BaseView):
+class TopicListView(BaseView):
     queryset = Topic.objects.filter(hidden=False)
     ordering = '-pk'
     detail_url = 'topic-detail'
@@ -69,7 +69,7 @@ class TopicList(BaseView):
         return json_response(res_dict)
 
 
-class LevelsList(BaseView):
+class LevelsListView(BaseView):
     def get(self, request, *args, **kwargs):
         category_pk = kwargs.get('category_pk', None)
 
@@ -305,7 +305,7 @@ class CategoryUnlockView(BaseView):
 
         return HttpResponse(status=200)
 
-class AchievementList(BaseView):
+class AchievementListView(BaseView):
     fields = ('icon', 'title', 'received_text', 'description_text')
 
     def flattened(self, iterable):
@@ -330,7 +330,7 @@ class AchievementList(BaseView):
         return json_response(res_dict)
 
 
-class AllAchievementList(BaseView):
+class AllAchievementListView(BaseView):
     fields = ('icon', 'title', 'received_text', 'description_text')
 
     def flattened(self, iterable):
