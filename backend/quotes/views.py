@@ -40,11 +40,19 @@ class TopicDetail(BaseView):
 class TopicList(BaseView):
     queryset = Topic.objects.filter(hidden=False)
     ordering = '-pk'
+    detail_url = 'topic-detail'
+
+    def flatten(self, topic):
+        return {
+            'id': topic.pk,
+            'title': topic.title,
+            'bonus_reward': topic.bonus_reward,
+            'on_complete_achievement': topic.on_complete_achievement,
+            'uri': reverse(self.detail_url, kwargs={'pk': topic.pk})
+        }
 
     def get(self, request, *args, **kwargs):
-        objects = [ model_to_dict(o) for o in self.queryset.order_by(self.ordering) ]
-        for o in objects:
-            o['uri'] = reverse('topic-detail', kwargs={'pk': o['id']})
+        objects = [ self.flatten(o) for o in self.queryset.order_by(self.ordering) ]
 
         res_dict = {
             "objects": objects,

@@ -113,6 +113,7 @@ class Topic(RewardableEntity):
         categories = QuoteCategory.objects.filter(section__in=sections).all()
 
         flat_topic = {
+            'id': self.pk,
             'title': self.title,
             'bonus_reward': self.bonus_reward,
             'on_complete_achievement': self.on_complete_achievement,
