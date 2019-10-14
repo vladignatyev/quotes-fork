@@ -32,6 +32,7 @@ class InMemoryCacheStorage:
                 self.clear_bucket(k)
 
 
+# todo: completely replace this entity by introducing a `lru_cache`-like decorator
 class ProfilesDataStorage(InMemoryCacheStorage):
     def get_levels_complete_by_profile_in_category(self, profile_pk, category_pk):
         bucket = self.get_bucket(profile_pk)

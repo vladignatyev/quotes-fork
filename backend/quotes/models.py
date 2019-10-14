@@ -93,6 +93,51 @@ class Topic(RewardableEntity):
     def handle_complete(self, profile):
         return super(Topic, self).handle_complete(profile)
 
+    # todo: extract such methods into separate ModelView
+    # todo: enable per-profile caching of required data
+    def get_flat(self, profile):
+        '''
+        Flattens hierahical models under Topic into lists,
+        mark categories opened/payable depending on user payments,
+        adds progress values to every category
+        '''
+
+        cache_bucket = get_profiles_storage().get_bucket(profile.pk)
+        key = f'Topic.get_flat({profile.pk}, {self.pk})'
+        result = cache_bucket.get(key, None)
+        if result is not None:
+            return result
+
+        sections = Section.objects.filter(topic=self).all()
+        # categories = QuoteCategory.objects.filter(section__topic=self).all()
+        categories = QuoteCategory.objects.filter(section__in=sections).all()
+
+        flat_topic = {
+            'title': self.title,
+            'bonus_reward': self.bonus_reward,
+            'on_complete_achievement': self.on_complete_achievement,
+            'sections': [section.get_flat() for section in sections]
+        }
+
+        for category in categories:
+            for section in flat_topic['sections']:
+                if category.section.id == section['id']:
+                    section['categories'] = section.get('categories', [])
+
+                    flat_category = category.get_flat()
+                    flat_category['is_available_to_user'] = category.is_available_to_user(profile)
+
+                    levels_complete, levels_total = category.get_progress(profile)
+
+                    flat_category['progress_levels_total'] = levels_total
+                    flat_category['progress_levels_complete'] = levels_complete
+
+                    section['categories'] += [flat_category]
+
+        cache_bucket[key] = flat_topic
+        return flat_topic
+
+
 
 class Section(RewardableEntity):
     title = models.CharField("Название Раздела", max_length=256)
@@ -118,6 +163,14 @@ class Section(RewardableEntity):
         if self.topic.is_completion_condition_met_by(profile) == True:
             user_events += self.topic.handle_complete(profile)
         return user_events
+
+    def get_flat(self):
+        return {
+            'id': self.pk,
+            'title': self.title,
+            'bonus_reward': self.bonus_reward,
+            'on_complete_achievement': self.on_complete_achievement.id if self.on_complete_achievement else None
+        }
 
 
 
@@ -228,6 +281,17 @@ class QuoteCategory(RewardableEntity):
             user_events += self.section.handle_complete(profile)
         return user_events
 
+    def get_flat(self):
+        return {
+            'id': self.id,
+            'icon': self.icon,
+            'title': self.title,
+            'section_id': self.section.id,
+            'is_payable': self.is_payable,
+            'price_to_unlock': self.price_to_unlock,
+            'bonus_reward': self.bonus_reward,
+            'on_complete_achievement': self.on_complete_achievement.id if self.on_complete_achievement else None
+        }
 
 
 

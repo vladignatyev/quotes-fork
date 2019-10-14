@@ -26,8 +26,15 @@ class BaseView(SafeView):
 
 class TopicDetail(BaseView):
     def get(self, request, *args, **kwargs):
-        topic = Topic.objects.get_flattened(pk=kwargs['pk'], current_user=self.request.user_profile)
-        return json_response(topic)
+        try:
+            topic = Topic.objects.get(pk=kwargs['pk'], hidden=False)
+            res_obj = {
+                'objects': [topic.get_flat(profile=self.request.user_profile)],
+                'meta': {}
+            }
+            return json_response(res_obj)
+        except Topic.DoesNotExist:
+            raise Http404()
 
 
 class TopicList(BaseView):

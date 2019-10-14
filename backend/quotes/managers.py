@@ -16,40 +16,6 @@ class TopicManager(models.Manager):
                        'event_description', 'event_win_achievement']
 
 
-    def get_flattened(self, topic, profile):
-        '''
-        Flattens hierahical models under Topic into lists,
-        mark categories opened/payable depending on user payments,
-        adds progress values to every category
-        '''
-        Section = apps.get_model('quotes.Section')
-        QuoteCategory = apps.get_model('quotes.QuoteCategory')
-        CategoryUnlockPurchase = apps.get_model('quotes.CategoryUnlockPurchase')
-
-        sections = Section.objects.filter(topic__pk=pk).all()
-        categories = QuoteCategory.objects.filter(section__topic=topic).all()
-
-
-        flat_topic = model_to_dict(topic, fields=self.topic_fields)
-        flat_topic['sections'] = [ model_to_dict(section, fields=self.section_fields) for section in sections ]
-        flat_topic['uri'] = reverse('topic-detail', kwargs={'pk': topic.pk})
-
-        for category in categories:
-            for section in flat_topic['sections']:
-                section['uri'] = reverse('section-detail', kwargs={'pk': section['id']})
-                if category.section.id == section['id']:
-                    categories_per_section = section.get('categories', [])
-                    flat_category = model_to_dict(category)
-                    flat_category['is_locked'] = category.is_available_to_user(profile)
-                    levels_complete, levels_total = category.get_progress(profile)
-                    flat_category['progress_levels_total'] = levels_total
-                    flat_category['progress_levels_complete'] = levels_complete
-                    categories_per_section += [flat_category]
-                    section['categories'] = categories_per_section
-
-        return flat_topic
-
-
 class ProductManager(models.Manager):
     def get_by_store_product(self, store_product):
         if type(store_product) is GooglePlayProduct:

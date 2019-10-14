@@ -672,3 +672,30 @@ class ProfileView(AuthenticatedTestCase):
         # Then
         profile_flat = json.loads(response.content)['objects'][0]
         self.assertEqual(set(profile_flat.keys()), set(expected_fields))
+
+
+class TopicDetailView(AuthenticatedTestCase, ContentMixin):
+    def test_should_present(self):
+        # Given
+        self._create_content_hierarchy()
+        self._create_multiple_quotes(category=self.category, author=self.author)
+
+        url = reverse('topic-detail', kwargs={'pk': self.topic.pk})
+
+        response = self.client.get(url, **self.auth())
+
+        self.assertEqual(200, response.status_code)
+
+        objects = json.loads(response.content)['objects']
+
+    def test_shouldnt_show_hidden_topic(self):
+        # Given
+        self._create_content_hierarchy()
+        self._create_multiple_quotes(category=self.category, author=self.author)
+        self.topic.hidden = True
+        self.topic.save()
+        url = reverse('topic-detail', kwargs={'pk': self.topic.pk})
+
+        response = self.client.get(url, **self.auth())
+
+        self.assertEqual(404, response.status_code)
