@@ -323,7 +323,34 @@ class QuoteSplit(TestCase):
         self.assertEqual(['改善', 'means improvement.'], quote_split('改善^ means improvement.'))
         self.assertEqual(['Кайдзен', 'означает совершенствование.'], quote_split('Кайдзен ^означает совершенствование.^'))
 
+    def test_split_should_merge_multiple_spaces(self):
+        self.assertEqual(['а', 'что', 'если?'], quote_split('а что  если?'))
 
+    def test_split_should_merge_space_followed_by_special_char(self):
+        self.assertEqual(['а', 'что', 'если?'], quote_split('а что  если ?'))
+
+    def test_split_should_avoid_empty_chunks(self):
+        self.assertEqual(['а', 'что', 'если'], quote_split('а что  если '))
+
+    def test_beautiful_text_should_capitalize_first(self):
+        q1 = 'and what is the use of a book without pictures or conversations?'
+        q2 = 'а что если?'
+
+        self.assertEqual('And what is the use of a book without pictures or conversations?',
+                         beautiful_text(q1))
+
+        self.assertEqual('А что если?',
+                         beautiful_text(q2))
+
+    def test_beautiful_text_should_remove_multiple_spaces(self):
+        q1 = 'and what is the   use of a book without pictures or conversations?'
+        q2 = 'а что  если ?'
+
+        self.assertEqual('And what is the use of a book without pictures or conversations?',
+                         beautiful_text(q1))
+
+        self.assertEqual('А что если?',
+                         beautiful_text(q2))
 
 
 

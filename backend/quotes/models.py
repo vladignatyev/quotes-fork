@@ -180,9 +180,14 @@ def quote_split(quote_item_text,
                 normal_case_re=r'\s+'):
     if '^' in quote_item_text:
         case = special_case_re
+        prepared = quote_item_text
     else:
         case = normal_case_re
-    return list(filter(None, re.split(case, quote_item_text)))
+        merge_spaces = re.sub(r' +', ' ', quote_item_text)
+        special_after_space = re.sub(r'\s+([?!])', '\g<1>', merge_spaces)
+
+        prepared = special_after_space
+    return list(filter(None, re.split(case, prepared)))
 
 
 def get_levels(category_pk, profile):
@@ -200,6 +205,7 @@ def get_levels(category_pk, profile):
             'text': item.text,
             'author': item.author.name,
             'reward': item.get_reward(profile),
+            'beautiful': beautiful_text(item.text),
             'order': item.order_in_category,
             'complete': item in complete_levels,
             'splitted': quote_split(item.text)
@@ -411,6 +417,14 @@ class Quote(RewardableEntity):
             user_events += self.category.handle_complete(profile)
 
         return user_events
+
+
+def beautiful_text(text):
+    c = quote_split(text)
+    capitalized_first = [c[0].capitalize()] + c[1:]
+
+    result = capitalized_first
+    return ' '.join(result)
 
 
 class BalanceRechargeProduct(models.Model):
