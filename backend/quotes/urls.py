@@ -51,6 +51,7 @@ urlpatterns = [
     # Google Play purchases
     path('purchase/play/coins/', PurchaseCoinsView.as_view(), name='purchase-coins-view'),
     path('purchase/play/unlock/', PurchaseUnlockView.as_view(), name='purchase-unlock-view'),
+    
     path('purchase/play/status/<uuid:purchase_id>/', PurchaseStatusView.as_view(), name='purchase-status-view'),
     path('purchase/play/products/', PurchaseableProductsListView.as_view(), name='purchase-products-list'),
 

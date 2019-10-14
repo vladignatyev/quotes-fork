@@ -321,8 +321,8 @@ class PurchaseStatusViewTest(AuthenticatedTestCase, ContentMixin):
 
         # Then
         self.assertEqual(200, response.status_code)
-        self.assertNotEqual(PurchaseStatus.VALID, json.loads(response.content)['status'])
-        self.assertEqual(PurchaseStatus.DEFAULT, json.loads(response.content)['status'])
+        self.assertNotEqual(PurchaseStatus.VALID, json.loads(response.content)['objects'][0]['status'])
+        self.assertEqual(PurchaseStatus.DEFAULT, json.loads(response.content)['objects'][0]['status'])
 
     def test_should_return_actual_status2(self):
         # Given
@@ -349,7 +349,7 @@ class PurchaseStatusViewTest(AuthenticatedTestCase, ContentMixin):
 
         # Then
         self.assertEqual(200, response.status_code)
-        self.assertEqual(PurchaseStatus.INVALID, json.loads(response.content)['status'])
+        self.assertEqual(PurchaseStatus.INVALID, json.loads(response.content)['objects'][0]['status'])
 
 
 class PurchaseCoinsViewTest(AuthenticatedTestCase, ContentMixin):
@@ -385,7 +385,7 @@ class PurchaseCoinsViewTest(AuthenticatedTestCase, ContentMixin):
 
         # Then
         self.assertEqual(200, response.status_code)
-        purchase_id = json.loads(response.content)['purchase_id']
+        purchase_id = json.loads(response.content)['objects'][0]['purchase_id']
         IAPPurchase = apps.get_model('api.GooglePlayIAPPurchase')
 
         purchase = IAPPurchase.objects.get(id=purchase_id)
@@ -412,7 +412,7 @@ class PurchaseCoinsViewTest(AuthenticatedTestCase, ContentMixin):
 
         response = self.client.post(url, params, content_type='application/json', **self.auth())
         self.assertEqual(200, response.status_code)
-        purchase_id = json.loads(response.content)['purchase_id']
+        purchase_id = json.loads(response.content)['objects'][0]['purchase_id']
 
         # When
         for i in range(3):
@@ -458,7 +458,7 @@ class PurchaseUnlockViewTest(AuthenticatedTestCase, ContentMixin):
         #
         # # Then
         self.assertEqual(200, response.status_code)
-        purchase_id = json.loads(response.content)['purchase_id']
+        purchase_id = json.loads(response.content)['objects'][0]['purchase_id']
         IAPPurchase = apps.get_model('api.GooglePlayIAPPurchase')
 
         purchase = IAPPurchase.objects.get(id=purchase_id)
@@ -488,7 +488,7 @@ class PurchaseUnlockViewTest(AuthenticatedTestCase, ContentMixin):
         # When
         response = self.client.post(url, params, content_type='application/json', **self.auth())
         self.assertEqual(200, response.status_code)
-        purchase_id = json.loads(response.content)['purchase_id']
+        purchase_id = json.loads(response.content)['objects'][0]['purchase_id']
 
         # When
         for i in range(3):
@@ -602,7 +602,7 @@ class PurchaseableProductsListViewTest(AuthenticatedTestCase, ContentMixin):
         # Then
         self.assertEqual(200, response.status_code)
 
-        response_objects = json.loads(response.content)['objects']
+        response_objects = json.loads(response.content)['objects'][0]
         recharge_products = response_objects['recharge_products']
         other_products = response_objects['other_products']
 

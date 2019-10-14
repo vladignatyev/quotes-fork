@@ -171,7 +171,10 @@ class PurchaseCoinsView(FormBasedView):
             existing_purchase = Purchase.objects.get(order_id=cleaned_data['order_id'],
                                                   purchase_token=cleaned_data['purchase_token'])
             res_dict = {
-                "purchase_id": existing_purchase.id
+                "objects":[{
+                    "purchase_id": existing_purchase.id
+                }],
+                "meta": {}
             }
             return json_response(res_dict)
         except Purchase.DoesNotExist:
@@ -185,13 +188,16 @@ class PurchaseCoinsView(FormBasedView):
                                                order_id=cleaned_data['order_id'],
                                                purchase_token=cleaned_data['purchase_token'])
             res_dict = {
-                "purchase_id": purchase.id
+                "objects":[{
+                    "purchase_id": purchase.id
+                }],
+                "meta": {}
             }
             return json_response(res_dict)
         except BalanceRechargeProduct.DoesNotExist:
             return HttpResponse(status=404)
 
-        return HttpResponse(status=400)
+        return HttpResponse(status=501)
 
 
 class PurchaseUnlockView(FormBasedView):
@@ -220,7 +226,10 @@ class PurchaseUnlockView(FormBasedView):
             existing_purchase = Purchase.objects.get(order_id=cleaned_data['order_id'],
                                                      purchase_token=cleaned_data['purchase_token'])
             res_dict = {
-                "purchase_id": existing_purchase.id
+                "objects":[{
+                    "purchase_id": existing_purchase.id
+                }],
+                "meta": {}
             }
             return json_response(res_dict)
         except Purchase.DoesNotExist:
@@ -239,7 +248,10 @@ class PurchaseUnlockView(FormBasedView):
                                                            google_play_purchase=purchase)
 
             res_dict = {
-                "purchase_id": purchase.id
+                "objects":[{
+                    "purchase_id": purchase.id
+                }],
+                "meta": {}
             }
             return json_response(res_dict)
         except GooglePlayProduct.DoesNotExist:
@@ -257,7 +269,10 @@ class PurchaseStatusView(BaseView):
         try:
             purchase = Purchase.objects.get(id=purchase_id)
             res_dict = {
-                "status": purchase.status
+                "objects":[{
+                    "status": purchase.status
+                }],
+                "meta": {}
             }
             return json_response(res_dict)
         except Purchase.DoesNotExist:
@@ -283,7 +298,7 @@ class PurchaseableProductsListView(BaseView):
             'recharge_products': balance_recharge_flat_list
         }
         res_dict = {
-            "objects": products,
+            "objects": [products],
             "meta": {}
         }
         return json_response(res_dict)
@@ -291,15 +306,16 @@ class PurchaseableProductsListView(BaseView):
 
 class CategoryUnlockView(BaseView):
     def post(self, request, *args, **kwargs):
-        category = QuoteCategory.objects.get(pk=kwargs['category_pk'])
-
         try:
+            category = QuoteCategory.objects.get(pk=kwargs['category_pk'])
             unlock = CategoryUnlockPurchase.objects.create(type=CategoryUnlockTypes.UNLOCK_FOR_COINS,
                                                   profile=self.request.user_profile,
                                                   category_to_unlock=category)
             unlock.do_unlock()
         except CategoryUnlockPurchase.InsufficientFunds:
             return HttpResponse(status=402)
+        except QuoteCategory.DoesNotExist:
+            raise Http404()
         except CategoryUnlockPurchase.AlreadyAvailable:
             pass
 
