@@ -47,7 +47,7 @@ class TopicListView(BaseView):
             'id': topic.pk,
             'title': topic.title,
             'bonus_reward': topic.bonus_reward,
-            'on_complete_achievement': topic.on_complete_achievement if topic.on_complete_achievement else None,
+            'on_complete_achievement': topic.on_complete_achievement.pk if topic.on_complete_achievement else None,
             'uri': reverse(self.detail_url, kwargs={'pk': topic.pk})
         }
 

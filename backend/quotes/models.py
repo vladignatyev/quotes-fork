@@ -116,7 +116,7 @@ class Topic(RewardableEntity):
             'id': self.pk,
             'title': self.title,
             'bonus_reward': self.bonus_reward,
-            'on_complete_achievement': self.on_complete_achievement,
+            'on_complete_achievement': self.on_complete_achievement.id if self.on_complete_achievement else None,
             'sections': [section.get_flat() for section in sections]
         }
 
