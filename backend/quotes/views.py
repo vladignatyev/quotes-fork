@@ -322,14 +322,14 @@ class CategoryUnlockView(BaseView):
         return HttpResponse(status=200)
 
 class AchievementListView(BaseView):
-    fields = ('icon', 'title', 'received_text', 'description_text')
-
     def flattened(self, iterable):
         result = [ None ] * len(iterable)
 
         for i, o in enumerate(iterable):
-            result[i] = model_to_dict(o.achievement, fields=self.fields)
-            result[i]['received_at'] = o.received_at.strftime('%Y-%m-%dT%H:%M:%S%z')
+            result[i] = {
+                'achievement_id': o.achievement.pk,
+                'received_at': o.received_at.strftime('%Y-%m-%dT%H:%M:%S%z')
+            }
         return result
 
     def filter(self):
@@ -353,7 +353,14 @@ class AllAchievementListView(BaseView):
         result = [ None ] * len(iterable)
 
         for i, o in enumerate(iterable):
-            result[i] = model_to_dict(o, fields=self.fields)
+            # result[i] = model_to_dict(o, fields=self.fields)
+            result[i] = {
+                'id': o.pk,
+                'title': o.title,
+                'icon': o.icon,
+                'received_text': o.received_text,
+                'description_text': o.description_text
+            }
         return result
 
     def get(self, request, *args, **kwargs):
