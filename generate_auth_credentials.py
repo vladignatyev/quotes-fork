@@ -14,7 +14,7 @@ timestamp = timezone.now().strftime('%Y-%m-%dT%H:%M:%S%z')
 payload = {
     'device_token': device_token,
     'timestamp': timestamp,
-    'signature': generate_signature(device_token, timestamp),
+    'signature': generate_signature(device_token, timestamp, shared_secret='0f1109c3b6e8acaa45988b1bd783f13fbcde16125067d7f8f2bab16ffb22c0db'),
     'nickname': f'тестировщик-{device_token[:4]}..{device_token[-4:]}'
 }
 

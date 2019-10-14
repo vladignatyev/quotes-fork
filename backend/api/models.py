@@ -168,13 +168,13 @@ def clean_tokens_lru_cache(*args, **kwargs):
 post_save.connect(clean_tokens_lru_cache, sender='api.Credentials')
 
 
-def generate_signature(device_token, timestamp):
+def generate_signature(device_token, timestamp, shared_secret=None):
     '''
     Generate deterministic signature.
     The algorithm should be implemented on client too,
     to be able to sign requests to authentication API.
     '''
-    shared_secret = get_shared_secret()
+    shared_secret = shared_secret or get_shared_secret()
 
     h = hashlib.sha256()
     h.update(shared_secret.encode('utf-8'))
