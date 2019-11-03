@@ -3,12 +3,9 @@ from django.contrib import admin
 from .models import *
 
 
-class QuoteAdmin(admin.ModelAdmin):
-    list_display = ('text', 'author', 'category')
-    exclude = ('available_to_users',)
-    fields = ( 'text', 'author', 'order_in_category', 'on_complete_achievement',)
-    search_fields = ['text', 'author']
-    view_on_site = True
+from django import forms
+
+
 
 class QuoteCategoryAdmin(admin.ModelAdmin):
     list_display = ('title', 'section')
@@ -17,20 +14,41 @@ class QuoteCategoryAdmin(admin.ModelAdmin):
     fields = ( 'title', 'section', 'bonus_reward', 'is_payable', 'price_to_unlock', 'on_complete_achievement', 'icon',)
     search_fields = ['title']
 
+
+class QuoteForm(forms.ModelForm):
+    text = forms.CharField(widget=forms.Textarea)
+
+    class Meta:
+        model = Quote
+        fields = '__all__'
+
+class QuoteAdmin(admin.ModelAdmin):
+    list_display = ('text', 'author', 'category')
+    exclude = ('available_to_users',)
+    fields = ('text', 'author', 'order_in_category', 'on_complete_achievement', 'category')
+    search_fields = ['text', 'author']
+    view_on_site = True
+
+    form = QuoteForm
+
+
 class TopicAdmin(admin.ModelAdmin):
     list_display = ('title',)
     fields = ( 'title', 'bonus_reward', 'on_complete_achievement', 'hidden',)
     search_fields = ['title']
+
 
 class SectionAdmin(admin.ModelAdmin):
     list_display = ('title', 'topic')
     fields = ( 'title', 'topic', 'bonus_reward', 'on_complete_achievement',)
     search_fields = ['title']
 
+
 class ProfileAdmin(admin.ModelAdmin):
     list_display = ('nickname', 'balance', )
     date_hierarchy = 'last_active'
     exclude = ('device_sessions',)
+
 
 class AchievementAdmin(admin.ModelAdmin):
     list_display = ('title', 'icon',)
@@ -45,8 +63,10 @@ class AchievementReceivingAdmin(admin.ModelAdmin):
         'profile'
     )
 
+
 class CategoryUnlockPurchaseAdmin(admin.ModelAdmin):
     date_hierarchy = 'date_created'
+
 
 class BalanceRechargeProductAdmin(admin.ModelAdmin):
     list_display = ('admin_title', 'google_play_product',) # 'app_store_product')
