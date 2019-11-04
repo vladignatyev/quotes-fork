@@ -1,9 +1,9 @@
 package com.brain.words.puzzle.quotes.ui.main.game.topic.section
 
-import com.brain.words.puzzle.quotes.ui.main.game.topic.quote.QuoteModel
+import com.brain.words.puzzle.quotes.ui.main.game.topic.category.CategoryModel
 
 data class SectionModel(
-    val id: String,
+    val id: Int,
     val title: String,
-    val quotes: List<QuoteModel>
+    val categories: List<CategoryModel>
 )

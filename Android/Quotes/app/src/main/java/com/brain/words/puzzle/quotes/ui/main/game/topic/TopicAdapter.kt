@@ -7,9 +7,12 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.brain.words.puzzle.quotes.R
 import com.brain.words.puzzle.quotes.databinding.MainGameTopicItemBinding
+import com.brain.words.puzzle.quotes.ui.main.game.GameListener
 import com.brain.words.puzzle.quotes.ui.main.game.topic.section.SectionModel
 
-class TopicAdapter : ListAdapter<SectionModel, TopicAdapter.ViewHolder>(
+class TopicAdapter(
+    private val gameListener: GameListener
+) : ListAdapter<SectionModel, TopicAdapter.ViewHolder>(
     DIFF_CALLBACK
 ) {
 
@@ -27,6 +30,7 @@ class TopicAdapter : ListAdapter<SectionModel, TopicAdapter.ViewHolder>(
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         holder.binding.item = getItem(position)
+        holder.binding.listener = gameListener
         holder.binding.executePendingBindings()
     }
 

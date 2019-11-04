@@ -3,13 +3,13 @@ package com.brain.words.puzzle.quotes.ui.onboarding.login
 import androidx.databinding.ObservableBoolean
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import com.brain.words.puzzle.data.UserManager
 import com.brain.words.puzzle.data.api.ApiClient
 import com.brain.words.puzzle.quotes.BuildConfig
 import com.brain.words.puzzle.quotes.core.AppViewModel
 import com.brain.words.puzzle.quotes.core.Schedulers
 import com.brain.words.puzzle.quotes.core.common.toFlowable
 import com.brain.words.puzzle.quotes.core.ext.Digest
-import com.brain.words.puzzle.quotes.core.manager.UserManager
 import com.brain.words.puzzle.quotes.core.rx.NonNullObservableField
 import io.reactivex.Flowable
 import io.reactivex.processors.BehaviorProcessor

@@ -1,4 +1,4 @@
-package com.brain.words.puzzle.quotes.core.manager
+package com.brain.words.puzzle.data
 
 import com.brain.words.puzzle.crypto.fs.sp.SecurePreferences
 

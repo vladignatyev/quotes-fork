@@ -1,11 +1,13 @@
 package com.brain.words.puzzle.quotes.core.di.module
 
+import com.brain.words.puzzle.data.UserManager
 import com.brain.words.puzzle.data.api.ApiClient
 import com.brain.words.puzzle.quotes.core.Schedulers
-import com.brain.words.puzzle.quotes.core.manager.UserManager
 import com.brain.words.puzzle.quotes.ui.main.MainViewModel
 import com.brain.words.puzzle.quotes.ui.main.game.GameViewModel
 import com.brain.words.puzzle.quotes.ui.main.game.topic.TopicViewModel
+import com.brain.words.puzzle.quotes.ui.main.game.topup.TopupFragment
+import com.brain.words.puzzle.quotes.ui.main.game.topup.TopupViewModel
 import com.brain.words.puzzle.quotes.ui.main.profile.ProfileViewModel
 import com.brain.words.puzzle.quotes.ui.main.top.TopViewModel
 import com.brain.words.puzzle.quotes.ui.onboarding.OnboardingViewModel
@@ -73,6 +75,16 @@ class ViewModelModule {
         schedulers: Schedulers,
         apiClient: ApiClient
     ) = TopViewModel.Factory(
+        schedulers,
+        apiClient
+    )
+
+    @Provides
+    @Singleton
+    fun topupViewModelFactory(
+        schedulers: Schedulers,
+        apiClient: ApiClient
+    ) = TopupViewModel.Factory(
         schedulers,
         apiClient
     )

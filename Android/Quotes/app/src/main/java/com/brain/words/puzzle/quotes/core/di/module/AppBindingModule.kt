@@ -21,6 +21,10 @@ class AppBindingModule {
 
         override fun getPreloaderButtonBindingAdapters() = PreloaderButtonBindingAdapters()
 
+        override fun getProgressBarBindingAdapters() = ProgressBarBindingAdapters()
+
+        override fun getTextViewBindingAdapters() = TextViewBindingAdapters()
+
         override fun getRecyclerViewBindingAdapters() = RecyclerViewBindingAdapters()
     }
 

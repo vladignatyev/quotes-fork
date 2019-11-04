@@ -5,13 +5,17 @@ import androidx.databinding.ObservableField
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.brain.words.puzzle.data.api.ApiClient
+import com.brain.words.puzzle.data.model.CategoryDO
+import com.brain.words.puzzle.data.model.TopicDO
 import com.brain.words.puzzle.quotes.core.AppViewModel
 import com.brain.words.puzzle.quotes.core.Schedulers
 import com.brain.words.puzzle.quotes.core.rx.ClearableBehaviorProcessor
-import com.brain.words.puzzle.quotes.ui.main.game.topic.quote.QuoteModel
+import com.brain.words.puzzle.quotes.ui.main.game.topic.category.CategoryModel
 import com.brain.words.puzzle.quotes.ui.main.game.topic.section.SectionModel
 import io.reactivex.Flowable
 import io.reactivex.processors.BehaviorProcessor
+import timber.log.Timber
+import kotlin.math.roundToInt
 
 class TopicViewModel(
     private val schedulers: Schedulers,
@@ -32,62 +36,72 @@ class TopicViewModel(
     }
 
     override fun initialise() {
-        sections.onNext(
-            listOf(
-                SectionModel(
-                    "0", "Вожди", listOf(
-                        QuoteModel("0", "Сталин", "", ""),
-                        QuoteModel("0", "Напалеон", "", ""),
-                        QuoteModel("0", "Ленин", "", ""),
-                        QuoteModel("0", "Мао Цзэдун", "", "")
-                    )
-                ), SectionModel(
-                    "1", "Философы", listOf(
-                        QuoteModel("0", "Конфуций", "", ""),
-                        QuoteModel("0", "Будда", "", ""),
-                        QuoteModel("0", "Ницше", "", ""),
-                        QuoteModel("0", "Сократ", "", ""),
-                        QuoteModel("0", "Платон", "", ""),
-                        QuoteModel("0", "Аристотель", "", "")
-                    )
-                ), SectionModel(
-                    "2", "Русские Классики", listOf(
-                        QuoteModel("0", "Лермонтов", "", ""),
-                        QuoteModel("0", "Достоевский", "", ""),
-                        QuoteModel("0", "Гоголь", "", ""),
-                        QuoteModel("0", "Пушкин", "", ""),
-                        QuoteModel("0", "Чехов", "", ""),
-                        QuoteModel("0", "Булгаков", "", ""),
-                        QuoteModel("0", "Толстой", "", "")
-                    )
-                ), SectionModel(
-                    "3", "Мировые Писатели", listOf(
-                        QuoteModel("0", "Шекспир", "", ""),
-                        QuoteModel("0", "Хемингуэй", "", ""),
-                        QuoteModel("0", "Джек Лондон", "", ""),
-                        QuoteModel("0", "Марк Твен", "", ""),
-                        QuoteModel("0", "Джордж Оруэлл", "", ""),
-                        QuoteModel("0", "Антуан де Сент-Экзюпери", "", "")
-                    )
-                ), SectionModel(
-                    "4", "Политики", listOf(
-                        QuoteModel("0", "Франклин Рузвельт", "", ""),
-                        QuoteModel("0", "Маргарет Тетчер", "", ""),
-                        QuoteModel("0", "Владимир Путин", "", ""),
-                        QuoteModel("0", "Уинстон Черчилль", "", ""),
-                        QuoteModel("0", "Авраам Линкольн", "", "")
-                    )
-                )
-            )
-        )
+        val id = state.id.get() ?: 0
+        apiClient
+            .topic(id)
+            .map { toLocalModel(it) }
+            .subscribeOn(schedulers.io())
+            .observeOn(schedulers.ui())
+            .subscribe({
+                sections.onNext(it)
+            }, {
+                Timber.w(it, "TopicViewModel init failed")
+            }).untilCleared()
     }
+
+    private fun toLocalModel(topicDO: TopicDO): List<SectionModel> = topicDO.sections
+        .map { section ->
+            SectionModel(
+                id = section.id,
+                title = section.title,
+                categories = section.categories.map { category ->
+                    //Opened
+                    mapCategory(category)
+                })
+        }
+
+    private fun mapCategory(category: CategoryDO): CategoryModel =
+        if (category.isAvailableToUser) {
+            if (category.completedLevels == category.totalLevels) {
+                //Completed
+                CategoryModel.Completed(
+                    id = category.id,
+                    title = category.onCompleteAchievement ?: "Знаток " + category.title
+                )
+            } else {
+                //User Can play
+                CategoryModel.Open(
+                    id = category.id,
+                    title = category.title,
+                    completedQuotes = category.completedLevels,
+                    totalQuotes = 100,
+                    percent = ((category.completedLevels.toDouble() / 100.0) * 100).roundToInt()
+                )
+            }
+        } else {
+            //Closed
+            CategoryModel.Closed(
+                id = category.id,
+                title = category.title,
+                price = category.priceToUnlock.toString()
+            )
+        }
 
     fun refresh() {
         state.isRefreshing.set(true)
-        val title = state.title.get()!!
-        val id = state.id.get()!!
-
-        state.isRefreshing.set(false)
+        val id = state.id.get() ?: 0
+        apiClient
+            .topic(id)
+            .map { toLocalModel(it) }
+            .subscribeOn(schedulers.io())
+            .observeOn(schedulers.ui())
+            .subscribe({
+                state.isRefreshing.set(false)
+                sections.onNext(it)
+            }, {
+                state.isRefreshing.set(false)
+                Timber.w(it, "TopicViewModel refresh() failed")
+            }).untilCleared()
     }
 
     fun reset() {
@@ -96,7 +110,7 @@ class TopicViewModel(
 
     data class State(
         val isRefreshing: ObservableBoolean = ObservableBoolean(false),
-        val id: ObservableField<String> = ObservableField(),
+        val id: ObservableField<Int> = ObservableField(),
         val title: ObservableField<String> = ObservableField(),
         val sections: Flowable<List<SectionModel>>,
         val errorTrigger: Flowable<Unit>

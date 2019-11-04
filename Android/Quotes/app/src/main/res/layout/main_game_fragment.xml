@@ -22,14 +22,14 @@
             android:id="@+id/appBar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/purple"
+            android:background="@color/indigo"
             app:visible="@{!viewModel.state.loading}"
             tools:visibility="visible">
 
             <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/toolbarContainer"
                 android:layout_width="match_parent"
-                android:layout_height="?android:attr/actionBarSize"
-                app:layout_scrollFlags="scroll">
+                android:layout_height="wrap_content">
 
                 <TextView
                     android:id="@+id/title"
@@ -38,11 +38,43 @@
                     android:layout_marginStart="16dp"
                     android:layout_marginTop="16dp"
                     android:layout_marginBottom="16dp"
-                    android:text="Тут будет что-то, а может и нет"
+                    android:text="@{String.format(@string/game_title, viewModel.state.name)}"
+                    android:textColor="@color/white"
+                    android:textSize="22sp"
+                    android:textStyle="bold"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
 
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/topup"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginEnd="16dp"
+                    android:layout_marginBottom="16dp"
+                    app:cardBackgroundColor="@color/transparent"
+                    app:cardCornerRadius="16dp"
+                    app:cardElevation="8dp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent">
+
+                    <TextView
+                        android:id="@+id/balance"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="4dp"
+                        android:background="@drawable/background_topup"
+                        android:drawableStart="@drawable/ic_money_white"
+                        android:onClick="@{() -> fragment.topupClicked()}"
+                        android:padding="8dp"
+                        android:text="@{viewModel.state.balance}"
+                        android:textColor="@color/gold"
+                        android:textSize="26sp"
+                        android:textStyle="bold"
+                        tools:text="100" />
+                </androidx.cardview.widget.CardView>
             </androidx.constraintlayout.widget.ConstraintLayout>
 
             <com.google.android.material.tabs.TabLayout
@@ -70,7 +102,7 @@
             android:id="@+id/topics"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="@color/purple"
+            android:background="@color/indigo"
             app:layout_behavior="@string/appbar_scrolling_view_behavior"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"

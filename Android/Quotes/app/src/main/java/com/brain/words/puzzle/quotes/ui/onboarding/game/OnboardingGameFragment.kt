@@ -13,13 +13,13 @@ import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import androidx.transition.Explode
 import androidx.transition.Transition
 import androidx.transition.TransitionManager
+import com.brain.words.puzzle.data.UserManager
 import com.brain.words.puzzle.game.animator.DraggableItemAnimator
 import com.brain.words.puzzle.game.draggable.RecyclerViewDragDropManager
 import com.brain.words.puzzle.game.utils.WrapperAdapterUtils
 import com.brain.words.puzzle.quotes.R
 import com.brain.words.puzzle.quotes.core.AppFragment
 import com.brain.words.puzzle.quotes.core.common.parentAs
-import com.brain.words.puzzle.quotes.core.manager.UserManager
 import com.brain.words.puzzle.quotes.core.ui.data.ExampleDataProvider
 import com.brain.words.puzzle.quotes.databinding.OnboardingGameFragmentBinding
 import io.reactivex.Completable

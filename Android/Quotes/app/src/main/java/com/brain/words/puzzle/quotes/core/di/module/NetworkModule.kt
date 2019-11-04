@@ -1,6 +1,7 @@
 package com.brain.words.puzzle.quotes.core.di.module
 
 import android.content.Context
+import com.brain.words.puzzle.data.UserManager
 import com.brain.words.puzzle.data.api.ApiClient
 import com.brain.words.puzzle.data.api.ApiService
 import com.brain.words.puzzle.data.api.NetworkApiClient
@@ -45,21 +46,26 @@ class NetworkModule {
 
     @Provides
     @Singleton
-    fun networkStatusProvider(context: Context): NetworkStatusProvider = BroadcastReceiverBackedNetworkStatusProvider(context)
+    fun networkStatusProvider(context: Context): NetworkStatusProvider =
+        BroadcastReceiverBackedNetworkStatusProvider(context)
 
     @Provides
     @Singleton
     fun apiClient(
         apiService: ApiService,
         errorMessageExtractor: ResponseErrorMessageExtractor,
-        networkStatusProvider: NetworkStatusProvider
-    ): ApiClient = NetworkApiClient(apiService, errorMessageExtractor, networkStatusProvider)
+        networkStatusProvider: NetworkStatusProvider,
+        userManager: UserManager
+    ): ApiClient =
+        NetworkApiClient(apiService, errorMessageExtractor, networkStatusProvider, userManager)
 
     @Provides
-    fun provideRetrofitCallAdapterFactory(): CallAdapter.Factory = RxJava2CallAdapterFactory.create()
+    fun provideRetrofitCallAdapterFactory(): CallAdapter.Factory =
+        RxJava2CallAdapterFactory.create()
 
     @Provides
-    fun provideRetrofitConverterFactory(objectMapper: ObjectMapper): Converter.Factory = JacksonConverterFactory.create(objectMapper)
+    fun provideRetrofitConverterFactory(objectMapper: ObjectMapper): Converter.Factory =
+        JacksonConverterFactory.create(objectMapper)
 
     @Provides
     fun provideJacksonObjectMapper(): ObjectMapper = jacksonObjectMapper()

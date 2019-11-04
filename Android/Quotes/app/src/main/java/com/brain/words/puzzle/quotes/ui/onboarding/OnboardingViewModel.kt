@@ -2,8 +2,8 @@ package com.brain.words.puzzle.quotes.ui.onboarding
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import com.brain.words.puzzle.data.UserManager
 import com.brain.words.puzzle.quotes.core.AppViewModel
-import com.brain.words.puzzle.quotes.core.manager.UserManager
 import io.reactivex.Flowable
 import io.reactivex.processors.BehaviorProcessor
 

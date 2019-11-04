@@ -6,21 +6,28 @@
     <data>
 
         <variable
+            name="listener"
+            type="com.brain.words.puzzle.quotes.ui.main.game.GameListener" />
+
+        <variable
             name="item"
             type="com.brain.words.puzzle.quotes.ui.main.game.topic.section.SectionModel" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        tools:background="@color/darkBlue">
 
         <TextView
             android:id="@+id/title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
-            android:layout_marginTop="16dp"
             android:text="@{item.title}"
+            android:textColor="@color/white"
+            android:textSize="22sp"
+            android:textStyle="bold"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             tools:text="Section 0" />
@@ -33,12 +40,13 @@
             android:clipToPadding="false"
             android:orientation="horizontal"
             android:paddingStart="16dp"
+            app:categories="@{item.categories}"
+            app:gameListener="@{listener}"
             app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/title"
-            app:quoteItems="@{item.quotes}" />
+            app:layout_constraintTop_toBottomOf="@+id/title" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

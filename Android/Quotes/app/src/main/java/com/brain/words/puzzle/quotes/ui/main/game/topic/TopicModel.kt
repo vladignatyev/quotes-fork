@@ -5,6 +5,6 @@ import kotlinx.android.parcel.Parcelize
 
 @Parcelize
 data class TopicModel(
-    val id: String,
+    val id: Int,
     val title: String
 ) : Parcelable

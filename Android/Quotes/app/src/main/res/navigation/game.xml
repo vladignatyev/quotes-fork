@@ -1,11 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/game"
     app:startDestination="@id/gameFragment">
 
     <fragment
         android:id="@+id/gameFragment"
         android:name="com.brain.words.puzzle.quotes.ui.main.game.GameFragment"
-        android:label="GameFragment" />
+        android:label="GameFragment"
+        tools:layout="@layout/main_game_fragment" >
+        <action
+            android:id="@+id/action_gameFragment_to_topupFragment"
+            app:destination="@id/topupFragment" />
+    </fragment>
+    <dialog
+        android:id="@+id/topupFragment"
+        android:name="com.brain.words.puzzle.quotes.ui.main.game.topup.TopupFragment"
+        android:label="TopupFragment"
+        tools:layout="@layout/topup_fragment" />
 </navigation>
