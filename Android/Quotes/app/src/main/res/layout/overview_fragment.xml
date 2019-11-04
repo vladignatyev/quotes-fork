@@ -7,11 +7,11 @@
 
         <variable
             name="fragment"
-            type="com.brain.words.puzzle.quotes.ui.main.game.GameFragment" />
+            type="com.brain.words.puzzle.quotes.ui.main.play.OverviewFragment" />
 
         <variable
             name="viewModel"
-            type="com.brain.words.puzzle.quotes.ui.main.game.GameViewModel" />
+            type="com.brain.words.puzzle.quotes.ui.main.play.OverviewViewModel" />
     </data>
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout

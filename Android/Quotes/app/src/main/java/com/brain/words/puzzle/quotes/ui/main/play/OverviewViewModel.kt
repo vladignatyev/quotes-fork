@@ -1,25 +1,23 @@
-package com.brain.words.puzzle.quotes.ui.main.game
+package com.brain.words.puzzle.quotes.ui.main.play
 
 import androidx.databinding.ObservableBoolean
 import androidx.databinding.ObservableField
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.brain.words.puzzle.data.api.ApiClient
-import com.brain.words.puzzle.data.model.MainTopicDO
 import com.brain.words.puzzle.data.model.UserDO
 import com.brain.words.puzzle.quotes.core.AppViewModel
 import com.brain.words.puzzle.quotes.core.Schedulers
 import com.brain.words.puzzle.quotes.core.rx.ClearableBehaviorProcessor
 import com.brain.words.puzzle.quotes.core.rx.NonNullObservableField
-import com.brain.words.puzzle.quotes.ui.main.game.topic.TopicModel
+import com.brain.words.puzzle.quotes.ui.main.play.topic.TopicModel
 import io.reactivex.Flowable
-import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.functions.BiFunction
 import io.reactivex.processors.BehaviorProcessor
 import timber.log.Timber
 
-class GameViewModel(
+class OverviewViewModel(
     private val schedulers: Schedulers,
     private val apiClient: ApiClient
 ) : AppViewModel() {
@@ -46,7 +44,7 @@ class GameViewModel(
                 state.balance.set(user.balance.toString())
                 state.name.set(user.nickname)
             }, {
-                Timber.w(it, "GameViewModel init failed")
+                Timber.w(it, "OverviewViewModel init failed")
             }).untilCleared()
     }
 
@@ -64,9 +62,9 @@ class GameViewModel(
         private val apiClient: ApiClient
     ) : ViewModelProvider.Factory {
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-            if (modelClass.isAssignableFrom(GameViewModel::class.java)) {
+            if (modelClass.isAssignableFrom(OverviewViewModel::class.java)) {
                 @Suppress("UNCHECKED_CAST")
-                return GameViewModel(schedulers, apiClient) as T
+                return OverviewViewModel(schedulers, apiClient) as T
             }
             throw IllegalArgumentException("Unknown ViewModel class")
         }

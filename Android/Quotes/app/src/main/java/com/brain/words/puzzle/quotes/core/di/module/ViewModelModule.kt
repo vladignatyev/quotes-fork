@@ -4,10 +4,9 @@ import com.brain.words.puzzle.data.UserManager
 import com.brain.words.puzzle.data.api.ApiClient
 import com.brain.words.puzzle.quotes.core.Schedulers
 import com.brain.words.puzzle.quotes.ui.main.MainViewModel
-import com.brain.words.puzzle.quotes.ui.main.game.GameViewModel
-import com.brain.words.puzzle.quotes.ui.main.game.topic.TopicViewModel
-import com.brain.words.puzzle.quotes.ui.main.game.topup.TopupFragment
-import com.brain.words.puzzle.quotes.ui.main.game.topup.TopupViewModel
+import com.brain.words.puzzle.quotes.ui.main.play.OverviewViewModel
+import com.brain.words.puzzle.quotes.ui.main.play.topic.TopicViewModel
+import com.brain.words.puzzle.quotes.ui.main.play.topup.TopupViewModel
 import com.brain.words.puzzle.quotes.ui.main.profile.ProfileViewModel
 import com.brain.words.puzzle.quotes.ui.main.top.TopViewModel
 import com.brain.words.puzzle.quotes.ui.onboarding.OnboardingViewModel
@@ -51,10 +50,10 @@ class ViewModelModule {
 
     @Provides
     @Singleton
-    fun gameViewModelFactory(
+    fun overviewViewModelFactory(
         schedulers: Schedulers,
         apiClient: ApiClient
-    ) = GameViewModel.Factory(
+    ) = OverviewViewModel.Factory(
         schedulers,
         apiClient
     )

@@ -1,12 +1,12 @@
-package com.brain.words.puzzle.quotes.ui.main.game
+package com.brain.words.puzzle.quotes.ui.main.play
 
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentPagerAdapter
-import com.brain.words.puzzle.quotes.ui.main.game.topic.TopicFragment
-import com.brain.words.puzzle.quotes.ui.main.game.topic.TopicModel
+import com.brain.words.puzzle.quotes.ui.main.play.topic.TopicFragment
+import com.brain.words.puzzle.quotes.ui.main.play.topic.TopicModel
 
-class GameTopicPagerAdapter(
+class OverviewPagerAdapter(
     fm: FragmentManager
 ) : FragmentPagerAdapter(fm, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT) {
 

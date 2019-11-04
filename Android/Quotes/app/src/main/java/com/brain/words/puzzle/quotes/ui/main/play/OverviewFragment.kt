@@ -1,4 +1,4 @@
-package com.brain.words.puzzle.quotes.ui.main.game
+package com.brain.words.puzzle.quotes.ui.main.play
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -6,28 +6,26 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProviders
-import androidx.navigation.fragment.FragmentNavigatorExtras
 import androidx.navigation.fragment.findNavController
-import com.brain.words.puzzle.data.UserManager
 import com.brain.words.puzzle.quotes.R
 import com.brain.words.puzzle.quotes.core.AppFragment
-import com.brain.words.puzzle.quotes.databinding.MainGameFragmentBinding
+import com.brain.words.puzzle.quotes.databinding.OverviewFragmentBinding
 import javax.inject.Inject
 
-class GameFragment : AppFragment() {
+class OverviewFragment : AppFragment() {
 
     @Inject
-    lateinit var vmFactory: GameViewModel.Factory
+    lateinit var vmFactory: OverviewViewModel.Factory
 
-    private lateinit var vm: GameViewModel
+    private lateinit var vm: OverviewViewModel
 
-    private lateinit var adapter: GameTopicPagerAdapter
+    private lateinit var adapter: OverviewPagerAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         vm = ViewModelProviders
             .of(this, vmFactory)
-            .get(GameViewModel::class.java)
+            .get(OverviewViewModel::class.java)
         vm.init()
     }
 
@@ -35,12 +33,12 @@ class GameFragment : AppFragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View = DataBindingUtil.inflate<MainGameFragmentBinding>(
-        inflater, R.layout.main_game_fragment, container, false
+    ): View = DataBindingUtil.inflate<OverviewFragmentBinding>(
+        inflater, R.layout.overview_fragment, container, false
     ).apply {
-        fragment = this@GameFragment
+        fragment = this@OverviewFragment
         viewModel = vm
-        adapter = GameTopicPagerAdapter(childFragmentManager)
+        adapter = OverviewPagerAdapter(childFragmentManager)
         topics.adapter = adapter
     }.root
 
@@ -52,8 +50,8 @@ class GameFragment : AppFragment() {
     }
 
     fun topupClicked() {
-        findNavController().navigate(R.id.action_gameFragment_to_topupFragment)
+        findNavController().navigate(R.id.action_overviewFragment_to_topupFragment)
     }
 
-    private fun binding() = viewBinding<MainGameFragmentBinding>()
+    private fun binding() = viewBinding<OverviewFragmentBinding>()
 }

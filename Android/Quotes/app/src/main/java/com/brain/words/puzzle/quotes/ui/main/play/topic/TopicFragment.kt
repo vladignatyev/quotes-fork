@@ -1,4 +1,4 @@
-package com.brain.words.puzzle.quotes.ui.main.game.topic
+package com.brain.words.puzzle.quotes.ui.main.play.topic
 
 import android.graphics.Color
 import android.os.Bundle
@@ -10,13 +10,13 @@ import androidx.lifecycle.ViewModelProviders
 import com.brain.words.puzzle.quotes.R
 import com.brain.words.puzzle.quotes.core.AppFragment
 import com.brain.words.puzzle.quotes.core.common.args
-import com.brain.words.puzzle.quotes.databinding.MainGameTopicFragmentBinding
-import com.brain.words.puzzle.quotes.ui.main.game.GameListener
+import com.brain.words.puzzle.quotes.databinding.OverviewTopicFragmentBinding
+import com.brain.words.puzzle.quotes.ui.main.play.CategoryClickListener
 import nl.dionsegijn.konfetti.models.Shape
 import nl.dionsegijn.konfetti.models.Size
 import javax.inject.Inject
 
-class TopicFragment : AppFragment(), GameListener {
+class TopicFragment : AppFragment(), CategoryClickListener {
 
     @Inject
     lateinit var vmFactory: TopicViewModel.Factory
@@ -37,8 +37,8 @@ class TopicFragment : AppFragment(), GameListener {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View = DataBindingUtil.inflate<MainGameTopicFragmentBinding>(
-        inflater, R.layout.main_game_topic_fragment, container, false
+    ): View = DataBindingUtil.inflate<OverviewTopicFragmentBinding>(
+        inflater, R.layout.overview_topic_fragment, container, false
     ).apply {
         fragment = this@TopicFragment
         viewModel = vm
@@ -75,7 +75,7 @@ class TopicFragment : AppFragment(), GameListener {
         println("----- onOpenedClicked")
     }
 
-    private fun binding() = viewBinding<MainGameTopicFragmentBinding>()
+    private fun binding() = viewBinding<OverviewTopicFragmentBinding>()
 
     companion object {
 

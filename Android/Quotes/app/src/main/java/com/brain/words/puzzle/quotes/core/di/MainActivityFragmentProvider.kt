@@ -1,8 +1,8 @@
 package com.brain.words.puzzle.quotes.core.di
 
-import com.brain.words.puzzle.quotes.ui.main.game.GameFragment
-import com.brain.words.puzzle.quotes.ui.main.game.topic.TopicFragment
-import com.brain.words.puzzle.quotes.ui.main.game.topup.TopupFragment
+import com.brain.words.puzzle.quotes.ui.main.play.OverviewFragment
+import com.brain.words.puzzle.quotes.ui.main.play.topic.TopicFragment
+import com.brain.words.puzzle.quotes.ui.main.play.topup.TopupFragment
 import com.brain.words.puzzle.quotes.ui.main.profile.ProfileFragment
 import com.brain.words.puzzle.quotes.ui.main.top.TopFragment
 import dagger.Module
@@ -18,7 +18,7 @@ abstract class MainActivityFragmentProvider {
     abstract fun bindsTopupFragment(): TopupFragment
 
     @ContributesAndroidInjector
-    abstract fun bindsGameFragment(): GameFragment
+    abstract fun bindsOverviewFragment(): OverviewFragment
 
     @ContributesAndroidInjector
     abstract fun bindsTopFragment(): TopFragment

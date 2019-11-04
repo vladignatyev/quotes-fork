@@ -1,4 +1,4 @@
-package com.brain.words.puzzle.quotes.ui.main.game.topic
+package com.brain.words.puzzle.quotes.ui.main.play.topic
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
@@ -6,21 +6,21 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.brain.words.puzzle.quotes.R
-import com.brain.words.puzzle.quotes.databinding.MainGameTopicItemBinding
-import com.brain.words.puzzle.quotes.ui.main.game.GameListener
-import com.brain.words.puzzle.quotes.ui.main.game.topic.section.SectionModel
+import com.brain.words.puzzle.quotes.databinding.OverviewTopicItemBinding
+import com.brain.words.puzzle.quotes.ui.main.play.CategoryClickListener
+import com.brain.words.puzzle.quotes.ui.main.play.topic.section.SectionModel
 
 class TopicAdapter(
-    private val gameListener: GameListener
+    private val categoryClickListener: CategoryClickListener
 ) : ListAdapter<SectionModel, TopicAdapter.ViewHolder>(
     DIFF_CALLBACK
 ) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder =
         when (viewType) {
-            R.layout.main_game_topic_item -> {
+            R.layout.overview_topic_item -> {
                 ViewHolder(
-                    MainGameTopicItemBinding.inflate(
+                    OverviewTopicItemBinding.inflate(
                         LayoutInflater.from(parent.context), parent, false
                     )
                 )
@@ -30,13 +30,13 @@ class TopicAdapter(
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         holder.binding.item = getItem(position)
-        holder.binding.listener = gameListener
+        holder.binding.listener = categoryClickListener
         holder.binding.executePendingBindings()
     }
 
-    override fun getItemViewType(position: Int) = R.layout.main_game_topic_item
+    override fun getItemViewType(position: Int) = R.layout.overview_topic_item
 
-    data class ViewHolder(val binding: MainGameTopicItemBinding) :
+    data class ViewHolder(val binding: OverviewTopicItemBinding) :
         RecyclerView.ViewHolder(binding.root)
 
     companion object {

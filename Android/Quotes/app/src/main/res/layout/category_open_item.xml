@@ -7,7 +7,7 @@
 
         <variable
             name="item"
-            type="com.brain.words.puzzle.quotes.ui.main.game.topic.category.CategoryModel.Open" />
+            type="com.brain.words.puzzle.quotes.ui.main.play.topic.category.CategoryModel.Open" />
     </data>
 
     <androidx.cardview.widget.CardView

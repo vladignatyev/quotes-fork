@@ -3,20 +3,20 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/game"
-    app:startDestination="@id/gameFragment">
+    app:startDestination="@id/overviewFragment">
 
     <fragment
-        android:id="@+id/gameFragment"
-        android:name="com.brain.words.puzzle.quotes.ui.main.game.GameFragment"
+        android:id="@+id/overviewFragment"
+        android:name="com.brain.words.puzzle.quotes.ui.main.play.OverviewFragment"
         android:label="GameFragment"
-        tools:layout="@layout/main_game_fragment" >
+        tools:layout="@layout/overview_fragment" >
         <action
-            android:id="@+id/action_gameFragment_to_topupFragment"
+            android:id="@+id/action_overviewFragment_to_topupFragment"
             app:destination="@id/topupFragment" />
     </fragment>
     <dialog
         android:id="@+id/topupFragment"
-        android:name="com.brain.words.puzzle.quotes.ui.main.game.topup.TopupFragment"
+        android:name="com.brain.words.puzzle.quotes.ui.main.play.topup.TopupFragment"
         android:label="TopupFragment"
         tools:layout="@layout/topup_fragment" />
 </navigation>

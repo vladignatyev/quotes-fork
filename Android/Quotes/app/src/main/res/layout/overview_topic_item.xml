@@ -7,11 +7,11 @@
 
         <variable
             name="listener"
-            type="com.brain.words.puzzle.quotes.ui.main.game.GameListener" />
+            type="com.brain.words.puzzle.quotes.ui.main.play.CategoryClickListener" />
 
         <variable
             name="item"
-            type="com.brain.words.puzzle.quotes.ui.main.game.topic.section.SectionModel" />
+            type="com.brain.words.puzzle.quotes.ui.main.play.topic.section.SectionModel" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -41,7 +41,7 @@
             android:orientation="horizontal"
             android:paddingStart="16dp"
             app:categories="@{item.categories}"
-            app:gameListener="@{listener}"
+            app:categoryClickListener="@{listener}"
             app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"

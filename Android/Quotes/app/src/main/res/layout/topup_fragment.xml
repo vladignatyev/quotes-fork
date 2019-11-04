@@ -6,11 +6,11 @@
 
         <variable
             name="fragment"
-            type="com.brain.words.puzzle.quotes.ui.main.game.topup.TopupFragment" />
+            type="com.brain.words.puzzle.quotes.ui.main.play.topup.TopupFragment" />
 
         <variable
             name="viewModel"
-            type="com.brain.words.puzzle.quotes.ui.main.game.topup.TopupViewModel" />
+            type="com.brain.words.puzzle.quotes.ui.main.play.topup.TopupViewModel" />
 
     </data>
 

@@ -1,4 +1,4 @@
-package com.brain.words.puzzle.quotes.ui.main.game.topup
+package com.brain.words.puzzle.quotes.ui.main.play.topup
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider

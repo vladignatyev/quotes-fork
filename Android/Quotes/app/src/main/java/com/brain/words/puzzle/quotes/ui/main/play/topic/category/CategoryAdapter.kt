@@ -1,4 +1,4 @@
-package com.brain.words.puzzle.quotes.ui.main.game.topic.category
+package com.brain.words.puzzle.quotes.ui.main.play.topic.category
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
@@ -10,10 +10,10 @@ import com.brain.words.puzzle.quotes.R
 import com.brain.words.puzzle.quotes.databinding.CategoryClosedItemBinding
 import com.brain.words.puzzle.quotes.databinding.CategoryCompletedItemBinding
 import com.brain.words.puzzle.quotes.databinding.CategoryOpenItemBinding
-import com.brain.words.puzzle.quotes.ui.main.game.GameListener
+import com.brain.words.puzzle.quotes.ui.main.play.CategoryClickListener
 
 class CategoryAdapter(
-    private val listener: GameListener
+    private val listener: CategoryClickListener
 ) : ListAdapter<CategoryModel, CategoryAdapter.ViewHolder>(
     DIFF_CALLBACK
 ) {

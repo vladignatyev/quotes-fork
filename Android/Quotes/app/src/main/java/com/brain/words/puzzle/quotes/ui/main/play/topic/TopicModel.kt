@@ -1,4 +1,4 @@
-package com.brain.words.puzzle.quotes.ui.main.game.topic
+package com.brain.words.puzzle.quotes.ui.main.play.topic
 
 import android.os.Parcelable
 import kotlinx.android.parcel.Parcelize

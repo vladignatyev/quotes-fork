@@ -1,4 +1,4 @@
-package com.brain.words.puzzle.quotes.ui.main.game.topic
+package com.brain.words.puzzle.quotes.ui.main.play.topic
 
 import androidx.databinding.ObservableBoolean
 import androidx.databinding.ObservableField
@@ -10,8 +10,8 @@ import com.brain.words.puzzle.data.model.TopicDO
 import com.brain.words.puzzle.quotes.core.AppViewModel
 import com.brain.words.puzzle.quotes.core.Schedulers
 import com.brain.words.puzzle.quotes.core.rx.ClearableBehaviorProcessor
-import com.brain.words.puzzle.quotes.ui.main.game.topic.category.CategoryModel
-import com.brain.words.puzzle.quotes.ui.main.game.topic.section.SectionModel
+import com.brain.words.puzzle.quotes.ui.main.play.topic.category.CategoryModel
+import com.brain.words.puzzle.quotes.ui.main.play.topic.section.SectionModel
 import io.reactivex.Flowable
 import io.reactivex.processors.BehaviorProcessor
 import timber.log.Timber

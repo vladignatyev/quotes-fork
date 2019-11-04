@@ -1,4 +1,4 @@
-package com.brain.words.puzzle.quotes.ui.main.game.topic.category
+package com.brain.words.puzzle.quotes.ui.main.play.topic.category
 
 sealed class CategoryModel {
 
