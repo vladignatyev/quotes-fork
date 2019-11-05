@@ -242,6 +242,7 @@ class PurchaseUnlockView(FormBasedView):
                                                order_id=cleaned_data['order_id'],
                                                purchase_token=cleaned_data['purchase_token'])
 
+            # todo: redesign in conformance with #16.
             unlock = CategoryUnlockPurchase.objects.create(type=CategoryUnlockTypes.UNLOCK_BY_PURCHASE,
                                                            profile=self.request.user_profile,
                                                            category_to_unlock=category_to_unlock,
@@ -308,7 +309,8 @@ class CategoryUnlockView(BaseView):
     def post(self, request, *args, **kwargs):
         try:
             category = QuoteCategory.objects.get(pk=kwargs['category_pk'])
-            unlock = CategoryUnlockPurchase.objects.create(type=CategoryUnlockTypes.UNLOCK_FOR_COINS,
+            # avoid creating dupes, see issue #16 and related test
+            unlock, created = CategoryUnlockPurchase.objects.get_or_create(type=CategoryUnlockTypes.UNLOCK_FOR_COINS,
                                                   profile=self.request.user_profile,
                                                   category_to_unlock=category)
             unlock.do_unlock()

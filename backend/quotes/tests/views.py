@@ -287,6 +287,36 @@ class CategoryUnlockViewTest(AuthenticatedTestCase, ContentMixin):
         self.assertTrue(updated_category.is_available_to_user(updated_profile))
         self.assertEqual(initial_balance, updated_profile.balance)
 
+    def test_shouldnt_500_if_performed_unlock_multiple_times_issue_16(self):
+        # Given
+        price_coins = 10
+        initial_balance = 100
+
+        self._create_content_hierarchy()
+        self._create_multiple_quotes(category=self.category, author=self.author)
+        self.category.is_payable = True
+        self.category.price_to_unlock = price_coins
+        self.category.save()
+        self.profile.balance = initial_balance
+        self.profile.save()
+
+        self.assertFalse(self.category.is_available_to_user(self.profile))
+        self.assertEqual(initial_balance, self.profile.balance)
+
+        url = reverse('category-unlock', kwargs={'category_pk': self.category.pk})
+
+        # When
+        for i in range(0,10):
+            response = self.client.post(url, **self.auth())
+            self.assertEqual(200, response.status_code)
+            self.assertTrue(self.category.is_available_to_user(self.profile))
+
+        response = self.client.post(url, **self.auth())
+        self.assertEqual(402, response.status_code)
+
+        # Then
+        self.assertTrue(self.category.is_available_to_user(self.profile))
+
 
 class PurchaseStatusViewTest(AuthenticatedTestCase, ContentMixin):
     def test_present(self):
