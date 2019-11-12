@@ -1,12 +1,17 @@
 from django.contrib import admin
 
 from .models import *
-
+from api.models import PushSubscription
 
 from django import forms
 
 
+@admin.register(PushSubscription)
+class PushSubscriptionAdmin(admin.ModelAdmin):
+    pass
 
+
+@admin.register(QuoteCategory)
 class QuoteCategoryAdmin(admin.ModelAdmin):
     list_display = ('title', 'section')
     # inlines = (SectionInline,)
@@ -22,6 +27,8 @@ class QuoteForm(forms.ModelForm):
         model = Quote
         fields = '__all__'
 
+
+@admin.register(Quote)
 class QuoteAdmin(admin.ModelAdmin):
     list_display = ('text', 'author', 'category')
     exclude = ('available_to_users',)
@@ -32,30 +39,34 @@ class QuoteAdmin(admin.ModelAdmin):
     form = QuoteForm
 
 
+@admin.register(Topic)
 class TopicAdmin(admin.ModelAdmin):
     list_display = ('title',)
     fields = ( 'title', 'bonus_reward', 'on_complete_achievement', 'hidden',)
     search_fields = ['title']
 
 
+@admin.register(Section)
 class SectionAdmin(admin.ModelAdmin):
     list_display = ('title', 'topic')
     fields = ( 'title', 'topic', 'bonus_reward', 'on_complete_achievement',)
     search_fields = ['title']
 
 
+@admin.register(Profile)
 class ProfileAdmin(admin.ModelAdmin):
     list_display = ('nickname', 'balance', )
     date_hierarchy = 'last_active'
     exclude = ('device_sessions',)
 
 
+@admin.register(Achievement)
 class AchievementAdmin(admin.ModelAdmin):
     list_display = ('title', 'icon',)
     exclude = ('opened_by_users',)
     search_fields = ['title']
 
-
+@admin.register(AchievementReceiving)
 class AchievementReceivingAdmin(admin.ModelAdmin):
     list_display = ('profile', 'achievement',)
     list_select_related = (
@@ -63,27 +74,21 @@ class AchievementReceivingAdmin(admin.ModelAdmin):
         'profile'
     )
 
-
+@admin.register(CategoryUnlockPurchase)
 class CategoryUnlockPurchaseAdmin(admin.ModelAdmin):
     date_hierarchy = 'date_created'
 
 
+@admin.register(BalanceRechargeProduct)
 class BalanceRechargeProductAdmin(admin.ModelAdmin):
     list_display = ('admin_title', 'google_play_product',) # 'app_store_product')
 
 
-admin.site.register(Topic, TopicAdmin)
-admin.site.register(Section, SectionAdmin)
-admin.site.register(Quote, QuoteAdmin)
-admin.site.register(QuoteCategory, QuoteCategoryAdmin)
-admin.site.register(QuoteAuthor)
+@admin.register(GameBalance)
+class GameBalanceAdmin(admin.ModelAdmin):
+    pass
 
-admin.site.register(GameBalance)
-admin.site.register(Profile, ProfileAdmin)
 
-admin.site.register(Achievement, AchievementAdmin)
-admin.site.register(BalanceRechargeProduct, BalanceRechargeProductAdmin)
-
-admin.site.register(AchievementReceiving, AchievementReceivingAdmin)
-
-admin.site.register(CategoryUnlockPurchase, CategoryUnlockPurchaseAdmin)
+@admin.register(QuoteAuthor)
+class QuoteAuthorAdmin(admin.ModelAdmin):
+    pass
