@@ -14,6 +14,8 @@ from django.db.models.signals import post_save
 
 from .crypto import generate_secret
 
+from longjob.models import LongJobQueueItem
+
 
 class DeviceSessionManager(models.Manager):
     def is_valid_token(self, token, valid_chars=r'^[a-z|A-Z|0-9]+$'):
@@ -45,9 +47,35 @@ class DeviceSession(models.Model):
         return f'{self.token}'# @ {self.timestamp}'
 
 
+class PushNotification:
+    def __init__(self, title, body, icon='ic_fcm_notification'):
+        self.title = title
+        self.body = body
+        self.icon = icon
+
+    def as_dict(self):
+        return self.__dict__
+
+
 class PushSubscription(models.Model):
     device_session = models.ForeignKey(DeviceSession, on_delete=models.CASCADE)
     token = models.CharField(max_length=256)
+
+
+class PushNotificationQueueItem(LongJobQueueItem):
+    # todo: switch to many to many for using FCM batch send
+    push_subscription = models.ForeignKey(PushSubscription, on_delete=models.CASCADE, null=True)
+
+    title = models.CharField(max_length=256, blank=True, default='')
+    body = models.TextField(blank=True, default='')
+    image_url = models.CharField(max_length=256, blank=True, default='')
+
+    data = models.TextField(blank=True, default='')
+    topic = models.CharField(max_length=256, blank=True, null=True, default='')
+    condition = models.CharField(max_length=256, blank=True, null=True, default='')
+
+    is_broadcast = models.BooleanField(default=False, blank=True)
+
 
 
 class GooglePlayIAPSubscription(models.Model):
@@ -151,21 +179,19 @@ class Credentials(models.Model):
         return f'{self.date_added:%Y-%m-%d %H:%M:%S}: {self.google_play_bundle_id} / {self.google_play_api_key} '
 
 
-@lru_cache(maxsize=1)
 def get_shared_secret():
-    credentials = Credentials.objects.get()
+    credentials = Credentials.objects.latest()
     return str(credentials.shared_secret)
 
-@lru_cache(maxsize=1)
 def get_server_secret():
-    credentials = Credentials.objects.get()
+    credentials = Credentials.objects.latest()
     return str(credentials.server_secret)
 
-def clean_tokens_lru_cache(*args, **kwargs):
-    get_shared_secret.cache_clear()
-    get_server_secret.cache_clear()
-
-post_save.connect(clean_tokens_lru_cache, sender='api.Credentials')
+# def clean_tokens_lru_cache(*args, **kwargs):
+#     get_shared_secret.cache_clear()
+#     get_server_secret.cache_clear()
+#
+# post_save.connect(clean_tokens_lru_cache, sender='api.Credentials')
 
 
 def generate_signature(device_token, timestamp, shared_secret=None):

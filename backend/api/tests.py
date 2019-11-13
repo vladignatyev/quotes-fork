@@ -9,6 +9,7 @@ from django.utils import timezone
 from django.test import RequestFactory
 
 from .views import AuthenticateView
+from .notifications import *
 
 
 class ModelTest(TestCase):
@@ -171,3 +172,31 @@ class AuthenticationTest(TestCase):
 
     def test_imrporper_signature(self):
         self.assertFalse(check_signature('1', '2019-10-06T12:37:16+0000', '1'))
+
+
+class NotificationsCoreTest(TestCase):
+    def test_should_prepare_correct_request(self):
+        # Given
+        class PushSubscrtionStub:
+            def __init__(self):
+                self.token = 'some-valid-subscription-token'
+
+        push_subscription = PushSubscrtionStub()
+        push_notification = PushNotification(title='Some push title',
+                                             body='Some test body',
+                                             icon='ic_test_icon')
+        test_firebase_key = 'some-firebase-key'
+
+        # When
+        url, headers, body = build_fcm_request(push_subscription, push_notification, test_firebase_key)
+
+        # Then
+        self.assertEqual(url, 'https://fcm.googleapis.com/fcm/send')
+
+        self.assertEqual(headers['Content-Type'], 'application/json')
+        self.assertEqual(headers['Authorization'], 'key=some-firebase-key')
+
+        self.assertEqual(body['to'], push_subscription.token)
+        self.assertEqual(body['notification']['title'], push_notification.title)
+        self.assertEqual(body['notification']['body'], push_notification.body)
+        self.assertEqual(body['notification']['icon'], push_notification.icon)

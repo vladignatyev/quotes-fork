@@ -40,6 +40,10 @@ INSTALLED_APPS = [
 ]
 
 INSTALLED_APPS += [
+    'longjob.apps.LongjobConfig'
+]
+
+INSTALLED_APPS += [
     'api.apps.ApiConfig',
     'quotes.apps.QuotesConfig'
 ]
@@ -129,6 +133,8 @@ STATIC_URL = '/static/'
 # API Version for API URLs
 #
 API_VERSION = 1
+
+GOOGLE_APPLICATION_CREDENTIALS = '/Users/ignatev/Downloads/quotepuzzle-904ce-firebase-adminsdk-93lt2-5a63006834.json'
 
 
 import os

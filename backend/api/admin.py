@@ -1,6 +1,7 @@
 from django.contrib import admin
 
 from .models import *
+from longjob.admin import LongJobAdmin
 
 
 class DeviceSessionAdmin(admin.ModelAdmin):
@@ -50,3 +51,8 @@ admin.site.register(GooglePlayIAPPurchase, GooglePlayIAPPurchaseAdmin)
 # admin.site.register(AppStoreIAPPurchase, AppStoreIAPPurchaseAdmin)
 
 admin.site.register(Credentials, CredentialsAdmin)
+
+
+@admin.register(PushNotificationQueueItem)
+class PushNotificationQueueItemAdmin(LongJobAdmin):
+    list_display = ['title'] + LongJobAdmin.list_display
