@@ -765,3 +765,19 @@ class LevelCompleteView(AuthenticatedTestCase, ContentMixin):
 
         complete_levels = get_levels_complete_by_profile_in_category(self.profile.pk, self.category.pk)
         self.assertEqual(quote_ut.pk, complete_levels[0].pk)
+
+
+class PushNotificationSubscriptionView(AuthenticatedTestCase, ContentMixin):
+    def test_should_present(self):
+        # Given
+        url = reverse('notifications-subscribe')
+
+        # When
+        register_token = 'some-registration-token-of-the-device'
+        params = {'token': register_token}
+        response = self.client.post(url, params, content_type='application/json', **self.auth())
+        pushsub = PushSubscription.objects.get()
+
+        # Then
+        self.assertEqual(200, response.status_code)
+        self.assertEqual(pushsub.token, register_token)

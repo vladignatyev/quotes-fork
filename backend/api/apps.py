@@ -31,24 +31,15 @@ def check_settings(app_configs, **kwargs):
                 id='api.W001',
             )
         )]
-    #
-    # if getattr(settings, 'FIREBASE_SENDER_ID', None) is None:
-    #     errors += [(
-    #         Warning(
-    #             'Missed FIREBASE_SENDER_ID in your `settings.py`',
-    #             hint='If you are using Push Notifications feature for Android apps, please provide FIREBASE_SENDER_ID in your Django `settings.py`',
-    #             obj=None,
-    #             id='api.W002',
-    #         )
-    #     )]
-    #
-    # if getattr(settings, 'FIREBASE_PROJECT', None) is None:
-    #     errors += [(
-    #         Warning(
-    #             'Missed FIREBASE_PROJECT in your `settings.py`',
-    #             hint='If you are using Push Notifications feature for Android apps, please provide FIREBASE_PROJECT in your Django `settings.py`',
-    #             obj=None,
-    #             id='api.W003',
-    #         )
-    #     )]
+
+    if getattr(settings, 'SECRET_KEY', None) is None:
+        errors += [(
+            Error(
+                'Missed SECRET_KEY in your `settings.py`',
+                hint='Please provide SECRET_KEY in your Django `settings.py`. It should be long and random, because cryptographical functions rely on it\'s quality.',
+                obj=None,
+                id='api.E002',
+            )
+        )]
+
     return errors

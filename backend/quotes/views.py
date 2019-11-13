@@ -13,7 +13,7 @@ from django import forms
 from .models import *
 
 
-from api.views import AuthenticationForm, AuthenticateView, SafeView
+from api.views import AuthenticationForm, AuthenticateView, SafeView, PushSubscriptionView
 
 
 from .utils import json_response
@@ -395,3 +395,7 @@ class QuotesAuthenticateView(AuthenticateView):
         return JsonResponse({
             'auth_token': self.device_session.auth_token
         })
+
+
+class PushNotificationSubscriptionView(PushSubscriptionView):
+    pass
