@@ -11,10 +11,17 @@ class PushSubscriptionAdmin(admin.ModelAdmin):
     pass
 
 
+class QuotesInline(admin.TabularInline):
+    model = Quote
+    exclude = ['order_in_category', 'on_complete_achievement', 'bonus_reward', 'complete_by_users']
+
+
 @admin.register(QuoteCategory)
 class QuoteCategoryAdmin(admin.ModelAdmin):
     list_display = ('title', 'section')
-    # inlines = (SectionInline,)
+
+    inlines = [QuotesInline,]
+
     exclude = ('is_event', 'event_due_date', 'event_title', 'event_icon', 'event_description','event_win_achievement', 'available_to_users', 'complete_by_users')
     fields = ( 'title', 'section', 'bonus_reward', 'is_payable', 'price_to_unlock', 'on_complete_achievement', 'icon',)
     search_fields = ['title']
