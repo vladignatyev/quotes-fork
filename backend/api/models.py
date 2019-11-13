@@ -8,12 +8,7 @@ from django.db import models
 
 from django.db.models.signals import post_save
 
-from .crypto import generate_signature as crypto_generate_signature, \
-                    check_signature as crypto_check_signature, \
-                    check_auth_token as crypto_check_auth_token, \
-                    generate_secret as crypto_generate_secret, \
-                    generate_auth_token as crypto_generate_auth_token, \
-                    sign_auth_token as crypto_sign_auth_token
+from .crypto import *
 
 
 from longjob.models import LongJobQueueItem

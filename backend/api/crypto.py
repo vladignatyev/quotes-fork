@@ -8,7 +8,7 @@ import codecs
 
 # settings.SECRET_KEY
 
-def generate_secret(secret_key):
+def crypto_generate_secret(secret_key):
     '''
     Here we generate random sequence of bytes by OS provided RNG.
     We need a plain valid a-z|0-9 string, so we use SHA256
@@ -23,7 +23,7 @@ def generate_secret(secret_key):
     return h.hexdigest()
 
 
-def generate_signature(device_token, timestamp, shared_secret=None):
+def crypto_generate_signature(device_token, timestamp, shared_secret=None):
     '''
     Generate deterministic signature.
     The algorithm should be implemented on client too,
@@ -43,25 +43,25 @@ def generate_signature(device_token, timestamp, shared_secret=None):
     return signature
 
 
-def generate_auth_token(secret_key, server_secret):
-    random_value = str(generate_secret(secret_key))
-    server_sig = str(sign_auth_token(random_value, server_secret))
+def crypto_generate_auth_token(secret_key, server_secret):
+    random_value = str(crypto_generate_secret(secret_key))
+    server_sig = str(crypto_sign_auth_token(random_value, server_secret))
     return random_value + server_sig
 
 
-def sign_auth_token(auth_token_payload, server_secret):
+def crypto_sign_auth_token(auth_token_payload, server_secret):
     return hmac.new(codecs.encode(server_secret), codecs.encode(auth_token_payload), digestmod=hashlib.sha256).hexdigest()[:16]
 
 
-def check_signature(device_token, timestamp, signature, shared_secret):
-    return generate_signature(device_token, timestamp, shared_secret) == signature
+def crypto_check_signature(device_token, timestamp, signature, shared_secret):
+    return crypto_generate_signature(device_token, timestamp, shared_secret) == signature
 
 
-def check_auth_token(auth_token, server_secret):
+def crypto_check_auth_token(auth_token, server_secret):
     if auth_token is None or auth_token == '':
         return False
 
     auth_token_payload = auth_token[0:-16]
     server_sig = auth_token[-16:]
 
-    return sign_auth_token(auth_token_payload, server_secret) == server_sig
+    return crypto_sign_auth_token(auth_token_payload, server_secret) == server_sig
