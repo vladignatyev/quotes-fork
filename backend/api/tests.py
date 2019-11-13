@@ -12,6 +12,7 @@ from .views import AuthenticateView
 from .notifications import *
 
 
+
 class ModelTest(TestCase):
     def test_device_session_creation(self):
         test_token = 'abcdabcdabcdabcdabcdabcdabcdabcd'
@@ -175,28 +176,16 @@ class AuthenticationTest(TestCase):
 
 
 class NotificationsCoreTest(TestCase):
-    def test_should_prepare_correct_request(self):
-        # Given
-        class PushSubscrtionStub:
-            def __init__(self):
-                self.token = 'some-valid-subscription-token'
+    def test_smoke(self):
+        # TODO:
+        pass
 
-        push_subscription = PushSubscrtionStub()
-        push_notification = PushNotification(title='Some push title',
-                                             body='Some test body',
-                                             icon='ic_test_icon')
-        test_firebase_key = 'some-firebase-key'
+
+class PushSubscriptionViewTest(TestCase):
+    def test_should_accept_token(self):
+        # Given
+        assert PushSubscription.objects.count() == 0
 
         # When
-        url, headers, body = build_fcm_request(push_subscription, push_notification, test_firebase_key)
 
         # Then
-        self.assertEqual(url, 'https://fcm.googleapis.com/fcm/send')
-
-        self.assertEqual(headers['Content-Type'], 'application/json')
-        self.assertEqual(headers['Authorization'], 'key=some-firebase-key')
-
-        self.assertEqual(body['to'], push_subscription.token)
-        self.assertEqual(body['notification']['title'], push_notification.title)
-        self.assertEqual(body['notification']['body'], push_notification.body)
-        self.assertEqual(body['notification']['icon'], push_notification.icon)

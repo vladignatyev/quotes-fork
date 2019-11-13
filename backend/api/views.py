@@ -97,3 +97,20 @@ class SafeView(View):
 
     def mixin_authorized(self, request):
         pass
+
+
+class PushSubscriptionView(SafeView):
+    def post(self, request, *args, **kwargs):
+        try:
+            deserialized = json.loads(request.body)
+            token = deserialized['token']
+        except json.decoder.JSONDecodeError:
+            return HttpResponse(status=400)
+
+        sub, created = PushSubscription.objects.create_or_update(device_session=request.device_session,
+                                                                 token=token)
+
+        if created:
+            return HttpResponse(status=200)
+        else:
+            return HttpResponse(status=201)

@@ -1,8 +1,5 @@
 import uuid
 import re
-import hashlib
-import hmac
-import codecs
 
 from functools import lru_cache
 
@@ -11,8 +8,13 @@ from django.db import models
 
 from django.db.models.signals import post_save
 
+from .crypto import generate_signature as crypto_generate_signature, \
+                    check_signature as crypto_check_signature, \
+                    check_auth_token as crypto_check_auth_token, \
+                    generate_secret as crypto_generate_secret, \
+                    generate_auth_token as crypto_generate_auth_token, \
+                    sign_auth_token as crypto_sign_auth_token
 
-from .crypto import generate_secret
 
 from longjob.models import LongJobQueueItem
 
@@ -158,6 +160,8 @@ class CredentialsManager(models.Manager):
             instance.save()
             return instance
 
+def generate_secret():
+    return crypto_generate_secret(settings.SECRET_KEY)
 
 class Credentials(models.Model):
     google_play_bundle_id = models.CharField("Play Market Bundle ID", default='', max_length=256)
@@ -179,13 +183,15 @@ class Credentials(models.Model):
         return f'{self.date_added:%Y-%m-%d %H:%M:%S}: {self.google_play_bundle_id} / {self.google_play_api_key} '
 
 
+
 def get_shared_secret():
-    credentials = Credentials.objects.latest()
+    credentials = Credentials.objects.get()
     return str(credentials.shared_secret)
 
 def get_server_secret():
-    credentials = Credentials.objects.latest()
+    credentials = Credentials.objects.get()
     return str(credentials.server_secret)
+
 
 # def clean_tokens_lru_cache(*args, **kwargs):
 #     get_shared_secret.cache_clear()
@@ -193,43 +199,24 @@ def get_server_secret():
 #
 # post_save.connect(clean_tokens_lru_cache, sender='api.Credentials')
 
-
-def generate_signature(device_token, timestamp, shared_secret=None):
-    '''
-    Generate deterministic signature.
-    The algorithm should be implemented on client too,
-    to be able to sign requests to authentication API.
-    '''
-    shared_secret = shared_secret or get_shared_secret()
-
-    h = hashlib.sha256()
-    h.update(shared_secret.encode('utf-8'))
-    masked_shared_secret = h.hexdigest()
-
-    sequence = f'{device_token}|{timestamp}'
-
-    h2 = hashlib.sha256()
-    h2.update(masked_shared_secret.encode('utf-8'))
-    h2.update(sequence.encode('utf-8'))
-
-    signature = h2.hexdigest()
-    return signature
+def generate_signature(device_token, timestamp):
+    shared_secret = get_shared_secret()
+    return crypto_generate_signature(device_token, timestamp, shared_secret)
 
 
 def check_signature(device_token, timestamp, signature):
-    return generate_signature(device_token, timestamp) == signature
+    shared_secret = get_shared_secret()
+    return crypto_check_signature(device_token, timestamp, signature, shared_secret)
+
 
 def check_auth_token(auth_token):
-    if auth_token is None or auth_token == '':
-        return False
-    auth_token_payload = auth_token[0:-16]
-    server_sig = auth_token[-16:]
-    return sign_auth_token(auth_token_payload) == server_sig
+    server_secret = get_server_secret()
+    return crypto_check_auth_token(auth_token, server_secret)
+
 
 def generate_auth_token():
-    random_value = str(generate_secret())
-    server_sig = str(sign_auth_token(random_value))
-    return random_value + server_sig
+    return crypto_generate_auth_token(settings.SECRET_KEY, get_server_secret())
 
-def sign_auth_token(auth_token_payload):
-    return hmac.new(codecs.encode(get_server_secret()), codecs.encode(auth_token_payload), digestmod=hashlib.sha256).hexdigest()[:16]
+
+def sign_auth_token(token):
+    return crypto_sign_auth_token(token, get_server_secret())
