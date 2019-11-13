@@ -21,14 +21,14 @@ class RewardableEntity(models.Model):
     def get_reward(self, profile):
         return self.bonus_reward
 
-    def handle_complete(self, profile):
+    def handle_complete(self, profile, save_profile=True):
         self.complete_by_users.add(profile)
         self.save()
 
         user_events = [UserEvents.new(self.complete_event_name, self.pk)]
 
         if self.get_reward(profile) > 0:
-            user_events += self.process_rewards(profile)
+            user_events += self.process_rewards(profile, save_profile=save_profile)
 
         if self.on_complete_achievement:
             user_events += self.process_achievements(profile)
@@ -42,9 +42,17 @@ class RewardableEntity(models.Model):
         return [UserEvents.new(self.achievement_event_name,
                                self.on_complete_achievement.pk)]
 
-    def process_rewards(self, profile):
+    def process_rewards(self, profile, save_profile=True):
+        """Updates user balance given reward
+
+        save_profile -- hook for deferred save of Profile to avoid cascade
+                        repeating saves on completing last quote in last
+                        category in last section of topic
+        """
         reward = self.get_reward(profile)
         profile.balance = profile.balance + reward
-        profile.save()
+
+        if save_profile:
+            profile.save()
 
         return [UserEvents.new(self.reward_event_name, reward)]

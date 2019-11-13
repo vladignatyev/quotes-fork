@@ -90,8 +90,8 @@ class Topic(RewardableEntity):
         levels_complete, levels_total = get_progress_profile_in_topic(profile.pk, self.pk)
         return levels_complete == levels_total
 
-    def handle_complete(self, profile):
-        return super(Topic, self).handle_complete(profile)
+    def handle_complete(self, profile, save_profile=True):
+        return super(Topic, self).handle_complete(profile, save_profile)
 
     # todo: extract such methods into separate ModelView
     # todo: enable per-profile caching of required data
@@ -159,10 +159,10 @@ class Section(RewardableEntity):
         levels_complete, levels_total = get_progress_profile_in_section(profile.pk, self.pk)
         return levels_complete == levels_total
 
-    def handle_complete(self, profile):
-        user_events = super(Section, self).handle_complete(profile)
+    def handle_complete(self, profile, save_profile=True):
+        user_events = super(Section, self).handle_complete(profile, save_profile)
         if self.topic.is_completion_condition_met_by(profile) == True:
-            user_events += self.topic.handle_complete(profile)
+            user_events += self.topic.handle_complete(profile, save_profile)
         return user_events
 
     def get_flat(self):
@@ -279,8 +279,8 @@ class QuoteCategory(RewardableEntity):
     def get_progress(self, profile):
         return get_progress_profile_in_category(profile.pk, self.pk)
 
-    def handle_complete(self, profile):
-        user_events = super(QuoteCategory, self).handle_complete(profile)
+    def handle_complete(self, profile, save_profile=True):
+        user_events = super(QuoteCategory, self).handle_complete(profile, save_profile)
 
         logger.debug('Category id %s complete by profile %s', self.pk, profile.pk)
 
@@ -328,19 +328,19 @@ def clean_profile_progress_cache(profile):
 
 
 # Content cacheable
-@lru_cache(maxsize=2**16)
+# @lru_cache(maxsize=2**16)
 def get_all_levels_in_category(category_pk):
     return list(Quote.objects.filter(category=category_pk).all())
 
-@lru_cache(maxsize=2**16)
+# @lru_cache(maxsize=2**16)
 def get_all_levels_in_category_count(category_pk):
     return Quote.objects.filter(category=category_pk).count()
 
-@lru_cache(maxsize=2**16)
+# @lru_cache(maxsize=2**16)
 def get_all_levels_in_section_count(section_pk):
     return Quote.objects.filter(category__section=section_pk).count()
 
-@lru_cache(maxsize=2**16)
+# @lru_cache(maxsize=2**16)
 def get_all_levels_in_topic_count(topic_pk):
     return Quote.objects.filter(category__section__topic=topic_pk).count()
 # --
@@ -353,22 +353,23 @@ def clean_content_cache(*args, **kwargs):
     # logger.debug('\tget_all_levels_in_section_count: %s', get_all_levels_in_section_count.cache_info())
     # logger.debug('\tget_all_levels_in_topic_count: %s', get_all_levels_in_topic_count.cache_info())
 
-    get_all_levels_in_category.cache_clear()
-    get_all_levels_in_category_count.cache_clear()
-    get_all_levels_in_section_count.cache_clear()
-    get_all_levels_in_topic_count.cache_clear()
+    # get_all_levels_in_category.cache_clear()
+    # get_all_levels_in_category_count.cache_clear()
+    # get_all_levels_in_section_count.cache_clear()
+    # get_all_levels_in_topic_count.cache_clear()
 
+    pass
 
-
-@lru_cache(maxsize=2 ** 16)
+# @lru_cache(maxsize=2 ** 16)
 def get_unlock_for_category_and_profile(category_pk, profile_pk):
     return CategoryUnlockPurchase.objects.get(category_to_unlock=category_pk,
                                               profile=profile_pk)
 
 def clean_unlock_cache(*args, **kwargs):
-    logger.debug('`get_unlock_for_category_and_profile` %s', get_unlock_for_category_and_profile.cache_info())
+    # logger.debug('`get_unlock_for_category_and_profile` %s', get_unlock_for_category_and_profile.cache_info())
 
-    get_unlock_for_category_and_profile.cache_clear()
+    # get_unlock_for_category_and_profile.cache_clear()
+    pass
 
 class Quote(RewardableEntity):
     text = models.CharField("Текст цитаты", max_length=256)
@@ -409,13 +410,14 @@ class Quote(RewardableEntity):
 
         logger.debug('Level id %s complete by profile %s', self.pk, profile.pk)
 
-        user_events = self.handle_complete(profile)
+        user_events = self.handle_complete(profile, save_profile=False)
+
+        if self.category.is_completion_condition_met_by(profile) == True:
+            user_events += self.category.handle_complete(profile, save_profile=False)
 
         clean_profile_progress_cache(profile=profile)
 
-        if self.category.is_completion_condition_met_by(profile) == True:
-            user_events += self.category.handle_complete(profile)
-
+        profile.save()
         return user_events
 
 

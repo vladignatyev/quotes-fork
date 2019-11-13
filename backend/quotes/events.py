@@ -24,3 +24,7 @@ class UserEvents:
     @classmethod
     def new(cls, name, param):
         return (name, param)
+
+    @classmethod
+    def filter_by_name(cls, name, events):
+        return filter(lambda e: e[0] == name, events)

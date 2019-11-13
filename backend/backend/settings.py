@@ -48,6 +48,10 @@ INSTALLED_APPS += [
     'quotes.apps.QuotesConfig'
 ]
 
+INSTALLED_APPS += [
+    'quoterank.apps.QuoterankConfig'
+]
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',

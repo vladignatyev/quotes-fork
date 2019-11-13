@@ -355,11 +355,16 @@ class QuoteSplit(TestCase):
 
 
 
-class LevelProgressTestCase(ContentMixin):
+class LevelProgressTestCase(TestCase, ContentMixin):
     def setUp(self):
         super(LevelProgressTestCase, self).setUp()
         self._create_content_hierarchy()
         self._create_multiple_quotes()
+
+        session = DeviceSession.objects.create()
+        session.save()
+
+        self.profile = Profile.objects.get(device_sessions__pk__contains=session)
 
     def test_marking_user_complete_will_update_balance(self):
         # Given
