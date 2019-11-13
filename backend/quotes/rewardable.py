@@ -23,7 +23,7 @@ class RewardableEntity(models.Model):
 
     def handle_complete(self, profile, save_profile=True):
         self.complete_by_users.add(profile)
-        self.save()
+        # self.save()
 
         user_events = [UserEvents.new(self.complete_event_name, self.pk)]
 
@@ -37,8 +37,9 @@ class RewardableEntity(models.Model):
 
     def process_achievements(self, profile):
         AchievementReceiving = apps.get_model('quotes.AchievementReceiving')
-        AchievementReceiving.objects.create(achievement=self.on_complete_achievement,
+        ar = AchievementReceiving.objects.create(achievement=self.on_complete_achievement,
                                             profile=profile)
+        ar.save()                                    
         return [UserEvents.new(self.achievement_event_name,
                                self.on_complete_achievement.pk)]
 

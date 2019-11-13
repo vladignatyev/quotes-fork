@@ -27,6 +27,8 @@ from .storage import get_profiles_storage
 
 from functools import lru_cache
 
+from quoterank.quoterank import handle_rank_update
+
 
 
 class QuoteAuthor(models.Model):
@@ -402,7 +404,7 @@ class Quote(RewardableEntity):
         return profile.settings.reward_per_level_completion
 
     def is_completion_condition_met_by(self, profile):
-        return True
+        return True  # stub
 
     def mark_complete(self, profile, solution=None):
         if not self.category.is_available_to_user(profile):
@@ -415,10 +417,15 @@ class Quote(RewardableEntity):
         if self.category.is_completion_condition_met_by(profile) == True:
             user_events += self.category.handle_complete(profile, save_profile=False)
 
-        clean_profile_progress_cache(profile=profile)
+        user_events += handle_rank_update(profile, user_events)
 
-        profile.save()
+        self._post_mark_complete(profile)
         return user_events
+
+    def _post_mark_complete(self, profile):
+        clean_profile_progress_cache(profile=profile)
+        profile.save()
+
 
 
 def beautiful_text(text):

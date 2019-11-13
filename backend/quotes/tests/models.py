@@ -1,5 +1,8 @@
 import json
 
+from unittest import skip
+
+
 from django.conf import settings
 from django.test import TestCase
 from django.apps import apps
@@ -381,7 +384,7 @@ class LevelProgressTestCase(TestCase, ContentMixin):
         self.assertNotIn(self.quotes[1], complete)
         self.assertNotIn(self.quotes[2], complete)
         self.assertNotIn(self.quotes[3], complete)
-
+    #
     def test_getter_for_levels_complete(self):
         # Given
 
@@ -397,6 +400,29 @@ class LevelProgressTestCase(TestCase, ContentMixin):
         self.assertNotIn(self.quotes[2], complete)
         self.assertNotIn(self.quotes[5], complete)
 
+    def test_getter_for_levels_complete2(self):
+        # Given
+
+        # When
+        self.quotes[0].mark_complete(self.profile)
+        self.quotes[1].mark_complete(self.profile)
+        self.quotes[2].mark_complete(self.profile)
+        # self.quotes[3].mark_complete(self.profile)
+
+        # Then
+        complete = get_levels_complete_by_profile_in_category(self.profile, self.category)
+        self.assertIn(self.quotes[0], complete)
+        self.assertIn(self.quotes[1], complete)
+        self.assertIn(self.quotes[2], complete)
+
+        # self.assertNotIn(self.quotes[0], complete)
+        # self.assertNotIn(self.quotes[1], complete)
+        # self.assertNotIn(self.quotes[2], complete)
+        self.assertNotIn(self.quotes[3], complete)
+        self.assertNotIn(self.quotes[4], complete)
+        self.assertNotIn(self.quotes[5], complete)
+
+    #
     def test_complete_should_reward_user(self):
         # Given
         game_settings = GameBalance.objects.get_actual()
@@ -412,6 +438,7 @@ class LevelProgressTestCase(TestCase, ContentMixin):
         self.assertEqual(profile_balance + expected_reward, profile_updated.balance)
 
         self.assertIn((UserEvents.RECEIVED_PER_LEVEL_REWARD, expected_reward), events)
+
 
     def test_complex_case(self):
         # Given

@@ -39,9 +39,16 @@ class ProfilesDataStorage(InMemoryCacheStorage):
 
         key = f'get_levels_complete_by_profile_in_category({profile_pk}, {category_pk})'
 
-        result = bucket.get(key, None)
+        # result = bucket.get(key, None)
+        result = False
         if not result:
-            result = list(apps.get_model('quotes.Quote').objects.filter(complete_by_users=profile_pk).filter(category=category_pk).all())
+            Quote = apps.get_model('quotes.Quote')
+
+            # complete_by_users_relation_values = Quote.complete_by_users.through.objects.filter(profile=profile_pk).all()
+            # quotes_pks = [o.quote_id for o in complete_by_users_relation_values]
+
+            # result = list(Quote.objects.filter(category=category_pk).filter(pk__in=quotes_pks).all())
+            result = list(Quote.objects.filter(category=category_pk).filter(complete_by_users=profile_pk).all())
             bucket[key] = result
 
         return result
@@ -51,7 +58,8 @@ class ProfilesDataStorage(InMemoryCacheStorage):
 
         key = f'get_levels_complete_by_profile_in_section_count({profile_pk}, {section_pk})'
 
-        result = bucket.get(key, None)
+        # result = bucket.get(key, None)
+        result = False
         if not result:
             result = apps.get_model('quotes.Quote').objects.filter(complete_by_users=profile_pk).filter(category__section=section_pk).count()
             bucket[key] = result
@@ -63,7 +71,8 @@ class ProfilesDataStorage(InMemoryCacheStorage):
 
         key = f'get_levels_complete_by_profile_in_topic_count({profile_pk}, {topic_pk})'
 
-        result = bucket.get(key, None)
+        # result = bucket.get(key, None)
+        result = False
         if not result:
             result = apps.get_model('quotes.Quote').objects.filter(complete_by_users=profile_pk).filter(category__section__topic=topic_pk).count()
             bucket[key] = result
