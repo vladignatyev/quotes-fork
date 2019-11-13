@@ -2,7 +2,7 @@ from django.conf import settings
 
 from longjob.worker import LongJobBaseCommand, Worker
 
-from api.models import PushNotificationQueueItem, PushNotification
+from api.models import PushNotificationQueueItem
 from api.notifications import FirebaseMessagingApp
 
 
@@ -14,7 +14,6 @@ class PushSendingWorker(Worker):
 
     def do_job_with_logger(self, job, logger):
         push_notification_model = job
-
 
         if push_notification_model.is_broadcast:
             subscriptions = PushSubscription.objects.all()

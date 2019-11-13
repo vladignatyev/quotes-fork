@@ -8,7 +8,7 @@ from django.utils import timezone
 
 from django.test import RequestFactory
 
-from .views import AuthenticateView
+from .views import AuthenticateView, PushSubscriptionView
 from .notifications import *
 
 
@@ -177,15 +177,29 @@ class AuthenticationTest(TestCase):
 
 class NotificationsCoreTest(TestCase):
     def test_smoke(self):
-        # TODO:
+        # TODO: use mocks to check calls to Firebase API
         pass
 
 
 class PushSubscriptionViewTest(TestCase):
+    FAKE_URL_PATH = '/somepushtokenpath/'
+
+    def setUp(self):
+        self.factory = RequestFactory()
+
     def test_should_accept_token(self):
         # Given
         assert PushSubscription.objects.count() == 0
+        device_session = DeviceSession.objects.create(token='testtoken', auth_token=generate_auth_token())
 
         # When
+        data = json.dumps({'token': 'some-subscription-device-token'}, ensure_ascii=False)
+        request = self.factory.post(self.FAKE_URL_PATH, data, content_type='application/json')
+        request.device_session = device_session
+        view = PushSubscriptionView()
+        response = view.post(request)
 
         # Then
+        self.assertEqual(response.status_code, 200)
+        sub = PushSubscription.objects.get()
+        self.assertEqual(sub.device_session, device_session)

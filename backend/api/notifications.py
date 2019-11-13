@@ -1,8 +1,6 @@
 # import re
 import json
 
-# from .models import PushNotification, PushSubscription
-
 from django.conf import settings
 
 import firebase_admin

@@ -19,4 +19,6 @@ from .views import *
 
 urlpatterns = [
     path(r'auth/', AuthenticateView.as_view(), name='api-auth'),
+
+    # path(r'push/token/', PushSubscriptionView.as_view(), name='api-push-subscription')
 ]

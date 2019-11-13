@@ -49,16 +49,6 @@ class DeviceSession(models.Model):
         return f'{self.token}'# @ {self.timestamp}'
 
 
-class PushNotification:
-    def __init__(self, title, body, icon='ic_fcm_notification'):
-        self.title = title
-        self.body = body
-        self.icon = icon
-
-    def as_dict(self):
-        return self.__dict__
-
-
 class PushSubscription(models.Model):
     device_session = models.ForeignKey(DeviceSession, on_delete=models.CASCADE)
     token = models.CharField(max_length=256)

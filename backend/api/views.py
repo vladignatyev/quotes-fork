@@ -107,8 +107,8 @@ class PushSubscriptionView(SafeView):
         except json.decoder.JSONDecodeError:
             return HttpResponse(status=400)
 
-        sub, created = PushSubscription.objects.create_or_update(device_session=request.device_session,
-                                                                 token=token)
+        sub, created = PushSubscription.objects.get_or_create(device_session=request.device_session,
+                                                      token=token)
 
         if created:
             return HttpResponse(status=200)
