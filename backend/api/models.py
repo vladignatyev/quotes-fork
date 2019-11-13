@@ -150,7 +150,7 @@ class CredentialsManager(models.Manager):
             instance.save()
             return instance
 
-def generate_secret():
+def generate_secret(secret_key=None):
     return crypto_generate_secret(settings.SECRET_KEY)
 
 class Credentials(models.Model):
