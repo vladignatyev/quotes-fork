@@ -7,10 +7,6 @@
         <variable
             name="activity"
             type="com.quote.mosaic.ui.onboarding.OnboardingActivity" />
-
-        <variable
-            name="viewModel"
-            type="com.quote.mosaic.ui.onboarding.OnboardingViewModel" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout

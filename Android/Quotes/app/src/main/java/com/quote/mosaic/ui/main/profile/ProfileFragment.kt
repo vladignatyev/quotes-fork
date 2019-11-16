@@ -9,6 +9,8 @@ import androidx.lifecycle.ViewModelProviders
 import com.quote.mosaic.R
 import com.quote.mosaic.core.AppFragment
 import com.quote.mosaic.databinding.ProfileFragmentBinding
+import com.quote.mosaic.ui.SplashActivity
+import com.quote.mosaic.ui.onboarding.OnboardingActivity
 import javax.inject.Inject
 
 class ProfileFragment : AppFragment() {
@@ -36,4 +38,12 @@ class ProfileFragment : AppFragment() {
         fragment = this@ProfileFragment
         viewModel = vm
     }.root
+
+    override fun onStart() {
+        super.onStart()
+        vm.state.logoutTrigger.subscribe {
+            startActivity(OnboardingActivity.newIntent(requireContext()))
+            requireActivity().finishAffinity()
+        }.untilStopped()
+    }
 }

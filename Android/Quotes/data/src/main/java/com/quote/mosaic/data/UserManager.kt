@@ -2,6 +2,7 @@ package com.quote.mosaic.data
 
 import com.quote.mosaic.crypto.fs.sp.SecurePreferences
 import com.quote.mosaic.data.model.UserDO
+import io.reactivex.Completable
 import io.reactivex.Flowable
 import io.reactivex.processors.BehaviorProcessor
 import io.reactivex.processors.PublishProcessor
@@ -40,6 +41,10 @@ class UserManager(
     }
 
     fun getSession(): String = securePreferences.getString(KEY_ACCESS_TOKEN, "").orEmpty()
+
+    fun logout(): Completable = Completable.fromAction {
+        securePreferences.remove(KEY_ACCESS_TOKEN)
+    }
 
     private companion object {
         private const val KEY_ACCESS_TOKEN = "KEY_ACCESS_TOKEN"

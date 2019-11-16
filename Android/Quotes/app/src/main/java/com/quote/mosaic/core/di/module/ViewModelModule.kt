@@ -14,7 +14,6 @@ import com.quote.mosaic.ui.main.play.topic.TopicViewModel
 import com.quote.mosaic.ui.main.play.topup.TopupViewModel
 import com.quote.mosaic.ui.main.profile.ProfileViewModel
 import com.quote.mosaic.ui.main.top.TopViewModel
-import com.quote.mosaic.ui.onboarding.OnboardingViewModel
 import com.quote.mosaic.ui.onboarding.login.LoginViewModel
 import dagger.Module
 import dagger.Provides
@@ -22,14 +21,6 @@ import javax.inject.Singleton
 
 @Module
 class ViewModelModule {
-
-    @Provides
-    @Singleton
-    fun onboardingViewModelFactory(
-        userManager: UserManager
-    ) = OnboardingViewModel.Factory(
-        userManager
-    )
 
     @Provides
     @Singleton
@@ -121,10 +112,12 @@ class ViewModelModule {
     @Singleton
     fun profileViewModelFactory(
         schedulers: Schedulers,
-        apiClient: ApiClient
+        apiClient: ApiClient,
+        userManager: UserManager
     ) = ProfileViewModel.Factory(
         schedulers,
-        apiClient
+        apiClient,
+        userManager
     )
 
     @Provides
