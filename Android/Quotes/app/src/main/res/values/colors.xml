@@ -27,4 +27,24 @@
     <color name="black">#000000</color>
     <color name="gold">#FFCB3E</color>
 
+    <!-- Game Backgrounds -->
+    <color name="game_background_blue">#0981CC</color>
+    <color name="bar_background_blue">#003E65</color>
+
+    <color name="game_background_purple">#673AB7</color>
+    <color name="bar_background_purple">#443E74</color>
+
+    <color name="game_background_gray">#9E9E9E</color>
+    <color name="bar_background_gray">#616161</color>
+
+    <color name="game_background_green">#388E3C</color>
+    <color name="bar_background_green">#1B5E20</color>
+
+    <color name="game_background_red">#D32F2F</color>
+    <color name="bar_background_red">#B71C1C</color>
+
+    <color name="game_background_black">#000000</color>
+    <color name="bar_background_black">#212121</color>
+
+
 </resources>

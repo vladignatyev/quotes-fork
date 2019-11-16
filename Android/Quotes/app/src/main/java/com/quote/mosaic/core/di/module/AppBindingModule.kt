@@ -17,8 +17,6 @@ class AppBindingModule {
 
         override fun getImageViewBindingAdapters() = ImageViewBindingAdapters()
 
-        override fun getConstraintLayoutBindingAdapters() = ConstraintLayoutBindingAdapters()
-
         override fun getViewPagerBindingAdapters() = ViewPagerBindingAdapters()
 
         override fun getPreloaderButtonBindingAdapters() = PreloaderButtonBindingAdapters()

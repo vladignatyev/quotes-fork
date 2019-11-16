@@ -15,4 +15,12 @@
     <string name="watch_video_and_get_freecoins">Посмотри видео и получи монеты</string>
     <string name="shared_button_continue">Продолжить</string>
     <string name="shared_button_main">Главная</string>
+    <string name="error_label_title">Упс!</string>
+    <string name="error_label_subtitle">Что-то пошло не так, попробуйте еще раз!</string>
+    <string name="error_button_refresh">Пробую!</string>
+    <string name="navigation_label_game">Игра</string>
+    <string name="navigation_label_top">Топ</string>
+    <string name="navigation_label_profile">Профиль</string>
+    <string name="settings_label_choose_color">Выбери цвет игры</string>
+    <string name="shared_button_press_again_to_exit">Нажмите еще раз, чтобы выйти из игры.</string>
 </resources>

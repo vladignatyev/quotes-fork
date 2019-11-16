@@ -15,14 +15,16 @@
     </data>
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout
+        android:id="@+id/container"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:background="@color/game_background_blue">
 
         <com.google.android.material.appbar.AppBarLayout
             android:id="@+id/appBar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/indigo"
+            android:background="@color/game_background_blue"
             app:visible="@{!viewModel.state.loading}"
             tools:visibility="visible">
 
@@ -51,8 +53,9 @@
                     android:id="@+id/topup"
                     android:layout_width="0dp"
                     android:layout_height="0dp"
+                    android:alpha="0.98"
                     android:background="@drawable/background_topup"
-                    app:cardBackgroundColor="@color/purple"
+                    app:cardBackgroundColor="@color/white"
                     app:cardCornerRadius="16dp"
                     app:cardElevation="8dp"
                     app:layout_constraintBottom_toBottomOf="@+id/balance"
@@ -68,6 +71,7 @@
                     android:layout_marginEnd="16dp"
                     android:layout_marginBottom="16dp"
                     android:drawableStart="@drawable/ic_money_white"
+                    android:drawablePadding="8dp"
                     android:elevation="20dp"
                     android:onClick="@{() -> fragment.topupClicked()}"
                     android:padding="8dp"
@@ -102,27 +106,39 @@
                 app:viewPager="@{topics}" />
         </com.google.android.material.appbar.AppBarLayout>
 
-        <androidx.viewpager.widget.ViewPager
-            android:id="@+id/topics"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@color/indigo"
-            app:layout_behavior="@string/appbar_scrolling_view_behavior"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:visible="@{!viewModel.state.loading}"
-            tools:visibility="visible" />
-
         <View
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:background="@drawable/ic_background"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
+
+        <androidx.viewpager.widget.ViewPager
+            android:id="@+id/topics"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:visibility="visible" />
+
+
+        <ImageView
+            android:id="@+id/logo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="28dp"
+            android:background="@drawable/ic_logo"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:visible="@{viewModel.state.loading}" />
 
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 </layout>

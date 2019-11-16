@@ -4,35 +4,31 @@ import androidx.databinding.ObservableBoolean
 import androidx.databinding.ObservableField
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import com.quote.mosaic.core.AppViewModel
+import com.quote.mosaic.core.Schedulers
+import com.quote.mosaic.core.manager.UserPreferences
+import com.quote.mosaic.core.rx.ClearableBehaviorProcessor
 import com.quote.mosaic.data.UserManager
 import com.quote.mosaic.data.api.ApiClient
 import com.quote.mosaic.data.error.ResponseException
-import com.quote.mosaic.data.model.CategoryDO
-import com.quote.mosaic.data.model.TopicDO
 import com.quote.mosaic.data.model.UserDO
-import com.quote.mosaic.R
-import com.quote.mosaic.core.AppViewModel
-import com.quote.mosaic.core.Schedulers
-import com.quote.mosaic.core.rx.ClearableBehaviorProcessor
-import com.quote.mosaic.ui.main.play.topic.category.CategoryModel
 import com.quote.mosaic.ui.main.play.topic.section.SectionModel
 import io.reactivex.Flowable
 import io.reactivex.functions.BiFunction
 import io.reactivex.processors.BehaviorProcessor
 import io.reactivex.processors.PublishProcessor
 import timber.log.Timber
-import kotlin.math.roundToInt
-import kotlin.random.Random
 
 class TopicViewModel(
     private val schedulers: Schedulers,
     private val apiClient: ApiClient,
-    private val userManager: UserManager
+    private val userManager: UserManager,
+    private val mapper: TopicMapper,
+    private val userPreferences: UserPreferences
 ) : AppViewModel() {
 
     private val sections = BehaviorProcessor.create<List<SectionModel>>()
     private val errorTrigger = ClearableBehaviorProcessor.create<Unit>()
-
     private val refreshTrigger = PublishProcessor.create<Unit>()
 
     val state = State(
@@ -47,96 +43,58 @@ class TopicViewModel(
     }
 
     override fun initialise() {
-        refreshTrigger.flatMap {
-            Flowable.zip(
-                apiClient.topic(state.id.get() ?: 0)
-                    .map { toLocalModel(it) }
-                    .toFlowable()
-                    .subscribeOn(schedulers.io())
-                    .observeOn(schedulers.ui()),
-
-                apiClient.profile().toFlowable()
-                    .subscribeOn(schedulers.io())
-                    .observeOn(schedulers.ui()),
-
-                BiFunction { topics: List<SectionModel>, user: UserDO ->
-                    Pair(topics, user)
-                }
-            )
-        }.subscribe({ (topics: List<SectionModel>, user: UserDO) ->
-            userManager.setUser(user)
-            sections.onNext(topics)
-        }, {
-            Timber.w(it, "TopicViewModel init failed")
-        }).untilCleared()
-
-        refreshTrigger.onNext(Unit)
-    }
-
-    private fun toLocalModel(topicDO: TopicDO): List<SectionModel> = topicDO.sections
-        .map { section ->
-            SectionModel(
-                id = section.id,
-                title = section.title,
-                categories = section.categories.filter { it.totalLevels > 0 }.map { category ->
-                    //Opened
-                    mapCategory(category)
-                })
-        }
-
-    private fun mapCategory(category: CategoryDO): CategoryModel =
-        if (category.isAvailableToUser) {
-            if (category.completedLevels == category.totalLevels) {
-                //Completed
-                CategoryModel.Completed(
-                    id = category.id,
-                    title = category.onCompleteAchievement ?: "Знаток " + category.title
-                )
-            } else {
-                //User Can play
-                CategoryModel.Open(
-                    id = category.id,
-                    title = category.title,
-                    completedQuotes = category.completedLevels,
-                    totalQuotes = 100,
-                    percent = ((category.completedLevels.toDouble() / 100.0) * 100).roundToInt(),
-                    backgroundId = getBackgroundId(category)
+        val id = state.id.get() ?: 0
+        sections.onNext(mapper.loadingState())
+        refreshTrigger
+            .flatMap {
+                Flowable.zip(
+                    apiClient.topic(id)
+                        .map { mapper.toLocalModel(it) }.toFlowable().subscribeOn(schedulers.io()),
+                    apiClient.profile()
+                        .toFlowable().subscribeOn(schedulers.io()),
+                    BiFunction { topics: List<SectionModel>, user: UserDO -> Pair(topics, user) }
                 )
             }
-        } else {
-            //Closed
-            CategoryModel.Closed(
-                id = category.id,
-                title = category.title,
-                price = category.priceToUnlock.toString()
-            )
-        }
+            .subscribe({ (topics: List<SectionModel>, user: UserDO) ->
+                userManager.setUser(user)
+                if (topics.isEmpty()) {
+                    sections.onNext(mapper.errorState())
+                } else {
+                    sections.onNext(topics)
+                }
+            }, {
+                sections.onNext(mapper.errorState())
+                Timber.w(it, "TopicViewModel init failed")
+            }).untilCleared()
 
-    private fun getBackgroundId(category: CategoryDO): Int {
-        val backgrounds = listOf(
-            R.drawable.background_category_open_green,
-            R.drawable.background_category_open_pink,
-            R.drawable.background_category_open_purple,
-            R.drawable.background_category_open_red,
-            R.drawable.background_category_open_yellow
-        )
+        refreshTrigger.onNext(Unit)
 
-        return backgrounds[Random.nextInt(0, backgrounds.size)]
+        userPreferences.state.colorChangedTrigger
+            .subscribeOn(schedulers.io())
+            .observeOn(schedulers.ui())
+            .subscribe {
+                refreshTrigger.onNext(Unit)
+            }.untilCleared()
     }
 
     fun refresh() {
         state.isRefreshing.set(true)
         val id = state.id.get() ?: 0
         apiClient
-            .topic(id)
-            .map { toLocalModel(it) }
+            .topic(id, true)
+            .map { mapper.toLocalModel(it) }
             .subscribeOn(schedulers.io())
             .observeOn(schedulers.ui())
-            .subscribe({
+            .subscribe({ topics ->
                 state.isRefreshing.set(false)
-                sections.onNext(it)
+                if (topics.isEmpty()) {
+                    sections.onNext(mapper.errorState())
+                } else {
+                    sections.onNext(topics)
+                }
             }, {
                 state.isRefreshing.set(false)
+                sections.onNext(mapper.errorState())
                 Timber.w(it, "TopicViewModel refresh() failed")
             }).untilCleared()
     }
@@ -173,7 +131,9 @@ class TopicViewModel(
     class Factory(
         private val schedulers: Schedulers,
         private val apiClient: ApiClient,
-        private val userManager: UserManager
+        private val userManager: UserManager,
+        private val mapper: TopicMapper,
+        private val userPreferences: UserPreferences
     ) : ViewModelProvider.Factory {
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
             if (modelClass.isAssignableFrom(TopicViewModel::class.java)) {
@@ -181,7 +141,9 @@ class TopicViewModel(
                 return TopicViewModel(
                     schedulers,
                     apiClient,
-                    userManager
+                    userManager,
+                    mapper,
+                    userPreferences
                 ) as T
             }
             throw IllegalArgumentException("Unknown ViewModel class")

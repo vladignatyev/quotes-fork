@@ -4,16 +4,16 @@
     <item
         android:id="@+id/game"
         android:icon="@drawable/ic_game"
-        android:title="Игра" />
+        android:title="@string/navigation_label_game" />
 
     <item
         android:id="@+id/top"
         android:icon="@drawable/ic_chart"
-        android:title="Топ" />
+        android:title="@string/navigation_label_top" />
 
     <item
         android:id="@+id/profile"
         android:icon="@drawable/ic_settings"
-        android:title="Профиль" />
+        android:title="@string/navigation_label_profile" />
 
 </menu>

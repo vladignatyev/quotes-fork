@@ -1,6 +1,7 @@
 package com.quote.mosaic.core.binding
 
 import android.view.View
+import androidx.annotation.DrawableRes
 import androidx.databinding.BindingAdapter
 
 class ViewBindingAdapters {
@@ -13,6 +14,11 @@ class ViewBindingAdapters {
     @BindingAdapter("invisible")
     fun setInvisible(view: View, invisible: Boolean) {
         view.setInvisible(invisible)
+    }
+
+    @BindingAdapter("backgroundRes")
+    fun srcBackgroundRes(view: View, @DrawableRes drawableRes: Int) {
+        view.background = view.context.getDrawable(drawableRes)
     }
 
 }

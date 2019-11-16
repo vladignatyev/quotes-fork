@@ -12,6 +12,7 @@ import javax.inject.Singleton
         NetworkModule::class,
         ViewModelModule::class,
         ManagerModule::class,
+        MapperModule::class,
         AppBindingModule::class
     ]
 )

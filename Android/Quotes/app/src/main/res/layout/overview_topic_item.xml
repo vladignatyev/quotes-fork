@@ -11,7 +11,7 @@
 
         <variable
             name="item"
-            type="com.quote.mosaic.ui.main.play.topic.section.SectionModel" />
+            type="com.quote.mosaic.ui.main.play.topic.section.SectionModel.Item" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout

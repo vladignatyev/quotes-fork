@@ -23,7 +23,7 @@ class MainActivity : AppActivity(), HasAndroidInjector {
     @Inject
     lateinit var fragmentDispatchingAndroidInjector: DispatchingAndroidInjector<Any>
 
-    private lateinit var binding: MainActivityBinding
+    lateinit var binding: MainActivityBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -57,7 +57,7 @@ class MainActivity : AppActivity(), HasAndroidInjector {
     fun promptToCloseApp() {
         val notify = appExitTimer.onAction()
         if (notify) {
-            Toast.makeText(this, "Press Again To Exit", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, R.string.shared_button_press_again_to_exit, Toast.LENGTH_SHORT).show()
         }
     }
 

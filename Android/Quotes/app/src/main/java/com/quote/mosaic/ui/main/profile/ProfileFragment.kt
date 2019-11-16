@@ -9,11 +9,12 @@ import androidx.lifecycle.ViewModelProviders
 import com.quote.mosaic.R
 import com.quote.mosaic.core.AppFragment
 import com.quote.mosaic.databinding.ProfileFragmentBinding
-import com.quote.mosaic.ui.SplashActivity
 import com.quote.mosaic.ui.onboarding.OnboardingActivity
+import eltos.simpledialogfragment.SimpleDialog
+import eltos.simpledialogfragment.color.SimpleColorDialog
 import javax.inject.Inject
 
-class ProfileFragment : AppFragment() {
+class ProfileFragment : AppFragment(), SimpleDialog.OnDialogResultListener {
 
     @Inject
     lateinit var vmFactory: ProfileViewModel.Factory
@@ -37,6 +38,7 @@ class ProfileFragment : AppFragment() {
     ).apply {
         fragment = this@ProfileFragment
         viewModel = vm
+        updateBackgroundColor(this.container)
     }.root
 
     override fun onStart() {
@@ -45,5 +47,41 @@ class ProfileFragment : AppFragment() {
             startActivity(OnboardingActivity.newIntent(requireContext()))
             requireActivity().finishAffinity()
         }.untilStopped()
+    }
+
+    override fun onResult(dialogTag: String, which: Int, extras: Bundle): Boolean {
+        if (which == SimpleDialog.OnDialogResultListener.BUTTON_POSITIVE) {
+            when (dialogTag) {
+                COLOR_DIALOG -> changeBackgroundColor(extras.getInt(SimpleColorDialog.SELECTED_SINGLE_POSITION))
+            }
+        }
+        return true
+    }
+
+    private fun changeBackgroundColor(position: Int) {
+        val colors = listOf(
+            R.drawable.ic_circle_shape_blue,
+            R.drawable.ic_circle_shape_purple,
+            R.drawable.ic_circle_shape_gray,
+            R.drawable.ic_circle_shape_green,
+            R.drawable.ic_circle_shape_red,
+            R.drawable.ic_circle_shape_black
+        )
+
+        vm.changeColor(colors[position])
+        updateBackgroundColor(binding().container)
+    }
+
+    fun onColorPickerClicked() {
+        SimpleColorDialog.build()
+            .title(R.string.settings_label_choose_color)
+            .colors(requireContext().resources.getIntArray(R.array.picker_colors))
+            .show(this, COLOR_DIALOG)
+    }
+
+    private fun binding() = viewBinding<ProfileFragmentBinding>()
+
+    companion object {
+        private const val COLOR_DIALOG = "COLOR_DIALOG"
     }
 }

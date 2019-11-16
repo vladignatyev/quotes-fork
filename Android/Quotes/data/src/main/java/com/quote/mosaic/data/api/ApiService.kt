@@ -20,6 +20,7 @@ interface ApiService {
     @GET("topic/{id}/")
     fun topic(
         @Header("X-Client-Auth") token: String,
+        @Header("Cache-Control") cacheControl: String?,
         @Path("id") id: Int
     ): Single<Response<ResponseData<TopicDO>>>
 

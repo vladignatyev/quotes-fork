@@ -1,10 +1,11 @@
 package com.quote.mosaic.core.di.module
 
 import android.content.Context
+import android.content.SharedPreferences
 import com.quote.mosaic.crypto.fs.sp.SecurePreferences
 import com.quote.mosaic.data.UserManager
 import com.quote.mosaic.core.manager.FirebaseManager
-import com.quote.mosaic.core.manager.GameManager
+import com.quote.mosaic.core.manager.UserPreferences
 import com.quote.mosaic.data.manager.BillingManager
 import com.quote.mosaic.data.manager.BillingManagerImpl
 import dagger.Module
@@ -26,7 +27,9 @@ class ManagerModule {
 
     @Provides
     @Singleton
-    fun provideGameManager(): GameManager = GameManager()
+    fun provideUserPreferences(
+        sharedPreferences: SharedPreferences
+    ): UserPreferences = UserPreferences(sharedPreferences)
 
     @Provides
     @Singleton

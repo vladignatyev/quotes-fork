@@ -35,6 +35,7 @@ class TopFragment : AppFragment() {
     ).apply {
         fragment = this@TopFragment
         viewModel = vm
+        updateBackgroundColor(this.container)
     }.root
 
 }

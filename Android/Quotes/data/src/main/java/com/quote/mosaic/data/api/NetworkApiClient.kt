@@ -37,8 +37,8 @@ class NetworkApiClient(
     override fun topics(): Single<List<MainTopicDO>> =
         apiService.topics(userManager.getSession()).transform().map { it.objects.requireNoNulls() }
 
-    override fun topic(id: Int): Single<TopicDO> =
-        apiService.topic(userManager.getSession(), id).transform().map { it.objects.first() }
+    override fun topic(id: Int, force: Boolean): Single<TopicDO> =
+        apiService.topic(userManager.getSession(), force.toCacheHeader(), id).transform().map { it.objects.first() }
 
     override fun openCategory(id: Int): Completable =
         apiService.openCategory(userManager.getSession(), id).transformToCompletable()
@@ -66,4 +66,7 @@ class NetworkApiClient(
             errorMessageExtractor
         )
     ).ignoreElement()
+
+    private fun Boolean.toCacheHeader(): String? = if (this) "no-cache" else null
+
 }

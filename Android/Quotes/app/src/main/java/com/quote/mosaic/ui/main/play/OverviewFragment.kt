@@ -7,9 +7,9 @@ import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.fragment.findNavController
-import com.quote.mosaic.data.UserManager
 import com.quote.mosaic.R
 import com.quote.mosaic.core.AppFragment
+import com.quote.mosaic.data.UserManager
 import com.quote.mosaic.databinding.OverviewFragmentBinding
 import javax.inject.Inject
 
@@ -44,12 +44,14 @@ class OverviewFragment : AppFragment() {
         viewModel = vm
         adapter = OverviewPagerAdapter(childFragmentManager)
         topics.adapter = adapter
+        updateBackgroundColor(this.container, listOf(this.appBar))
     }.root
 
     override fun onStart() {
         super.onStart()
         vm.state.categories.subscribe {
             adapter.submitList(it)
+            binding().topics.scrollTo(0, 0)
         }.untilStopped()
 
         userManager.lowBalanceTrigger().subscribe {

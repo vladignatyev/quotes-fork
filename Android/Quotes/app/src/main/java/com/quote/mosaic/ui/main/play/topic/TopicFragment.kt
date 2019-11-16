@@ -77,6 +77,10 @@ class TopicFragment : AppFragment(), CategoryClickListener {
         startActivity(GameActivity.newIntent(requireContext(), id))
     }
 
+    override fun onRefreshClicked() {
+        vm.refresh()
+    }
+
     private fun binding() = viewBinding<OverviewTopicFragmentBinding>()
 
     companion object {

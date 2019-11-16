@@ -3,6 +3,7 @@ package com.quote.mosaic.core.di.module
 import com.quote.mosaic.data.UserManager
 import com.quote.mosaic.data.api.ApiClient
 import com.quote.mosaic.core.Schedulers
+import com.quote.mosaic.core.manager.UserPreferences
 import com.quote.mosaic.data.manager.BillingManager
 import com.quote.mosaic.ui.main.MainViewModel
 import com.quote.mosaic.ui.main.play.OverviewViewModel
@@ -10,6 +11,7 @@ import com.quote.mosaic.ui.game.GameViewModel
 import com.quote.mosaic.ui.game.lamp.GameLampViewModel
 import com.quote.mosaic.ui.game.lamp.buy.GameBuyViewModel
 import com.quote.mosaic.ui.game.lamp.hints.GameHintsViewModel
+import com.quote.mosaic.ui.main.play.topic.TopicMapper
 import com.quote.mosaic.ui.main.play.topic.TopicViewModel
 import com.quote.mosaic.ui.main.play.topup.TopupViewModel
 import com.quote.mosaic.ui.main.profile.ProfileViewModel
@@ -71,11 +73,15 @@ class ViewModelModule {
     fun topicViewModelFactory(
         schedulers: Schedulers,
         apiClient: ApiClient,
-        userManager: UserManager
+        userManager: UserManager,
+        mapper: TopicMapper,
+        userPreferences: UserPreferences
     ) = TopicViewModel.Factory(
         schedulers,
         apiClient,
-        userManager
+        userManager,
+        mapper,
+        userPreferences
     )
 
     @Provides
@@ -113,11 +119,13 @@ class ViewModelModule {
     fun profileViewModelFactory(
         schedulers: Schedulers,
         apiClient: ApiClient,
-        userManager: UserManager
+        userManager: UserManager,
+        userPreferences: UserPreferences
     ) = ProfileViewModel.Factory(
         schedulers,
         apiClient,
-        userManager
+        userManager,
+        userPreferences
     )
 
     @Provides

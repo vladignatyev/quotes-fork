@@ -9,8 +9,11 @@ import androidx.recyclerview.widget.RecyclerView
 import com.quote.mosaic.R
 import com.quote.mosaic.databinding.CategoryClosedItemBinding
 import com.quote.mosaic.databinding.CategoryCompletedItemBinding
+import com.quote.mosaic.databinding.CategoryLoadingItemBinding
 import com.quote.mosaic.databinding.CategoryOpenItemBinding
 import com.quote.mosaic.ui.main.play.CategoryClickListener
+import me.grantland.widget.AutofitHelper
+import me.grantland.widget.AutofitTextView
 
 class CategoryAdapter(
     private val listener: CategoryClickListener
@@ -54,6 +57,13 @@ class CategoryAdapter(
                 }
             )
         }
+        R.layout.category_loading_item -> {
+            ViewHolder.Loading(
+                CategoryLoadingItemBinding.inflate(
+                    LayoutInflater.from(parent.context), parent, false
+                )
+            )
+        }
         else -> throw IllegalArgumentException("Unexpected view type: $viewType")
     }
 
@@ -68,6 +78,9 @@ class CategoryAdapter(
             is CategoryModel.Completed -> {
                 (holder as ViewHolder.Completed).binding.item = item
             }
+            is CategoryModel.Loading -> {
+                (holder as ViewHolder.Loading).binding.shimmerContainer.startShimmerAnimation()
+            }
         }
         holder.binding.executePendingBindings()
     }
@@ -76,6 +89,7 @@ class CategoryAdapter(
         is CategoryModel.Closed -> R.layout.category_closed_item
         is CategoryModel.Open -> R.layout.category_open_item
         is CategoryModel.Completed -> R.layout.category_completed_item
+        is CategoryModel.Loading -> R.layout.category_loading_item
     }
 
     sealed class ViewHolder(open val binding: ViewDataBinding) :
@@ -83,6 +97,7 @@ class CategoryAdapter(
         class Closed(override val binding: CategoryClosedItemBinding) : ViewHolder(binding)
         class Open(override val binding: CategoryOpenItemBinding) : ViewHolder(binding)
         class Completed(override val binding: CategoryCompletedItemBinding) : ViewHolder(binding)
+        class Loading(override val binding: CategoryLoadingItemBinding) : ViewHolder(binding)
     }
 
     companion object {
@@ -91,16 +106,18 @@ class CategoryAdapter(
                 oldItem: CategoryModel, newItem: CategoryModel
             ): Boolean = when (oldItem) {
                 is CategoryModel.Closed -> newItem is CategoryModel.Closed
-                is CategoryModel.Open -> newItem is CategoryModel.Open
+                is CategoryModel.Open -> newItem is CategoryModel.Open && oldItem.overlayResId == newItem.overlayResId
                 is CategoryModel.Completed -> newItem is CategoryModel.Completed
+                is CategoryModel.Loading -> newItem is CategoryModel.Loading || newItem is CategoryModel.Closed || newItem is CategoryModel.Open || newItem is CategoryModel.Completed
             }
 
             override fun areContentsTheSame(
                 oldItem: CategoryModel, newItem: CategoryModel
             ): Boolean = when (oldItem) {
                 is CategoryModel.Closed -> newItem is CategoryModel.Closed && oldItem.id == newItem.id
-                is CategoryModel.Open -> newItem is CategoryModel.Open && oldItem.id == newItem.id
+                is CategoryModel.Open -> newItem is CategoryModel.Open && oldItem.id == newItem.id && oldItem.overlayResId == newItem.overlayResId
                 is CategoryModel.Completed -> newItem is CategoryModel.Completed && oldItem.id == newItem.id
+                is CategoryModel.Loading -> newItem is CategoryModel.Loading
             }
         }
     }

@@ -8,7 +8,8 @@ sealed class CategoryModel {
         val completedQuotes: Int,
         val totalQuotes: Int,
         val percent: Int,
-        val backgroundId: Int
+        val iconUrl: String,
+        val overlayResId: Int
     ) : CategoryModel()
 
     data class Completed(
@@ -19,6 +20,9 @@ sealed class CategoryModel {
     data class Closed(
         val id: Int,
         val title: String,
-        val price: String
+        val price: String,
+        val iconUrl: String
     ) : CategoryModel()
+
+    object Loading : CategoryModel()
 }

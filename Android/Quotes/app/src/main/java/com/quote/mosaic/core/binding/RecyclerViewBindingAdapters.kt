@@ -8,7 +8,7 @@ import com.quote.mosaic.ui.main.play.topic.category.CategoryModel
 
 class RecyclerViewBindingAdapters {
 
-    @BindingAdapter("categories", "categoryClickListener", requireAll = true)
+    @BindingAdapter("categories", "categoryClickListener", requireAll = false)
     fun categories(recyclerView: RecyclerView, quotes: List<CategoryModel>, categoryClickListener: CategoryClickListener) {
         val adapter = CategoryAdapter(categoryClickListener)
         recyclerView.adapter = adapter

@@ -4,21 +4,29 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
+import android.view.ViewGroup
 import androidx.annotation.CallSuper
+import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import androidx.databinding.ViewDataBinding
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
+import com.quote.mosaic.core.manager.UserPreferences
+import com.quote.mosaic.ui.main.MainActivity
 import dagger.android.support.AndroidSupportInjection
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
 import io.reactivex.rxkotlin.plusAssign
 import timber.log.Timber
+import javax.inject.Inject
 
 /**
  * Base class for application's fragments.
  */
 abstract class AppFragment : Fragment() {
+
+    @Inject
+    lateinit var userPreferences: UserPreferences
 
     private var viewBinding: ViewDataBinding? = null
 
@@ -71,5 +79,21 @@ abstract class AppFragment : Fragment() {
 
     fun goBack() {
         findNavController().popBackStack()
+    }
+
+    fun updateBackgroundColor(
+        container: ViewGroup,
+        views: List<View> = emptyList()
+    ) {
+        (requireActivity() as? MainActivity)?.let {
+            it.binding.bottomBar.setBackgroundResource(userPreferences.getBackgroundBarColor())
+            it.window.statusBarColor =
+                ContextCompat.getColor(requireContext(), userPreferences.getBackgroundBarColor())
+        }
+        container.setBackgroundResource(userPreferences.getBackgroundColor())
+
+        views.forEach {
+            it.setBackgroundResource(userPreferences.getBackgroundColor())
+        }
     }
 }

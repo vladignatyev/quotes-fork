@@ -14,7 +14,7 @@ interface ApiClient {
 
     fun topics(): Single<List<MainTopicDO>>
 
-    fun topic(id: Int): Single<TopicDO>
+    fun topic(id: Int, force: Boolean = false): Single<TopicDO>
 
     //Categories
     fun openCategory(id: Int): Completable
