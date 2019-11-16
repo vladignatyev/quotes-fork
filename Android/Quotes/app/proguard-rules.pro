@@ -21,7 +21,7 @@
 #-renamesourcefileattribute SourceFile
 
 # ====== BEGIN Project level ======
--keep class com.brain.words.puzzle.** { *; }
+-keep class com.quote.mosaic.** { *; }
 
 # ====== END Project level ======
 

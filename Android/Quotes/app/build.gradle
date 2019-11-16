@@ -12,7 +12,7 @@ android {
     compileSdkVersion rootProject.ext.sdk.compile
 
     defaultConfig {
-        applicationId "com.brain.words.puzzle.quotes"
+        applicationId "com.quote.mosaic"
         minSdkVersion rootProject.ext.sdk.min
         targetSdkVersion rootProject.ext.sdk.target
 //        buildConfigField "String", "API_URL", "\"http://alpha.quotes.com/api/v1/\""
@@ -106,4 +106,6 @@ dependencies {
     implementation "com.airbnb.android:lottie:$versions.lottieVersion"
     implementation "nl.dionsegijn:konfetti:$versions.konfetti"
 
+    //Billing
+    implementation "com.android.billingclient:billing:$versions.billing"
 }

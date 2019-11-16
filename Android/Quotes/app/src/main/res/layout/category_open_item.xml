@@ -7,42 +7,38 @@
 
         <variable
             name="item"
-            type="com.brain.words.puzzle.quotes.ui.main.play.topic.category.CategoryModel.Open" />
+            type="com.quote.mosaic.ui.main.play.topic.category.CategoryModel.Open" />
     </data>
 
     <androidx.cardview.widget.CardView
         android:id="@+id/cardView"
-        android:layout_width="164dp"
-        android:layout_height="164dp"
+        android:layout_width="200dp"
+        android:layout_height="200dp"
         android:layout_marginEnd="8dp"
         android:layout_marginBottom="32dp"
-        app:cardCornerRadius="82dp"
+        app:cardCornerRadius="100dp"
         app:cardElevation="16dp">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="@drawable/background_category_open">
+            app:backgroundRes="@{item.backgroundId}">
 
             <TextView
                 android:id="@+id/name"
                 android:layout_width="0dp"
                 android:layout_height="0dp"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="16dp"
-                android:layout_marginEnd="8dp"
-                android:layout_marginBottom="8dp"
                 android:gravity="center"
                 android:text="@{item.title}"
                 android:textAlignment="center"
                 android:textColor="#FAFAFA"
                 android:textSize="18sp"
                 android:textStyle="bold"
-                app:layout_constraintBottom_toTopOf="@+id/progress"
+                app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                tools:text="Category item" />
+                tools:text="Иван Васильевич меняет професисю" />
 
             <TextView
                 android:id="@+id/progress"

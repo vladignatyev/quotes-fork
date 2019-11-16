@@ -7,7 +7,7 @@
 
         <variable
             name="listener"
-            type="com.brain.words.puzzle.quotes.ui.onboarding.game.OnboardingGameFragment.Listener" />
+            type="com.quote.mosaic.ui.onboarding.game.OnboardingGameFragment.Listener" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout

@@ -6,11 +6,11 @@
 
         <variable
             name="fragment"
-            type="com.brain.words.puzzle.quotes.ui.main.top.TopFragment" />
+            type="com.quote.mosaic.ui.main.top.TopFragment" />
 
         <variable
             name="viewModel"
-            type="com.brain.words.puzzle.quotes.ui.main.top.TopViewModel" />
+            type="com.quote.mosaic.ui.main.top.TopViewModel" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout

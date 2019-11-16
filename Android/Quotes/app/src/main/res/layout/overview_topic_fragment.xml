@@ -6,11 +6,11 @@
 
         <variable
             name="fragment"
-            type="com.brain.words.puzzle.quotes.ui.main.play.topic.TopicFragment" />
+            type="com.quote.mosaic.ui.main.play.topic.TopicFragment" />
 
         <variable
             name="viewModel"
-            type="com.brain.words.puzzle.quotes.ui.main.play.topic.TopicViewModel" />
+            type="com.quote.mosaic.ui.main.play.topic.TopicViewModel" />
     </data>
 
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout

@@ -7,11 +7,11 @@
 
         <variable
             name="listener"
-            type="com.brain.words.puzzle.quotes.ui.main.play.CategoryClickListener" />
+            type="com.quote.mosaic.ui.main.play.CategoryClickListener" />
 
         <variable
             name="item"
-            type="com.brain.words.puzzle.quotes.ui.main.play.topic.section.SectionModel" />
+            type="com.quote.mosaic.ui.main.play.topic.section.SectionModel" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout

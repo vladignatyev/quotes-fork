@@ -6,11 +6,11 @@
 
         <variable
             name="fragment"
-            type="com.brain.words.puzzle.quotes.ui.main.play.topup.TopupFragment" />
+            type="com.quote.mosaic.ui.main.play.topup.TopupFragment" />
 
         <variable
             name="viewModel"
-            type="com.brain.words.puzzle.quotes.ui.main.play.topup.TopupViewModel" />
+            type="com.quote.mosaic.ui.main.play.topup.TopupViewModel" />
 
     </data>
 
@@ -18,17 +18,7 @@
         android:id="@+id/container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@null">
-
-        <View
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:alpha="0.9"
-            android:background="@drawable/shape_solid_dark_indigo_rounded_corners"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+        android:background="@drawable/shape_solid_dark_indigo_rounded_corners">
 
         <TextView
             android:layout_width="wrap_content"

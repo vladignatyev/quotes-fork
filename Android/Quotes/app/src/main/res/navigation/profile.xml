@@ -6,6 +6,6 @@
 
     <fragment
         android:id="@+id/profileFragment"
-        android:name="com.brain.words.puzzle.quotes.ui.main.profile.ProfileFragment"
+        android:name="com.quote.mosaic.ui.main.profile.ProfileFragment"
         android:label="ProfileFragment" />
 </navigation>

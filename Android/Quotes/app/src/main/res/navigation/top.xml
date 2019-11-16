@@ -6,6 +6,6 @@
 
     <fragment
         android:id="@+id/topFragment"
-        android:name="com.brain.words.puzzle.quotes.ui.main.top.TopFragment"
+        android:name="com.quote.mosaic.ui.main.top.TopFragment"
         android:label="TopFragment" />
 </navigation>

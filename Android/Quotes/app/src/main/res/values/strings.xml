@@ -8,4 +8,11 @@
     <string name="welcome_aboard_hint">Правила игры просты: меняй слова местами, чтобы собрать фразу!</string>
     <string name="game">Игра</string>
     <string name="game_title">Привет, %s!</string>
+    <string name="game_level_title">Уровень %s из %s</string>
+    <string name="balance">Баланс</string>
+    <string name="buy_hints">Монетки</string>
+    <string name="use_hints">Подсказки</string>
+    <string name="watch_video_and_get_freecoins">Посмотри видео и получи монеты</string>
+    <string name="shared_button_continue">Продолжить</string>
+    <string name="shared_button_main">Главная</string>
 </resources>

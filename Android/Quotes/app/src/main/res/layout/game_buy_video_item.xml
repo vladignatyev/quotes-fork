@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <variable
+            name="item"
+            type="com.quote.mosaic.ui.game.lamp.buy.GameBuyModel.WatchVideo" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp">
+
+
+        <TextView
+            android:id="@+id/watchVideo"
+            android:layout_width="0dp"
+            android:layout_height="46dp"
+            android:background="@drawable/shape_solid_green_rounded_corners"
+            android:gravity="center_vertical"
+            android:paddingStart="16dp"
+            android:text="@string/watch_video_and_get_freecoins"
+            android:textColor="@color/white"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="Some Hint" />
+
+        <TextView
+            android:id="@+id/earnings"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:drawableEnd="@drawable/ic_coins"
+            android:drawablePadding="8dp"
+            android:elevation="8dp"
+            android:padding="8dp"
+            android:text="- 10"
+            android:textColor="@color/white"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="-10" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

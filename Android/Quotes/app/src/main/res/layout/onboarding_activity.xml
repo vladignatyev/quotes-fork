@@ -6,18 +6,18 @@
 
         <variable
             name="activity"
-            type="com.brain.words.puzzle.quotes.ui.onboarding.OnboardingActivity" />
+            type="com.quote.mosaic.ui.onboarding.OnboardingActivity" />
 
         <variable
             name="viewModel"
-            type="com.brain.words.puzzle.quotes.ui.onboarding.OnboardingViewModel" />
+            type="com.quote.mosaic.ui.onboarding.OnboardingViewModel" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <com.brain.words.puzzle.quotes.core.ui.DeactivatedViewPager
+        <com.quote.mosaic.core.ui.DeactivatedViewPager
             android:id="@+id/pager"
             android:layout_width="0dp"
             android:layout_height="0dp"
@@ -26,7 +26,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <com.brain.words.puzzle.quotes.core.ui.NonTouchableTabLayout
+        <com.quote.mosaic.core.ui.NonTouchableTabLayout
             android:id="@+id/tabDots"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

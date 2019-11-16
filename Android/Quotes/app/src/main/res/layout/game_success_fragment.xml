@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <variable
+            name="listener"
+            type="com.quote.mosaic.ui.game.success.GameSuccessFragment.Listener" />
+
+        <variable
+            name="fragment"
+            type="com.quote.mosaic.ui.game.success.GameSuccessFragment" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/dialog_rounded_bg">
+
+        <TextView
+            android:id="@+id/title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="32dp"
+            android:layout_marginEnd="16dp"
+            android:text="Congrats, the quote is:"
+            android:textColor="@color/black"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/quote"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            app:layout_constraintEnd_toEndOf="@+id/title"
+            app:layout_constraintStart_toStartOf="@+id/title"
+            app:layout_constraintTop_toBottomOf="@+id/title"
+            tools:text="Per Aspera Ad Astra" />
+
+        <TextView
+            android:id="@+id/youWin"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="32dp"
+            android:text="You win 100500 $"
+            app:layout_constraintEnd_toEndOf="@+id/quote"
+            app:layout_constraintStart_toStartOf="@+id/quote"
+            app:layout_constraintTop_toBottomOf="@+id/quote" />
+
+        <Button
+            android:id="@+id/next"
+            android:layout_width="0dp"
+            android:layout_height="56dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="64dp"
+            android:layout_marginEnd="4dp"
+            android:gravity="center"
+            android:onClick="@{() -> fragment.onNextClicked()}"
+            android:text="@string/shared_button_continue"
+            app:layout_constraintEnd_toStartOf="@+id/goBack"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/youWin" />
+
+        <Button
+            android:id="@+id/goBack"
+            android:layout_width="0dp"
+            android:layout_height="56dp"
+            android:layout_marginStart="4dp"
+            android:layout_marginEnd="8dp"
+            android:gravity="center"
+            android:onClick="@{() -> listener.goMainClicked()}"
+            android:text="@string/shared_button_main"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/next"
+            app:layout_constraintTop_toTopOf="@+id/next" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>
