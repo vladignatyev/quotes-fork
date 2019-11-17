@@ -22,7 +22,8 @@ sealed class CategoryModel {
         val id: Int,
         val title: String,
         val price: String,
-        val iconUrl: String
+        val iconUrl: String,
+        var loading: Boolean
     ) : CategoryModel()
 
     object Loading : CategoryModel()

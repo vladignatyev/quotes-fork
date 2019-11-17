@@ -99,7 +99,8 @@ class TopicMapperImpl(
             id = category.id,
             title = category.title,
             price = category.priceToUnlock.toString(),
-            iconUrl = getImageUrl(category)
+            iconUrl = getImageUrl(category),
+            loading = false
         )
     }
 

@@ -27,7 +27,9 @@ class CategoryAdapter(
                 CategoryClosedItemBinding.inflate(
                     LayoutInflater.from(parent.context), parent, false
                 ).apply {
-                    cardView.setOnClickListener {
+                    container.setOnClickListener {
+                        item?.loading = true
+                        notifyDataSetChanged()
                         listener.onClosedClicked(item!!.id)
                     }
                 }

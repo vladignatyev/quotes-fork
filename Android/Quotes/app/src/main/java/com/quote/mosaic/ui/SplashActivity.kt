@@ -17,11 +17,11 @@ class SplashActivity : AppActivity() {
         setTheme(R.style.NoActionBar)
         super.onCreate(savedInstanceState)
 
-//        if (userManager.getSession().isEmpty()) {
+        if (userManager.getSession().isEmpty()) {
             startActivity(OnboardingActivity.newIntent(this))
-//        } else {
-//            startActivity(MainActivity.newIntent(this))
-//        }
+        } else {
+            startActivity(MainActivity.newIntent(this))
+        }
     }
 
 }
