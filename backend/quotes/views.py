@@ -243,7 +243,7 @@ class PurchaseUnlockView(FormBasedView):
                                                purchase_token=cleaned_data['purchase_token'])
 
             # todo: redesign in conformance with #16.
-            unlock = CategoryUnlockPurchase.objects.create(type=CategoryUnlockTypes.UNLOCK_BY_PURCHASE,
+            unlock, created = CategoryUnlockPurchase.objects.get_or_create(type=CategoryUnlockTypes.UNLOCK_BY_PURCHASE,
                                                            profile=self.request.user_profile,
                                                            category_to_unlock=category_to_unlock,
                                                            google_play_purchase=purchase)

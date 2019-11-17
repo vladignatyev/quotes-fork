@@ -139,7 +139,8 @@ STATIC_URL = '/static/'
 API_VERSION = 1
 
 GOOGLE_APPLICATION_CREDENTIALS = '/Users/ignatev/Downloads/quotepuzzle-904ce-firebase-adminsdk-93lt2-5a63006834.json'
-
+GOOGLE_PLAY_API_KEY = 'AIzaSyD4tYv7eoQIbkFNMhIbNAgyWhdoPmzwCPU'
+GOOGLE_PLAY_PROJECT_ID = 'quotepuzzle-904ce'
 
 import os
 import logging

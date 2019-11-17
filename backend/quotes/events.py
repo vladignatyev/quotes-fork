@@ -21,6 +21,9 @@ class UserEvents:
     RECEIVED_GENERIC_ACHIEVEMENT = 'received_generic_achievement'
     RECEIVED_GENERIC_REWARD = 'received_generic_reward'
 
+    QUOTERANK_POSITION_IN_TOP_CHANGED = 'quoterank_position_in_top_changed'
+    QUOTERANK_RANK_CHANGED = 'quoterank_rank_changed'
+
     @classmethod
     def new(cls, name, param):
         return (name, param)
