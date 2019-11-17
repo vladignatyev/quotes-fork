@@ -179,7 +179,6 @@ class Section(RewardableEntity):
         }
 
 
-
 def quote_split(quote_item_text,
                 special_case_re=r'\s*\^\s*',
                 normal_case_re=r'\s+'):
@@ -192,7 +191,11 @@ def quote_split(quote_item_text,
         special_after_space = re.sub(r'\s+([?!])', '\g<1>', merge_spaces)
 
         prepared = special_after_space
-    return list(filter(None, re.split(case, prepared)))
+
+    splitted_and_without_punctuation = [re.sub(r'[^\w\s]+', '', str) for str in re.split(case, prepared)]
+    without_empty = filter(None, splitted_and_without_punctuation)
+    lowercased = [str.lower() for str in without_empty]
+    return lowercased
 
 
 def get_levels(category_pk, profile):
@@ -430,13 +433,11 @@ class Quote(RewardableEntity):
         profile.save()
 
 
-
 def beautiful_text(text):
-    c = quote_split(text)
-    capitalized_first = [c[0].capitalize()] + c[1:]
-
-    result = capitalized_first
-    return ' '.join(result)
+    capitalized = text.capitalize()
+    whitespace_removed = re.sub('\s+', ' ', capitalized)
+    whitespace_followed_by_non_word_removed = re.sub('(\s+)(\W)', '\g<2>', whitespace_removed)
+    return whitespace_followed_by_non_word_removed
 
 
 class BalanceRechargeProduct(models.Model):

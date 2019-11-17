@@ -306,31 +306,31 @@ class CategoryModelUnlock(GameBalanceMixin):
 
 class QuoteSplit(TestCase):
     def test_split_normal(self):
-        self.assertEqual(['And', 'what', 'is', 'the', 'use', 'of', 'a', 'book',
-                          'without', 'pictures', 'or', 'conversations?'],
+        self.assertEqual(['and', 'what', 'is', 'the', 'use', 'of', 'a', 'book',
+                          'without', 'pictures', 'or', 'conversations'],
                           quote_split('And what is the use of a book without pictures or conversations?'))
-        self.assertEqual(['I', 'suppose', 'I', 'ought', 'to', 'eat', 'or',
-                          'drink', 'something', 'or', 'other;', 'but', 'the',
-                          'great', 'question', 'is', '‘What?’'], quote_split('I suppose I ought to eat or drink something or other; but the great question is ‘What?’'))
+        self.assertEqual(['i', 'suppose', 'i', 'ought', 'to', 'eat', 'or',
+                          'drink', 'something', 'or', 'other', 'but', 'the',
+                          'great', 'question', 'is', 'what'], quote_split('I suppose I ought to eat or drink something or other; but the great question is ‘What?’'))
 
     def test_split_special(self):
-        self.assertEqual(['And what is the use of', 'a book without', 'pictures or conversations', '?'],
+        self.assertEqual(['and what is the use of', 'a book without', 'pictures or conversations'],
                           quote_split('And what is the use of ^a book without ^pictures or conversations^?'))
 
 
     def test_unicode_normal(self):
-        self.assertEqual(['改善', 'means', 'improvement.'], quote_split('改善 means improvement.'))
-        self.assertEqual(['Кайдзен', 'означает', 'совершенствование.'], quote_split('Кайдзен означает совершенствование.'))
+        self.assertEqual(['改善', 'means', 'improvement'], quote_split('改善 means improvement.'))
+        self.assertEqual(['кайдзен', 'означает', 'совершенствование'], quote_split('Кайдзен означает совершенствование.'))
 
     def test_unicode_special(self):
-        self.assertEqual(['改善', 'means improvement.'], quote_split('改善^ means improvement.'))
-        self.assertEqual(['Кайдзен', 'означает совершенствование.'], quote_split('Кайдзен ^означает совершенствование.^'))
+        self.assertEqual(['改善', 'means improvement'], quote_split('改善^ means improvement.'))
+        self.assertEqual(['кайдзен', 'означает совершенствование'], quote_split('Кайдзен ^означает совершенствование.^'))
 
     def test_split_should_merge_multiple_spaces(self):
-        self.assertEqual(['а', 'что', 'если?'], quote_split('а что  если?'))
+        self.assertEqual(['а', 'что', 'если'], quote_split('а что  если?'))
 
     def test_split_should_merge_space_followed_by_special_char(self):
-        self.assertEqual(['а', 'что', 'если?'], quote_split('а что  если ?'))
+        self.assertEqual(['а', 'что', 'если'], quote_split('а что  если ?'))
 
     def test_split_should_avoid_empty_chunks(self):
         self.assertEqual(['а', 'что', 'если'], quote_split('а что  если '))
