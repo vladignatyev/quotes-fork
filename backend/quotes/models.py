@@ -338,7 +338,7 @@ def clean_profile_progress_cache(profile):
 # Content cacheable
 # @lru_cache(maxsize=2**16)
 def get_all_levels_in_category(category_pk):
-    return list(Quote.objects.filter(category=category_pk).all())
+    return list(Quote.objects.filter(category=category_pk).order_by('-order_in_category').order_by('-date_added').all())
 
 # @lru_cache(maxsize=2**16)
 def get_all_levels_in_category_count(category_pk):
@@ -385,6 +385,8 @@ class Quote(RewardableEntity):
     category = models.ForeignKey(QuoteCategory, verbose_name="Категория", on_delete=models.SET_NULL, null=True)
 
     order_in_category = models.BigIntegerField('Порядковый номер уровня в категории', default=0, blank=True)
+
+    date_added = models.DateTimeField(auto_now_add=True)
 
     def get_absolute_url(self):
         return reverse('quote-preview', args=[self.id])
