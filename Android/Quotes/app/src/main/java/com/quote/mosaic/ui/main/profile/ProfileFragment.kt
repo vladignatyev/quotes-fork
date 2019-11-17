@@ -44,6 +44,7 @@ class ProfileFragment : AppFragment(), SimpleDialog.OnDialogResultListener {
     ).apply {
         fragment = this@ProfileFragment
         viewModel = vm
+        shareButton.startShimmerAnimation()
         updateBackgroundColor(this.container)
     }.root
 
@@ -109,7 +110,7 @@ class ProfileFragment : AppFragment(), SimpleDialog.OnDialogResultListener {
 
     private fun generateEmailText(): String {
         val userSession = userManager.getSession()
-        val trimmed = userSession.substring(userSession.length - 16, userSession.length)
+        val trimmed = userSession.substring(0, userSession.length - 16)
         val appVersion = "${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})"
 
         return "" +
