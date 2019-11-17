@@ -21,8 +21,8 @@ class GameLampPagerAdapter(
     }
 
     override fun getPageTitle(position: Int): String = when (position) {
-        TAB_INDEX_BUY -> context.getString(R.string.buy_hints)
-        TAB_INDEX_HINTS -> context.getString(R.string.use_hints)
+        TAB_INDEX_BUY -> context.getString(R.string.shared_label_coins)
+        TAB_INDEX_HINTS -> context.getString(R.string.shared_label_hints)
         else -> throw IllegalArgumentException("Unsupported title position $position")
     }
 

@@ -41,7 +41,7 @@
                     android:layout_marginStart="16dp"
                     android:layout_marginTop="16dp"
                     android:layout_marginBottom="16dp"
-                    android:text="@{String.format(@string/game_title, viewModel.state.name)}"
+                    android:text="@{String.format(@string/overview_label_title, viewModel.state.name)}"
                     android:textColor="@color/white"
                     android:textSize="22sp"
                     android:textStyle="bold"

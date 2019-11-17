@@ -37,7 +37,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:text="@{String.format(@string/game_level_title, viewModel.state.currentLevel, viewModel.state.totalLevel)}"
+            android:text="@{String.format(@string/game_label_title, viewModel.state.currentLevel, viewModel.state.totalLevel)}"
             android:textColor="@color/white"
             android:textSize="20sp"
             app:layout_constraintEnd_toStartOf="@+id/hint"

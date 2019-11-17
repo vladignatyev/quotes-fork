@@ -1,26 +1,45 @@
 <resources>
     <string name="app_name">Quotes</string>
+    <string name="app_link">https://play.google.com/store/apps/details?id=com.quote.mosaic</string>
 
-    <string name="button_continue">Продолжить</string>
-    <string name="name_hint">Ваше имя</string>
-    <string name="welcome_hint">Привет!\nДавай знакомиться.</string>
-    <string name="welcome_aboard">Добро пожаловать на борт, %s!</string>
-    <string name="welcome_aboard_hint">Правила игры просты: меняй слова местами, чтобы собрать фразу!</string>
-    <string name="game">Игра</string>
-    <string name="game_title">Привет, %s!</string>
-    <string name="game_level_title">Уровень %s из %s</string>
-    <string name="balance">Баланс</string>
-    <string name="buy_hints">Монетки</string>
-    <string name="use_hints">Подсказки</string>
-    <string name="watch_video_and_get_freecoins">Посмотри видео и получи монеты</string>
+    <!-- SHARED -->
+    <string name="shared_button_press_again_to_exit">Нажмите еще раз, чтобы выйти из игры.</string>
+    <string name="shared_button_save">Сохранить</string>
     <string name="shared_button_continue">Продолжить</string>
     <string name="shared_button_main">Главная</string>
+    <string name="shared_button_watch_video">Посмотри видео и получи монеты</string>
+    <string name="shared_label_balance">Баланс</string>
+    <string name="shared_label_coins">Монетки</string>
+    <string name="shared_label_hints">Подсказки</string>
+    <string name="shared_label_send">Отправить</string>
+
     <string name="error_label_title">Упс!</string>
     <string name="error_label_subtitle">Что-то пошло не так, попробуйте еще раз!</string>
     <string name="error_button_refresh">Пробую!</string>
+
     <string name="navigation_label_game">Игра</string>
     <string name="navigation_label_top">Топ</string>
     <string name="navigation_label_profile">Профиль</string>
-    <string name="settings_label_choose_color">Выбери цвет игры</string>
-    <string name="shared_button_press_again_to_exit">Нажмите еще раз, чтобы выйти из игры.</string>
+
+    <!-- ONBOARDING -->
+    <string name="onboarding_label_name_hint">Ваше имя</string>
+    <string name="onboarding_label_welcome">Привет!\nДавай знакомиться.</string>
+    <string name="onboarding_label_welcome_aboard">Добро пожаловать на борт, %s!</string>
+    <string name="onboarding_label_rules">Правила игры просты: меняй слова местами, чтобы собрать фразу!</string>
+
+    <!-- MAIN -->
+    <string name="overview_label_title">Привет, %s!</string>
+
+    <!-- GAME -->
+    <string name="game_label_title">Уровень %s из %s</string>
+
+    <!-- PROFILE -->
+    <string name="profile_name_hint">Ваше имя</string>
+    <string name="profile_label_choose_color">Выбери цвет игры</string>
+    <string name="profile_label_change_main_color">Цвет игры</string>
+    <string name="profile_button_feedback">Сообщить о проблеме</string>
+    <string name="profile_button_share_app">Поделиться Игрой</string>
+    <string name="profile_label_email_title">Пожалуйста не удаляйте это!</string>
+    <string name="profile_label_email_write">Напишите ваш отзыв или сообщите о проблеме:</string>
+    <string name="profile_label_share_app">Привет! Рекомендую скачать эту классную игру:</string>
 </resources>

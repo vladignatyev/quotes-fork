@@ -24,7 +24,7 @@
             android:background="@drawable/shape_solid_green_rounded_corners"
             android:gravity="center_vertical"
             android:paddingStart="16dp"
-            android:text="@string/watch_video_and_get_freecoins"
+            android:text="@string/shared_button_watch_video"
             android:textColor="@color/white"
             android:textStyle="bold"
             app:layout_constraintBottom_toBottomOf="parent"

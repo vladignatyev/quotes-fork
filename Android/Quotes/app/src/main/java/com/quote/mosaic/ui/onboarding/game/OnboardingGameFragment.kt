@@ -63,7 +63,7 @@ class OnboardingGameFragment : AppFragment() {
 
     override fun onResume() {
         super.onResume()
-        binding().welcomeMsg.text = getString(R.string.welcome_aboard, userManager.getUserName())
+        binding().welcomeMsg.text = getString(R.string.onboarding_label_welcome_aboard, userManager.getUserName())
     }
 
     override fun onPause() {

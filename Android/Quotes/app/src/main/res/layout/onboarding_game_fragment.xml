@@ -40,7 +40,7 @@
             android:layout_marginEnd="32dp"
             android:alpha="0.8"
             android:gravity="center"
-            android:text="@string/welcome_aboard_hint"
+            android:text="@string/onboarding_label_rules"
             android:textColor="@color/white"
             android:textSize="15sp"
             app:layout_constraintEnd_toEndOf="parent"

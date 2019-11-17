@@ -1,11 +1,14 @@
 package com.quote.mosaic.ui.main.profile
 
+import androidx.databinding.ObservableBoolean
 import androidx.databinding.ObservableInt
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.quote.mosaic.core.AppViewModel
 import com.quote.mosaic.core.Schedulers
+import com.quote.mosaic.core.common.toFlowable
 import com.quote.mosaic.core.manager.UserPreferences
+import com.quote.mosaic.core.rx.NonNullObservableField
 import com.quote.mosaic.data.UserManager
 import com.quote.mosaic.data.api.ApiClient
 import io.reactivex.Flowable
@@ -26,7 +29,15 @@ class ProfileViewModel(
     )
 
     override fun initialise() {
+        state.nameText.toFlowable()
+            .startWith("")
+            .map { it.isNotBlank() && it != userManager.getUserName() }
+            .subscribe {
+                state.saveEnabled.set(it)
+            }.untilCleared()
+
         state.color.set(userPreferences.profileShapeResId())
+        state.nameText.set(userManager.getUserName())
     }
 
     fun logout() {
@@ -45,9 +56,16 @@ class ProfileViewModel(
         userPreferences.setBackgroundColor(newColor)
     }
 
+    fun save() {
+
+    }
+
     data class State(
         val logoutTrigger: Flowable<Unit>,
-        val color: ObservableInt = ObservableInt()
+        val color: ObservableInt = ObservableInt(),
+        val nameText: NonNullObservableField<String> = NonNullObservableField(""),
+        val saveEnabled: ObservableBoolean = ObservableBoolean(),
+        val loading: ObservableBoolean = ObservableBoolean()
     )
 
     class Factory(
