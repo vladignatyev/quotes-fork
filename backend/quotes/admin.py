@@ -18,7 +18,7 @@ class QuotesInline(admin.TabularInline):
 
 @admin.register(QuoteCategory)
 class QuoteCategoryAdmin(admin.ModelAdmin):
-    list_display = ('item_image_view', 'title', 'section')
+    list_display = ('title', 'section')
 
     inlines = [QuotesInline,]
 
