@@ -34,11 +34,26 @@ class NetworkApiClient(
     override fun profile(): Single<UserDO> =
         apiService.profile(userManager.getSession()).transform().map { it.objects.first() }
 
+    override fun subscribePushNotifications(): Completable =
+        if (!userManager.getDeviceToken().isNullOrEmpty()) {
+            val body = HashMap<String, String>()
+            body["token"] = userManager.getDeviceToken().orEmpty()
+            apiService
+                .subscribePushNotifications(userManager.getSession(), body)
+                .transformToCompletable()
+        } else {
+            Completable.complete()
+        }
+
     override fun topics(): Single<List<MainTopicDO>> =
         apiService.topics(userManager.getSession()).transform().map { it.objects.requireNoNulls() }
 
     override fun topic(id: Int, force: Boolean): Single<TopicDO> =
-        apiService.topic(userManager.getSession(), force.toCacheHeader(), id).transform().map { it.objects.first() }
+        apiService.topic(
+            userManager.getSession(),
+            force.toCacheHeader(),
+            id
+        ).transform().map { it.objects.first() }
 
     override fun openCategory(id: Int): Completable =
         apiService.openCategory(userManager.getSession(), id).transformToCompletable()

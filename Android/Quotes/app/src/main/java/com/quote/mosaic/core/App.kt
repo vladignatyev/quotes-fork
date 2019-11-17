@@ -9,6 +9,7 @@ import com.quote.mosaic.core.di.AppComponent
 import com.quote.mosaic.core.di.DaggerAppComponent
 import com.quote.mosaic.core.di.AppDataBindingComponent
 import com.crashlytics.android.Crashlytics
+import com.quote.mosaic.core.manager.FirebaseManager
 import dagger.android.AndroidInjector
 import dagger.android.DispatchingAndroidInjector
 import dagger.android.HasAndroidInjector
@@ -25,6 +26,9 @@ class App : Application(), HasAndroidInjector {
     lateinit var appDataBindingComponent: AppDataBindingComponent
 
     private lateinit var appComponent: AppComponent
+
+    //Don't remove, needed to have up-to-date data on application start.
+    @Inject lateinit var firebaseManager: FirebaseManager
 
     override fun onCreate() {
         super.onCreate()

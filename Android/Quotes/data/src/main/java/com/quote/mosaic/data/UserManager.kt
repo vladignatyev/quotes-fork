@@ -44,11 +44,20 @@ class UserManager(
 
     fun logout(): Completable = Completable.fromAction {
         securePreferences.remove(KEY_ACCESS_TOKEN)
+        securePreferences.remove(KEY_USERNAME)
+        securePreferences.remove(KEY_DEVICE_TOKEN)
     }
+
+    fun saveDeviceToken(deviceToken: String) {
+        securePreferences.putString(KEY_DEVICE_TOKEN, deviceToken)
+    }
+
+    fun getDeviceToken() = securePreferences.getString(KEY_DEVICE_TOKEN, "")
 
     private companion object {
         private const val KEY_ACCESS_TOKEN = "KEY_ACCESS_TOKEN"
         private const val KEY_USERNAME = "KEY_USERNAME"
+        private const val KEY_DEVICE_TOKEN = "KEY_DEVICE_TOKEN"
     }
 
 }

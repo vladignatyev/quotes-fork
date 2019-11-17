@@ -2,6 +2,7 @@ apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-kapt'
+apply plugin: 'io.fabric'
 
 androidExtensions {
     experimental = true
@@ -71,6 +72,7 @@ dependencies {
     implementation "com.google.firebase:firebase-core:$versions.firebase"
     implementation "com.google.firebase:firebase-analytics:$versions.firebase"
     implementation "com.google.android.material:material:$versions.material"
+    implementation "com.google.firebase:firebase-messaging:$versions.messaging"
 
     //Dagger
     implementation "com.google.dagger:dagger:$versions.dagger"
@@ -113,3 +115,4 @@ dependencies {
     //Billing
     implementation "com.android.billingclient:billing:$versions.billing"
 }
+apply plugin: 'com.google.gms.google-services'

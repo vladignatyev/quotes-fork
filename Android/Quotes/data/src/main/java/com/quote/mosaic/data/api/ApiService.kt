@@ -47,4 +47,9 @@ interface ApiService {
         @Path("id") id: Int
     ): Single<Response<ResponseData<QuoteDO>>>
 
+    @POST("notifications/subscribe/")
+    fun subscribePushNotifications(
+        @Header("X-Client-Auth") token: String,
+        @Body body: HashMap<String, String>
+    ): Single<Response<Void>>
 }

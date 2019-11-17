@@ -52,6 +52,14 @@ class OverviewViewModel(
                 state.name.set(it.name)
             }.untilCleared()
 
+        apiClient
+            .subscribePushNotifications()
+            .onErrorComplete()
+            .subscribeOn(schedulers.io())
+            .observeOn(schedulers.ui())
+            .subscribe()
+            .untilCleared()
+
     }
 
     data class State(

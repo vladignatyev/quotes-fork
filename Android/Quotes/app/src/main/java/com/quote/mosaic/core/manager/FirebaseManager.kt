@@ -1,22 +1,20 @@
 package com.quote.mosaic.core.manager
 
-import io.reactivex.processors.BehaviorProcessor
+import com.google.firebase.iid.FirebaseInstanceId
+import com.quote.mosaic.data.UserManager
+import timber.log.Timber
 
-class FirebaseManager {
-
-    private val deviceIdEmitter = BehaviorProcessor.create<String>()
-
-    val deviceId = deviceIdEmitter
+class FirebaseManager(
+    private val userManager: UserManager
+) {
 
     init {
-//        FirebaseInstanceId.getInstance().instanceId
-//            .addOnSuccessListener { deviceIdEmitter.onNext(it.id) }
-//            .addOnFailureListener {
-//                Timber.w(
-//                    it,
-//                    "Error retrieving current token in FirebaseManager"
-//                )
-//            }
+        FirebaseInstanceId.getInstance().instanceId
+            .addOnSuccessListener {
+                userManager.saveDeviceToken(it.token)
+            }
+            .addOnFailureListener {
+                Timber.w(it, "Error retrieving device token in FirebaseManager")
+            }
     }
-
 }

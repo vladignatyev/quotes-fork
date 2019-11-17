@@ -17,7 +17,7 @@ class ManagerModule {
 
     @Provides
     @Singleton
-    fun providesFirebaseManager(): FirebaseManager = FirebaseManager()
+    fun providesFirebaseManager(userManager: UserManager): FirebaseManager = FirebaseManager(userManager)
 
     @Provides
     @Singleton
