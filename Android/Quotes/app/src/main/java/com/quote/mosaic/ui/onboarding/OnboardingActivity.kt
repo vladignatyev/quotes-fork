@@ -4,14 +4,17 @@ import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.view.LayoutInflater
+import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import com.quote.mosaic.R
 import com.quote.mosaic.core.AppActivity
 import com.quote.mosaic.core.common.utils.Ime
+import com.quote.mosaic.core.common.utils.TimedActionConfirmHelper
 import com.quote.mosaic.data.UserManager
 import com.quote.mosaic.databinding.OnboardingActivityBinding
-import com.quote.mosaic.ui.SplashActivity
+import com.quote.mosaic.databinding.OnboardingCompletePopupBinding
 import com.quote.mosaic.ui.main.MainActivity
 import com.quote.mosaic.ui.onboarding.game.OnboardingGameFragment
 import com.quote.mosaic.ui.onboarding.login.LoginFragment
@@ -24,6 +27,9 @@ class OnboardingActivity : AppActivity(),
     HasAndroidInjector,
     LoginFragment.Listener,
     OnboardingGameFragment.Listener {
+
+    @Inject
+    lateinit var appExitTimer: TimedActionConfirmHelper
 
     @Inject
     lateinit var userManager: UserManager
@@ -44,6 +50,10 @@ class OnboardingActivity : AppActivity(),
             activity = this@OnboardingActivity
             pager.adapter = OnboardingPagerAdapter(supportFragmentManager)
         }
+
+        appExitTimer.setListener {
+            finishAffinity()
+        }
     }
 
     override fun firstStepCompleted() {
@@ -53,12 +63,36 @@ class OnboardingActivity : AppActivity(),
     }
 
     override fun onGameCompleted() {
-        AlertDialog
-            .Builder(this)
-            .setTitle("Ура!")
-            .setMessage("Молодец, ты прошел обучение. Забери свои 100 монет")
-            .setPositiveButton("Беру!") { _, _ -> startActivity(MainActivity.newIntent(this)) }
+        val binding: OnboardingCompletePopupBinding =
+            DataBindingUtil.inflate(
+                LayoutInflater.from(this), R.layout.onboarding_complete_popup, null, true
+            )
+
+        binding.grab.setOnClickListener {
+            startActivity(MainActivity.newIntent(this))
+        }
+
+        AlertDialog.Builder(this)
+            .setCancelable(false)
+            .setView(binding.root)
             .show()
+    }
+
+    override fun onBackPressed() {
+        val fragment = supportFragmentManager.findFragmentById(R.id.fragmentContainer)
+
+        if (fragment != null && fragment.childFragmentManager.backStackEntryCount > 0) {
+            super.onBackPressed()
+        } else {
+            promptToCloseApp()
+        }
+    }
+
+    private fun promptToCloseApp() {
+        val notify = appExitTimer.onAction()
+        if (notify) {
+            Toast.makeText(this, R.string.shared_button_press_again_to_exit, Toast.LENGTH_SHORT).show()
+        }
     }
 
     private fun setStatusBarColor(colorRes: Int) {

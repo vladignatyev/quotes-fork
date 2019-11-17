@@ -1,6 +1,6 @@
 <resources>
     <string name="app_name">Quotes</string>
-    <string name="app_link">https://play.google.com/store/apps/details?id=com.quote.mosaic</string>
+    <string name="app_link">https://play.google.com/store/apps/details?id=com.quote.mosaic&amp;hl=ru</string>
 
     <!-- SHARED -->
     <string name="shared_button_press_again_to_exit">Нажмите еще раз, чтобы выйти из игры.</string>
@@ -12,6 +12,7 @@
     <string name="shared_label_coins">Монетки</string>
     <string name="shared_label_hints">Подсказки</string>
     <string name="shared_label_send">Отправить</string>
+    <string name="shared_label_ura">Ура!</string>
 
     <string name="error_label_title">Упс!</string>
     <string name="error_label_subtitle">Что-то пошло не так, попробуйте еще раз!</string>
@@ -26,6 +27,9 @@
     <string name="onboarding_label_welcome">Привет!\nДавай знакомиться.</string>
     <string name="onboarding_label_welcome_aboard">Добро пожаловать на борт, %s!</string>
     <string name="onboarding_label_rules">Правила игры просты: меняй слова местами, чтобы собрать фразу!</string>
+    <string name="onboarding_label_success_title">Молодец, всё верно!</string>
+    <string name="onboarding_label_success_subtitle">За каждый пройденный уровень ты получаешь монеты.</string>
+    <string name="onboarding_button_grab">Продолжить!</string>
 
     <!-- MAIN -->
     <string name="overview_label_title">Привет, %s!</string>

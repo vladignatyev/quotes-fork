@@ -54,7 +54,7 @@ class MainActivity : AppActivity(), HasAndroidInjector {
         }
     }
 
-    fun promptToCloseApp() {
+    private fun promptToCloseApp() {
         val notify = appExitTimer.onAction()
         if (notify) {
             Toast.makeText(this, R.string.shared_button_press_again_to_exit, Toast.LENGTH_SHORT).show()
