@@ -381,7 +381,7 @@ def clean_unlock_cache(*args, **kwargs):
 
 class Quote(RewardableEntity):
     text = models.CharField("Текст цитаты", max_length=256)
-    author = models.ForeignKey(QuoteAuthor, verbose_name="Автор", on_delete=models.SET_NULL, null=True)
+    author = models.ForeignKey(QuoteAuthor, verbose_name="Автор", on_delete=models.SET_NULL, null=True, blank=True)
     category = models.ForeignKey(QuoteCategory, verbose_name="Категория", on_delete=models.SET_NULL, null=True)
 
     order_in_category = models.BigIntegerField('Порядковый номер уровня в категории', default=0, blank=True)
