@@ -86,9 +86,9 @@ class TopicMapperImpl(
             CategoryModel.Open(
                 id = category.id,
                 title = category.title,
-                completedQuotes = 30,
+                completedQuotes = category.completedLevels * 100,
                 totalQuotes = category.totalLevels * 100,
-                percent = Random(category.id).nextInt(0, 100),
+                percent = calculatePercent(category),
                 iconUrl = getImageUrl(category),
                 overlayResId = userPreferences.getOverlayResId()
             )
