@@ -18,13 +18,16 @@ class QuotesInline(admin.TabularInline):
 
 @admin.register(QuoteCategory)
 class QuoteCategoryAdmin(admin.ModelAdmin):
-    list_display = ('title', 'section')
+    list_display = ('item_image_view', 'title', 'section')
 
     inlines = [QuotesInline,]
 
     exclude = ('is_event', 'event_due_date', 'event_title', 'event_icon', 'event_description','event_win_achievement', 'available_to_users', 'complete_by_users')
-    fields = ( 'title', 'section', 'bonus_reward', 'is_payable', 'price_to_unlock', 'on_complete_achievement', 'icon',)
+    fields = ( 'title', 'section', 'bonus_reward', 'is_payable', 'price_to_unlock', 'on_complete_achievement', 'icon', 'item_image', 'item_image_view')
     search_fields = ['title']
+
+
+    readonly_fields = ('item_image_view',)
 
 
 class QuoteForm(forms.ModelForm):

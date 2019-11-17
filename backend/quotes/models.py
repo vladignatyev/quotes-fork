@@ -1,19 +1,23 @@
 import uuid
 
 import re
+import os
 import logging
 logger = logging.getLogger(__name__)
 
-
-from django.utils import timezone
-
-from django.db import models
+from functools import lru_cache
 
 from django.conf import settings
+from django.db import models
 from django.db.models.signals import post_save
+from django.db import transaction
 
 from django.forms.models import model_to_dict
 from django.urls import reverse
+
+from django.utils import timezone
+from django.utils.safestring import mark_safe
+
 
 from api.models import DeviceSession, PurchaseStatus, GooglePlayProduct, AppStoreProduct
 
@@ -24,15 +28,13 @@ from .rewardable import RewardableEntity
 from .managers import *
 from .storage import get_profiles_storage
 
-
-from functools import lru_cache
+from .itemimage import ItemWithImageMixin
 
 from quoterank.quoterank import handle_rank_update
 
-from django.db import transaction
 
 
-
+from django.utils.html import escape
 
 class QuoteAuthor(models.Model):
     name = models.CharField("Автор цитаты", max_length=256)
@@ -222,7 +224,8 @@ def get_levels(category_pk, profile):
     return result
 
 
-class QuoteCategory(RewardableEntity):
+
+class QuoteCategory(RewardableEntity, ItemWithImageMixin):
     section = models.ForeignKey(Section, verbose_name="Раздел", on_delete=models.CASCADE, default=None, null=True)
     title = models.CharField("Название Категории", max_length=256)
     icon = models.CharField("Название иконки", max_length=256, default='', blank=True)
@@ -247,6 +250,9 @@ class QuoteCategory(RewardableEntity):
                                                 through='CategoryUnlockPurchase',
                                                 related_name='availability_to_profile')
 
+
+
+
     def __str__(self):
         return _truncate(f'{self.section.topic.title} > {self.section.title} > {self.title}')
 
@@ -257,6 +263,16 @@ class QuoteCategory(RewardableEntity):
     complete_event_name = UserEvents.CATEGORY_COMPLETE
     achievement_event_name = UserEvents.RECEIVED_CATEGORY_ACHIEVEMENT
     reward_event_name = UserEvents.RECEIVED_PER_CATEGORY_REWARD
+
+
+    item_image = models.FileField('Картинка категории 512х512', upload_to='quotecategoryimages', null=True, blank=True)
+    item_image_preview = models.FileField('Превью картинки категории 256х256', upload_to='quotecategoryimages-preview', null=True, blank=True)
+
+    @mark_safe
+    def item_image_view(self):
+        return u'<img src="%s" />' % escape(self.get_image_url())
+    item_image_view.short_description = 'Картинка категории'
+    item_image_view.allow_tags = True
 
 
     def is_available_to_user(self, profile):
@@ -305,9 +321,14 @@ class QuoteCategory(RewardableEntity):
             'is_payable': self.is_payable,
             'price_to_unlock': self.price_to_unlock,
             'bonus_reward': self.bonus_reward,
+            'image': self.get_image_url(),
+            'image-preview': self.get_image_preview_url(),
             'on_complete_achievement': self.on_complete_achievement.id if self.on_complete_achievement else None
         }
 
+    def save_images(self, *args, **kwargs):
+        self.save_images()
+        return super(QuoteCategory, self).save(*args, **kwargs)
 
 
 
