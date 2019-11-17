@@ -78,7 +78,8 @@ class TopicMapperImpl(
             //Completed
             CategoryModel.Completed(
                 id = category.id,
-                title = category.onCompleteAchievement ?: "Знаток " + category.title
+                title = category.onCompleteAchievement ?: "Знаток " + category.title,
+                iconUrl = getImageUrl(category)
             )
         } else {
             //User Can play

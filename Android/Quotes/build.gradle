@@ -1,7 +1,7 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 
 buildscript {
-    ext.gradle_version = "3.5.0"
+    ext.gradle_version = "3.5.2"
     ext.kotlin_version = "1.3.50"
     repositories {
         google()
@@ -65,7 +65,6 @@ ext {
             konfetti            : "1.1.2",
             billing             : "1.2",
             colorPicker         : "2.2.2",
-            autofit             : "0.2.+",
             glide               : "4.10.0"
 
     ]

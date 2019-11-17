@@ -12,8 +12,6 @@ import com.quote.mosaic.databinding.CategoryCompletedItemBinding
 import com.quote.mosaic.databinding.CategoryLoadingItemBinding
 import com.quote.mosaic.databinding.CategoryOpenItemBinding
 import com.quote.mosaic.ui.main.play.CategoryClickListener
-import me.grantland.widget.AutofitHelper
-import me.grantland.widget.AutofitTextView
 
 class CategoryAdapter(
     private val listener: CategoryClickListener

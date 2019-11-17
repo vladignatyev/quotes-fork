@@ -11,12 +11,9 @@ import com.quote.mosaic.core.rx.NonNullObservableField
 import com.quote.mosaic.data.UserManager
 import com.quote.mosaic.data.api.ApiClient
 import com.quote.mosaic.ui.main.play.topic.TopicModel
-import io.reactivex.Completable
 import io.reactivex.Flowable
-import io.reactivex.Single
 import io.reactivex.processors.BehaviorProcessor
 import timber.log.Timber
-import java.util.concurrent.TimeUnit
 
 class OverviewViewModel(
     private val schedulers: Schedulers,
@@ -36,7 +33,6 @@ class OverviewViewModel(
         state.loading.set(true)
         apiClient.topics()
             .map { topics -> topics.map { TopicModel(it.id, it.title) } }
-            .flatMap { list -> Single.timer(2, TimeUnit.SECONDS).flatMap { Single.just(list) } }
             .subscribeOn(schedulers.io())
             .observeOn(schedulers.ui())
             .subscribe({ topics: List<TopicModel> ->

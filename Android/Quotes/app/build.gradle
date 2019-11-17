@@ -104,7 +104,6 @@ dependencies {
 
     //UI Libraries
     implementation "com.airbnb.android:lottie:$versions.lottieVersion"
-    implementation "me.grantland:autofittextview:$versions.autofit"
     implementation "nl.dionsegijn:konfetti:$versions.konfetti"
     implementation "com.github.eltos:simpledialogfragment:$versions.colorPicker"
     implementation "io.supercharge:shimmerlayout:$versions.shimmer"

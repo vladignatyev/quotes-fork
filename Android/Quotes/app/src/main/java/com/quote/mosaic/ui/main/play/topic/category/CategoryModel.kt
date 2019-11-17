@@ -14,7 +14,8 @@ sealed class CategoryModel {
 
     data class Completed(
         val id: Int,
-        val title: String
+        val title: String,
+        val iconUrl: String
     ) : CategoryModel()
 
     data class Closed(

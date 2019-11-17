@@ -10,39 +10,59 @@
             type="com.quote.mosaic.ui.main.play.topic.category.CategoryModel.Completed" />
     </data>
 
-    <androidx.cardview.widget.CardView
-        android:id="@+id/cardView"
-        android:layout_width="200dp"
-        android:layout_height="200dp"
+    <FrameLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_marginEnd="8dp"
-        android:layout_marginBottom="32dp"
-        android:clickable="true"
-        android:foreground="?attr/selectableItemBackground"
-        android:stateListAnimator="@animator/lift_on_touch"
-        app:cardCornerRadius="100dp"
-        app:cardElevation="16dp">
+        android:layout_marginBottom="32dp">
 
         <androidx.constraintlayout.widget.ConstraintLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:id="@+id/cardView"
+            android:layout_width="164dp"
+            android:layout_height="164dp">
+
+            <ImageView
+                android:layout_width="144dp"
+                android:layout_height="144dp"
+                android:layout_marginBottom="16dp"
+                app:imageUri="@{item.iconUrl}"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <View
+                android:layout_width="144dp"
+                android:layout_height="144dp"
+                android:layout_marginBottom="16dp"
+                android:alpha="0.6"
+                android:background="@drawable/background_category_completed_overlay"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
             <TextView
                 android:id="@+id/name"
                 android:layout_width="0dp"
-                android:layout_height="0dp"
-                android:layout_margin="8dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="24dp"
+                android:layout_marginEnd="24dp"
                 android:gravity="center"
                 android:text="@{item.title}"
-                android:textAlignment="center"
-                android:textColor="#6A7986"
-                android:textSize="18sp"
+                android:textColor="@color/white"
+                android:textSize="14sp"
                 android:textStyle="bold"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                tools:text="Category item" />
-
+                tools:text="Знаток Криминальное чтиво" />
         </androidx.constraintlayout.widget.ConstraintLayout>
-    </androidx.cardview.widget.CardView>
+
+        <ImageView
+            android:layout_width="164dp"
+            android:layout_height="164dp"
+            android:src="@drawable/ic_laurel_one_gold" />
+    </FrameLayout>
 </layout>

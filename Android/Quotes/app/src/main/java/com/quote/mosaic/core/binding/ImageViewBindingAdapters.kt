@@ -22,8 +22,7 @@ class ImageViewBindingAdapters {
             .apply {
                 if (imagePlaceholder != 0) apply(RequestOptions().placeholder(imagePlaceholder))
 
-                apply(RequestOptions.centerCropTransform())
-                apply(RequestOptions.bitmapTransform(RoundedCorners(100)))
+                    apply(RequestOptions.circleCropTransform())
             }
             .into(imageView)
     }

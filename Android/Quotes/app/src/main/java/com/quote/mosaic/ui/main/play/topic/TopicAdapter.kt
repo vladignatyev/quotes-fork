@@ -41,7 +41,6 @@ class TopicAdapter(
                         LayoutInflater.from(parent.context), parent, false
                     ).apply {
                         refresh.setOnClickListener {
-                            item!!.copy(loading = true)
                             categoryClickListener.onRefreshClicked()
                         }
                     }

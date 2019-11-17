@@ -89,7 +89,7 @@ class NetworkModule {
         .connectTimeout(NETWORK_TIMEOUT_SECONDS, TimeUnit.SECONDS)
         .writeTimeout(NETWORK_TIMEOUT_SECONDS, TimeUnit.SECONDS)
         .readTimeout(NETWORK_TIMEOUT_SECONDS, TimeUnit.SECONDS)
-        .cache(okhttpCache)
+//        .cache(okhttpCache)
         .addNetworkInterceptor(httpLoggingInterceptor)
         .build()
 
