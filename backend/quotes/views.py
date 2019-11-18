@@ -314,11 +314,11 @@ class CategoryUnlockView(BaseView):
                                                   profile=self.request.user_profile,
                                                   category_to_unlock=category)
             unlock.do_unlock()
-        except CategoryUnlockPurchase.InsufficientFunds:
+        except InsufficientFunds:
             return HttpResponse(status=402)
         except QuoteCategory.DoesNotExist:
             raise Http404()
-        except CategoryUnlockPurchase.AlreadyAvailable:
+        except AlreadyAvailable:
             pass
 
         return HttpResponse(status=200)

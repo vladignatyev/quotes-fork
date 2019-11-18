@@ -285,15 +285,15 @@ class QuoteCategory(RewardableEntity, ItemWithImageMixin):
         except CategoryUnlockPurchase.DoesNotExist:
             return False
 
-        return self.is_unlocked_for_cash(profile, unlock) or self.is_unlocked_for_coins(profile, unlock)
+        return unlock.is_unlocked()
+        # return self.is_unlocked_for_cash(profile, unlock) or self.is_unlocked_for_coins(profile, unlock)
 
     def is_unlocked_for_coins(self, profile, unlock):
-        if not unlock.google_play_purchase:
-            return True
+        return not unlock.google_play_purchase and unlock.status == CategoryUnlockPurchaseStatus.COMPLETE
 
     def is_unlocked_for_cash(self, profile, unlock):
-        if unlock.google_play_purchase:
-            return unlock.google_play_purchase.status == PurchaseStatus.VALID
+        return unlock.google_play_purchase and unlock.status == CategoryUnlockPurchaseStatus.COMPLETE
+            # return unlock.google_play_purchase.status == PurchaseStatus.VALID
 
     def is_completion_condition_met_by(self, profile):
         levels_complete, levels_total = self.get_progress(profile)
@@ -547,14 +547,32 @@ class CategoryUnlockTypes:
     ]
 
 
-class CategoryUnlockPurchase(models.Model):
-    class InvalidPurchaseStatus(Exception):
-        pass
-    class InsufficientFunds(Exception):
-        pass
-    class AlreadyAvailable(Exception):
-        pass
 
+class InvalidPurchaseStatus(Exception):
+    pass
+
+
+class InsufficientFunds(Exception):
+    pass
+
+
+class AlreadyAvailable(Exception):
+    pass
+
+
+class CategoryUnlockPurchaseStatus:
+    DEFAULT = UNKNOWN = 'unknown'
+    COMPLETE = 'complete'
+    ERROR = 'error'
+
+    choices = (
+        ('unknown', 'Неизвестно (только что создан?)'),
+        ('complete', 'Успешно обработан'),
+        ('error', 'Ошибка'),
+    )
+
+
+class CategoryUnlockPurchase(models.Model):
     type = models.CharField("Тип анлока (за монеты или за покупку)", blank=False, max_length=32, choices=CategoryUnlockTypes.choices, default=CategoryUnlockTypes.NULL_UNLOCK)
     profile = models.ForeignKey(Profile, verbose_name="Юзер", on_delete=models.CASCADE)
     category_to_unlock = models.ForeignKey(QuoteCategory, verbose_name="Категория",  on_delete=models.CASCADE)
@@ -563,41 +581,41 @@ class CategoryUnlockPurchase(models.Model):
 
     date_created = models.DateTimeField("Дата создания", auto_now_add=True)
 
+    status = models.CharField(max_length=64, choices=CategoryUnlockPurchaseStatus.choices, default=CategoryUnlockPurchaseStatus.DEFAULT)
+
     class Meta:
         verbose_name = 'Покупка доступа к категории'
         verbose_name_plural = 'Покупки доступов к категориям'
 
+    def is_unlocked(self):
+        return self.status == CategoryUnlockPurchaseStatus.COMPLETE
+
     def do_unlock(self):
-        with transaction.atomic():
-            if self.category_to_unlock.is_payable == False:
-                raise self.AlreadyAvailable()
-
-            if self.type == CategoryUnlockTypes.NULL_UNLOCK:
-                raise ValueError('CategoryUnlockPurchase should be one of type specified in CategoryUnlockTypes, except NULL_UNLOCK')
-
-            elif self.type == CategoryUnlockTypes.UNLOCK_FOR_COINS:
-
+        if self.type == CategoryUnlockTypes.UNLOCK_FOR_COINS:
+            with transaction.atomic():
                 profile = Profile.objects.select_for_update().get(pk=self.profile.pk)
-                category_to_unlock = QuoteCategory.objects.select_for_update().get(pk=self.category_to_unlock.pk)
 
+                new_balance = profile.balance - self.category_to_unlock.price_to_unlock
 
-                new_balance = profile.balance - category_to_unlock.price_to_unlock
-                if new_balance < 0:
-                    raise self.InsufficientFunds()
+                print(f'New balance {new_balance}')
 
-                profile.balance = new_balance
-                profile.save()
+                if new_balance >= 0:
+                    self.status = CategoryUnlockPurchaseStatus.COMPLETE
+                    self.save()
+                    profile.balance = new_balance
+                    profile.save()
 
-                category_to_unlock.available_to_users.add(profile)
-                category_to_unlock.save()
+                    logger.debug('Profile unlocking category: %s %s', self.profile, self.category_to_unlock.pk)
+                    return
 
-                logger.debug('Profile unlocking category: %s %s', self.profile, self.category_to_unlock.pk)
+            raise InsufficientFunds()
 
-            elif self.type == CategoryUnlockTypes.UNLOCK_BY_PURCHASE:
-                if self.google_play_purchase.status == PurchaseStatus.VALID:
-                    category_to_unlock = QuoteCategory.objects.select_for_update().get(pk=self.category_to_unlock.pk)
-                    with transaction.atomic():
-                        category_to_unlock.available_to_users.add(self.profile)
-                        self.save()
-                else:
-                    raise self.InvalidPurchaseStatus('Tried to unlock category, but the status of IAP purchase was invalid.')
+        elif self.type == CategoryUnlockTypes.UNLOCK_BY_PURCHASE:
+            if self.google_play_purchase.status == PurchaseStatus.VALID:
+                self.status = CategoryUnlockPurchaseStatus.COMPLETE
+                self.save()
+            else:
+                raise InvalidPurchaseStatus('Tried to unlock category, but the status of IAP purchase was invalid.')
+
+        elif self.type == CategoryUnlockTypes.NULL_UNLOCK:
+            raise ValueError('CategoryUnlockPurchase should be one of type specified in CategoryUnlockTypes, except NULL_UNLOCK')

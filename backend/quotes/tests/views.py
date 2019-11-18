@@ -151,8 +151,17 @@ class LevelsListTest(AuthenticatedTestCase, ContentMixin):
 
         # When
         # Unlocking for coins
-        unlocked, _ = Profile.objects.unlock_category(self.profile, self.category)
-        self.assertTrue(unlocked)
+        # unlocked, _ = Profile.objects.unlock_category(self.profile, self.category)
+        # self.assertTrue(unlocked)
+
+        unlock_purchase = CategoryUnlockPurchase.objects.create(profile=self.profile,
+                                              type=CategoryUnlockTypes.UNLOCK_FOR_COINS,
+                                              category_to_unlock=self.category)
+
+        unlock_purchase.do_unlock()
+
+        # tbd
+
 
         url = reverse('levels-list', kwargs={'category_pk': self.category.pk})
         response = self.client.get(url, **self.auth())
@@ -180,7 +189,7 @@ class LevelsListTest(AuthenticatedTestCase, ContentMixin):
                                               google_play_purchase=purchase)
 
         purchase.status = PurchaseStatus.VALID  # manually 'validated' purchase
-        purchase.save()
+        purchase.save()  # do_unlock will be called on save see `signals.py`
 
 
         url = reverse('levels-list', kwargs={'category_pk': self.category.pk})
@@ -284,7 +293,7 @@ class CategoryUnlockViewTest(AuthenticatedTestCase, ContentMixin):
         updated_profile = Profile.objects.get(pk=self.profile.pk)
         updated_category = QuoteCategory.objects.get(pk=self.category.pk)
 
-        self.assertTrue(updated_category.is_available_to_user(updated_profile))
+        self.assertFalse(updated_category.is_available_to_user(updated_profile))
         self.assertEqual(initial_balance, updated_profile.balance)
 
     def test_shouldnt_500_if_performed_unlock_multiple_times_issue_16(self):

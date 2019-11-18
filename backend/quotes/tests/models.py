@@ -174,53 +174,53 @@ class GameBalanceTest(TestCase):
 
         # Then
         self.assertEqual(30, game_settings.initial_profile_balance)
+#
+#
+# class ProfileCategoryUnlocking(GameBalanceMixin):
+#     def test_should_unlock_category_for_given_profile(self):
+#         # Given
+#         INITIAL_BALANCE = 30
+#         PRICE_TO_UNLOCK = 5
+#
+#         GameBalance.objects.create(initial_profile_balance=INITIAL_BALANCE)
+#
+#         profile = Profile.objects.create()
+#         profile.save()
+#
+#         category = QuoteCategory.objects.create(title='Тестовая платная категория',
+#                                                 is_payable=True,
+#                                                 price_to_unlock=PRICE_TO_UNLOCK)
+#
+#         # When
+#         result, explanation = Profile.objects.unlock_category(profile, category)
+#         category = QuoteCategory.objects.get(pk=category.pk)
+#
+#         # Then
+#         self.assertTrue(result)
+#         self.assertEqual(INITIAL_BALANCE - PRICE_TO_UNLOCK, profile.balance)
+#         self.assertIn(profile, category.available_to_users.all())
 
-
-class ProfileCategoryUnlocking(GameBalanceMixin):
-    def test_should_unlock_category_for_given_profile(self):
-        # Given
-        INITIAL_BALANCE = 30
-        PRICE_TO_UNLOCK = 5
-
-        GameBalance.objects.create(initial_profile_balance=INITIAL_BALANCE)
-
-        profile = Profile.objects.create()
-        profile.save()
-
-        category = QuoteCategory.objects.create(title='Тестовая платная категория',
-                                                is_payable=True,
-                                                price_to_unlock=PRICE_TO_UNLOCK)
-
-        # When
-        result, explanation = Profile.objects.unlock_category(profile, category)
-        category = QuoteCategory.objects.get(pk=category.pk)
-
-        # Then
-        self.assertTrue(result)
-        self.assertEqual(INITIAL_BALANCE - PRICE_TO_UNLOCK, profile.balance)
-        self.assertIn(profile, category.available_to_users.all())
-
-    def test_shouldnt_unlock_category_if_no_funds_available(self):
-        # Given
-        INITIAL_BALANCE = 4
-        PRICE_TO_UNLOCK = 5
-
-        GameBalance.objects.create(initial_profile_balance=INITIAL_BALANCE)
-
-        profile = Profile.objects.create()
-        profile.save()
-
-        category = QuoteCategory.objects.create(title='Тестовая платная категория',
-                                                is_payable=True,
-                                                price_to_unlock=PRICE_TO_UNLOCK)
-
-        # When
-        result, explanation = Profile.objects.unlock_category(profile, category)
-        category = QuoteCategory.objects.get(pk=category.pk)
-
-        # Then
-        self.assertFalse(result)
-        self.assertNotIn(profile, category.available_to_users.all())
+    # def test_shouldnt_unlock_category_if_no_funds_available(self):
+    #     # Given
+    #     INITIAL_BALANCE = 4
+    #     PRICE_TO_UNLOCK = 5
+    #
+    #     GameBalance.objects.create(initial_profile_balance=INITIAL_BALANCE)
+    #
+    #     profile = Profile.objects.create()
+    #     profile.save()
+    #
+    #     category = QuoteCategory.objects.create(title='Тестовая платная категория',
+    #                                             is_payable=True,
+    #                                             price_to_unlock=PRICE_TO_UNLOCK)
+    #
+    #     # When
+    #     result, explanation = Profile.objects.unlock_category(profile, category)
+    #     category = QuoteCategory.objects.get(pk=category.pk)
+    #
+    #     # Then
+    #     self.assertFalse(result)
+    #     self.assertNotIn(profile, category.available_to_users.all())
 
 
 class ProfileCategoryPurchaseUnlock(GameBalanceMixin):
@@ -282,6 +282,35 @@ class CategoryModelUnlock(GameBalanceMixin):
         # Then
         self.assertIn(profile, category.available_to_users.all())
 
+    def test_shouldnt_unlock_when_no_funds(self):
+        # Given
+        PRICE_TO_UNLOCK = 100000
+
+        session = DeviceSession.objects.create()
+        session.save()
+
+        profile = Profile.objects.get_by_session(device_session=session)
+
+        self.assertTrue(profile.balance < PRICE_TO_UNLOCK)
+
+        category = QuoteCategory.objects.create(title='Тестовая платная категория',
+                                                is_payable=True,
+                                                price_to_unlock=PRICE_TO_UNLOCK)
+
+        self.assertNotIn(profile, category.available_to_users.all())
+
+        unlock = CategoryUnlockPurchase.objects.create(profile=profile,
+                                              type=CategoryUnlockTypes.UNLOCK_FOR_COINS,
+                                              category_to_unlock=category)
+
+        # When
+        with self.assertRaises(InsufficientFunds):
+            unlock.do_unlock()
+
+        # Then
+        self.assertEqual(Profile.objects.get(pk=profile.pk).balance, profile.balance)
+        self.assertFalse(category.is_available_to_user(profile))
+
     def test_should_raise_insufficient_funds_exception(self):
         # Given
         PRICE_TO_UNLOCK = 10E8 # huge amount
@@ -300,7 +329,7 @@ class CategoryModelUnlock(GameBalanceMixin):
                                               category_to_unlock=category)
 
         # When
-        with self.assertRaises(CategoryUnlockPurchase.InsufficientFunds):
+        with self.assertRaises(InsufficientFunds):
             unlock.do_unlock()
 
 
