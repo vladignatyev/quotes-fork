@@ -611,11 +611,12 @@ class CategoryUnlockPurchase(models.Model):
             raise InsufficientFunds()
 
         elif self.type == CategoryUnlockTypes.UNLOCK_BY_PURCHASE:
-            if self.google_play_purchase.status == PurchaseStatus.VALID:
-                self.status = CategoryUnlockPurchaseStatus.COMPLETE
-                self.save()
-            else:
-                raise InvalidPurchaseStatus('Tried to unlock category, but the status of IAP purchase was invalid.')
+            with transaction.atomic():
+                if self.google_play_purchase.status == PurchaseStatus.VALID:
+                    self.status = CategoryUnlockPurchaseStatus.COMPLETE
+                    self.save()
+                else:
+                    raise InvalidPurchaseStatus('Tried to unlock category, but the status of IAP purchase was invalid.')
 
         elif self.type == CategoryUnlockTypes.NULL_UNLOCK:
             raise ValueError('CategoryUnlockPurchase should be one of type specified in CategoryUnlockTypes, except NULL_UNLOCK')

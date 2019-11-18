@@ -321,7 +321,7 @@ class CategoryUnlockViewTest(AuthenticatedTestCase, ContentMixin):
             self.assertTrue(self.category.is_available_to_user(self.profile))
 
         response = self.client.post(url, **self.auth())
-        self.assertEqual(402, response.status_code)
+        self.assertEqual(200, response.status_code)
 
         # Then
         self.assertTrue(self.category.is_available_to_user(self.profile))
