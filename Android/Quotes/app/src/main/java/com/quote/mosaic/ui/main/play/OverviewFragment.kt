@@ -51,7 +51,6 @@ class OverviewFragment : AppFragment() {
         super.onStart()
         vm.state.categories.subscribe {
             adapter.submitList(it)
-            binding().topics.scrollTo(0, 0)
         }.untilStopped()
 
         userManager.lowBalanceTrigger().subscribe {

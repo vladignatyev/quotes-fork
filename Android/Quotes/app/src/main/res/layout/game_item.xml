@@ -14,10 +14,13 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:maxLines="2"
         android:minWidth="128dp"
+        android:maxLines="2"
+        android:autoSizeTextType="uniform"
         android:minHeight="64dp"
-        android:textSize="16sp"
+        android:autoSizeMaxTextSize="14sp"
+        android:autoSizeMinTextSize="10sp"
+        android:textSize="14sp"
         android:textStyle="bold" />
 
 </FrameLayout>

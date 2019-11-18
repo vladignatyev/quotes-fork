@@ -51,8 +51,11 @@ class TopicFragment : AppFragment(), CategoryClickListener {
         super.onStart()
         vm.state.sections.subscribe {
             adapter.submitList(it)
-            binding().items.setHasFixedSize(true)
-            binding().items.isNestedScrollingEnabled = true
+            binding().items.run {
+                setHasFixedSize(true)
+                isNestedScrollingEnabled = true
+                smoothScrollToPosition(0)
+            }
         }.untilStopped()
     }
 

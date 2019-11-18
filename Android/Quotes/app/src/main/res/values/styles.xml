@@ -60,4 +60,8 @@
         <item name="android:textSize">11sp</item>
     </style>
 
+    <style name="progressBarGold" parent="@style/Theme.AppCompat">
+        <item name="colorAccent">@color/gold</item>
+    </style>
+
 </resources>

@@ -55,11 +55,11 @@
                 app:layout_constraintTop_toTopOf="parent" />
 
             <ProgressBar
+                android:theme="@style/progressBarGold"
                 android:id="@+id/progressbar"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:indeterminateTint="@color/gold"
                 app:invisible="@{!item.loading}"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
