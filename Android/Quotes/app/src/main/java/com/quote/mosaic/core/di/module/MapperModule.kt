@@ -1,5 +1,6 @@
 package com.quote.mosaic.core.di.module
 
+import android.content.Context
 import com.quote.mosaic.core.manager.UserPreferences
 import com.quote.mosaic.ui.main.play.topic.TopicMapper
 import com.quote.mosaic.ui.main.play.topic.TopicMapperImpl
@@ -13,7 +14,8 @@ class MapperModule {
     @Provides
     @Singleton
     fun providesTopicMapper(
-        userPreferences: UserPreferences
-    ): TopicMapper = TopicMapperImpl(userPreferences)
+        userPreferences: UserPreferences,
+        context: Context
+    ): TopicMapper = TopicMapperImpl(userPreferences, context)
 
 }

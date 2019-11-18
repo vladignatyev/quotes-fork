@@ -33,15 +33,9 @@ class App : Application(), HasAndroidInjector {
     override fun onCreate() {
         super.onCreate()
 
-        if (!BuildConfig.DEBUG) {
-            Fabric.with(this, Crashlytics())
-        }
+        Fabric.with(this, Crashlytics())
 
-        if (BuildConfig.DEBUG) {
-            Timber.plant(Timber.DebugTree())
-        } else {
-            Timber.plant(CrashlyticsTimberTree())
-        }
+        Timber.plant(CrashlyticsTimberTree())
 
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true)
 

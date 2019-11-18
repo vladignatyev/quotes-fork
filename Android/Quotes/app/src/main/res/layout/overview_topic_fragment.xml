@@ -13,34 +13,29 @@
             type="com.quote.mosaic.ui.main.play.topic.TopicViewModel" />
     </data>
 
-    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:onRefreshListener="@{() -> viewModel.refresh()}"
-        app:refreshing="@{viewModel.state.isRefreshing}">
+        android:layout_height="match_parent">
 
-        <androidx.core.widget.NestedScrollView
+        <nl.dionsegijn.konfetti.KonfettiView
+            android:id="@+id/viewKonfetti"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent" />
 
-            <FrameLayout
+        <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:onRefreshListener="@{() -> viewModel.refresh()}"
+            app:refreshing="@{viewModel.state.isRefreshing}">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/items"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent">
-
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/items"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:clipToPadding="false"
-                    android:paddingTop="16dp"
-                    android:paddingBottom="16dp"
-                    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
-
-                <nl.dionsegijn.konfetti.KonfettiView
-                    android:id="@+id/viewKonfetti"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent" />
-            </FrameLayout>
-        </androidx.core.widget.NestedScrollView>
-    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+                android:layout_height="match_parent"
+                android:clipToPadding="false"
+                android:paddingTop="16dp"
+                android:paddingBottom="16dp"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
+        </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+    </FrameLayout>
 </layout>

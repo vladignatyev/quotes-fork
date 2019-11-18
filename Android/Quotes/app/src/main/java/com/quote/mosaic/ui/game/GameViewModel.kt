@@ -41,7 +41,7 @@ class GameViewModel(
                 state.allQuotes.set(quotes)
                 handleLevelChanges()
             }, {
-                Timber.w(it, "GameViewModel init failed")
+                Timber.e(it, "GameViewModel init failed")
             }).untilCleared()
     }
 
@@ -59,7 +59,7 @@ class GameViewModel(
                 handleLevelChanges()
                 levelCompletedTrigger.onNext(Unit)
             }, {
-                Timber.w(it, "completeLevel failed")
+                Timber.e(it, "completeLevel failed")
             }).untilCleared()
 
     }

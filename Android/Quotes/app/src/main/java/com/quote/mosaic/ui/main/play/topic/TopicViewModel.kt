@@ -64,7 +64,7 @@ class TopicViewModel(
                 }
             }, {
                 sections.onNext(mapper.errorState())
-                Timber.w(it, "TopicViewModel init failed")
+                Timber.e(it, "TopicViewModel init failed")
             }).untilCleared()
 
         refreshTrigger.onNext(Unit)
@@ -95,7 +95,7 @@ class TopicViewModel(
             }, {
                 state.isRefreshing.set(false)
                 sections.onNext(mapper.errorState())
-                Timber.w(it, "TopicViewModel refresh() failed")
+                Timber.e(it, "TopicViewModel refresh() failed")
             }).untilCleared()
     }
 
@@ -115,7 +115,7 @@ class TopicViewModel(
                 if (it is ResponseException.Application && it.error.lowBalance()) {
                     userManager.hasEmptyBalance()
                 }
-                Timber.w(it, "openCategory: $id failed")
+                Timber.e(it, "openCategory: $id failed")
             }).untilCleared()
     }
 

@@ -19,5 +19,6 @@ data class CategoryDO(
     @JsonProperty("progress_levels_total")
     val totalLevels: Int,
     @JsonProperty("progress_levels_complete")
-    val completedLevels: Int
+    val completedLevels: Int,
+    val image: String
 )

@@ -1,5 +1,4 @@
 <resources>
-    <string name="app_name">Quotes</string>
     <string name="app_link">https://play.google.com/store/apps/details?id=com.quote.mosaic&amp;hl=ru</string>
 
     <!-- SHARED -->
@@ -33,6 +32,7 @@
 
     <!-- MAIN -->
     <string name="overview_label_title">Привет, %s!</string>
+    <string name="topic_label_achievement_placeholder">Знаток %s</string>
 
     <!-- GAME -->
     <string name="game_label_title">Уровень %s из %s</string>

@@ -14,7 +14,7 @@ class FirebaseManager(
                 userManager.saveDeviceToken(it.token)
             }
             .addOnFailureListener {
-                Timber.w(it, "Error retrieving device token in FirebaseManager")
+                Timber.e(it, "Error retrieving device token in FirebaseManager")
             }
     }
 }

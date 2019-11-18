@@ -40,7 +40,7 @@ class OverviewViewModel(
                 categories.onNext(topics)
             }, {
                 state.loading.set(false)
-                Timber.w(it, "OverviewViewModel init failed")
+                Timber.e(it, "OverviewViewModel init failed")
             }).untilCleared()
 
         userManager

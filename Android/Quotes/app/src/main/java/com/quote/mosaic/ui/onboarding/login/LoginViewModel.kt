@@ -66,7 +66,7 @@ class LoginViewModel(
             }, {
                 state.loading.set(false)
                 loginFailure.onNext(it.message)
-                Timber.w(it, "OnboardingViewModel login failed")
+                Timber.e(it, "OnboardingViewModel login failed")
             }).untilCleared()
     }
 

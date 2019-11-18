@@ -1,12 +1,13 @@
 package com.quote.mosaic.ui.main.play.topic
 
+import android.content.Context
+import com.quote.mosaic.R
 import com.quote.mosaic.core.manager.UserPreferences
 import com.quote.mosaic.data.model.CategoryDO
 import com.quote.mosaic.data.model.TopicDO
 import com.quote.mosaic.ui.main.play.topic.category.CategoryModel
 import com.quote.mosaic.ui.main.play.topic.section.SectionModel
 import kotlin.math.roundToInt
-import kotlin.random.Random
 
 
 interface TopicMapper {
@@ -16,7 +17,8 @@ interface TopicMapper {
 }
 
 class TopicMapperImpl(
-    private val userPreferences: UserPreferences
+    private val userPreferences: UserPreferences,
+    private val context: Context
 ) : TopicMapper {
 
     override fun errorState(): List<SectionModel> = listOf(SectionModel.Error(false))
@@ -78,8 +80,8 @@ class TopicMapperImpl(
             //Completed
             CategoryModel.Completed(
                 id = category.id,
-                title = category.onCompleteAchievement ?: "Знаток " + category.title,
-                iconUrl = getImageUrl(category)
+                title = category.onCompleteAchievement ?: context.getString(R.string.topic_label_achievement_placeholder, category.title),
+                iconUrl = category.image
             )
         } else {
             //User Can play
@@ -89,7 +91,7 @@ class TopicMapperImpl(
                 completedQuotes = category.completedLevels * 100,
                 totalQuotes = category.totalLevels * 100,
                 percent = calculatePercent(category),
-                iconUrl = getImageUrl(category),
+                iconUrl = category.image,
                 overlayResId = userPreferences.getOverlayResId()
             )
         }
@@ -99,26 +101,12 @@ class TopicMapperImpl(
             id = category.id,
             title = category.title,
             price = category.priceToUnlock.toString(),
-            iconUrl = getImageUrl(category),
+            iconUrl = category.image,
             loading = false
         )
     }
 
-    private fun getImageUrl(
-        category: CategoryDO
-    ): String = imageUrls[Random(category.id).nextInt(0, imageUrls.size)]
-
     private fun calculatePercent(
         category: CategoryDO
     ): Int = ((category.completedLevels.toDouble() / 100.0) * 100).roundToInt()
-
-    private val imageUrls = listOf(
-        "https://i.imgur.com/ROKBFS1.jpg",
-        "https://i.imgur.com/4kG6S86.jpg",
-        "https://i.imgur.com/KBRCocL.jpg",
-        "https://i.imgur.com/Aw0azmF.jpg",
-        "https://i.imgur.com/CSe7HVR.jpg",
-        "https://i.imgur.com/f7dWEL1.jpg",
-        "https://i.imgur.com/yCvT7Fn.jpg"
-    )
 }

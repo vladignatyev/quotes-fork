@@ -26,7 +26,7 @@ class GameLampViewModel(
             .subscribe({
                 state.coinsCount.set(it.balance.toString())
             }, {
-                Timber.w(it, "GameLampViewModel loadProfile()")
+                Timber.e(it, "GameLampViewModel loadProfile()")
             }).untilCleared()
     }
 
