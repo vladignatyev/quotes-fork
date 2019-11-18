@@ -310,6 +310,8 @@ class CategoryUnlockView(BaseView):
         try:
             category = QuoteCategory.objects.get(pk=kwargs['category_pk'])
             # avoid creating dupes, see issue #16 and related test
+            if category.is_available_to_user(self.request.user_profile):
+                return HttpResponse(status=200)
             unlock, created = CategoryUnlockPurchase.objects.get_or_create(type=CategoryUnlockTypes.UNLOCK_FOR_COINS,
                                                   profile=self.request.user_profile,
                                                   category_to_unlock=category)
