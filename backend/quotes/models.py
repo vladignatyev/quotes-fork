@@ -109,11 +109,12 @@ class Topic(RewardableEntity):
         adds progress values to every category
         '''
 
-        cache_bucket = get_profiles_storage().get_bucket(profile.pk)
-        key = f'Topic.get_flat({profile.pk}, {self.pk})'
-        result = cache_bucket.get(key, None)
-        if result is not None:
-            return result
+
+        # cache_bucket = get_profiles_storage().get_bucket(profile.pk)
+        # key = f'Topic.get_flat({profile.pk}, {self.pk})'
+        # result = cache_bucket.get(key, None)
+        # if result is not None:
+        #     return result
 
         sections = Section.objects.filter(topic=self).all()
         # categories = QuoteCategory.objects.filter(section__topic=self).all()
@@ -142,7 +143,7 @@ class Topic(RewardableEntity):
 
                     section['categories'] += [flat_category]
 
-        cache_bucket[key] = flat_topic
+        # cache_bucket[key] = flat_topic
         return flat_topic
 
 
