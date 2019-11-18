@@ -10,6 +10,7 @@ import com.quote.mosaic.core.rx.ClearableBehaviorProcessor
 import com.quote.mosaic.core.rx.NonNullObservableField
 import com.quote.mosaic.data.UserManager
 import com.quote.mosaic.data.api.ApiClient
+import com.quote.mosaic.data.model.UserDO
 import com.quote.mosaic.ui.main.play.topic.TopicModel
 import io.reactivex.Flowable
 import io.reactivex.processors.BehaviorProcessor
@@ -31,12 +32,15 @@ class OverviewViewModel(
 
     override fun initialise() {
         state.loading.set(true)
+
         apiClient.topics()
             .map { topics -> topics.map { TopicModel(it.id, it.title) } }
+            .flatMap { topics -> apiClient.profile().map { Pair(topics, it) } }
             .subscribeOn(schedulers.io())
             .observeOn(schedulers.ui())
-            .subscribe({ topics: List<TopicModel> ->
+            .subscribe({ (topics: List<TopicModel>, user: UserDO) ->
                 state.loading.set(false)
+                userManager.setUser(user)
                 categories.onNext(topics)
             }, {
                 state.loading.set(false)

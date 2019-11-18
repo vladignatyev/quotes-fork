@@ -26,10 +26,6 @@ class UserManager(
         userTrigger.onNext(User(user.balance, user.nickname))
     }
 
-    fun setBalance(balance: Int) {
-        userTrigger.onNext(userTrigger.value?.copy(balance = balance))
-    }
-
     fun saveUserName(name: String) {
         securePreferences.putString(KEY_USERNAME, name)
     }
