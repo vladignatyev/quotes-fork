@@ -8,10 +8,7 @@ class ExampleDataProvider : AbstractDataProvider() {
 
     private val data: MutableList<ConcreteData> = LinkedList()
 
-    var hintPart = arrayOf<String>()
-
-    override val count: Int
-        get() = data.size
+    override val count: Int get() = data.size
 
     fun addQuote(quote: String) {
         this.quote = quote
@@ -35,10 +32,7 @@ class ExampleDataProvider : AbstractDataProvider() {
         return data[index]
     }
 
-    override fun moveItem(
-        fromPosition: Int,
-        toPosition: Int
-    ) {
+    override fun moveItem(fromPosition: Int, toPosition: Int) {
         if (fromPosition == toPosition) return
 
         val item = data.removeAt(fromPosition)
@@ -51,41 +45,6 @@ class ExampleDataProvider : AbstractDataProvider() {
 
     override fun getCurrentQuote(): String {
         return data.joinToString(separator = SEPARATOR_WHITESPACE)
-    }
-
-    fun hintFirstPart(hint: String, index: Int) {
-        this.quote = hint
-        val quoteArr = hint
-            .replace("\u00A0", " ")
-            .split(SEPARATOR_WHITESPACE)
-            .toTypedArray()
-
-        val endIndex = index
-        hintPart = Arrays.copyOfRange(quoteArr, 0, endIndex)
-        val mixedPart = Arrays.copyOfRange(quoteArr, endIndex, quoteArr.size).toList().shuffled().toTypedArray()
-        val newArr = hintPart + mixedPart
-
-        fillInData(newArr)
-    }
-
-    fun lastTwoWords(): String {
-        val quoteArr = quote
-            .replace("\u00A0", " ")
-            .split(SEPARATOR_WHITESPACE)
-            .toTypedArray()
-        return quoteArr.copyOfRange(quoteArr.size - 2, quoteArr.size).joinToString(" ")
-    }
-
-    fun lastThreeWords(): String {
-        val quoteArr = quote
-            .replace("\u00A0", " ")
-            .split(SEPARATOR_WHITESPACE)
-            .toTypedArray()
-        return quoteArr.copyOfRange(quoteArr.size - 3, quoteArr.size).joinToString(" ")
-    }
-
-    fun savedQuote(progressQuote: String) {
-        fillInData(arrayOf(progressQuote))
     }
 
     private fun fillInData(quoteArr: Array<String>) {

@@ -17,6 +17,7 @@ import com.quote.mosaic.core.ui.data.AbstractDataProvider
 import kotlinx.android.synthetic.main.game_item.view.*
 
 class OnboardingGameAdapter(
+    private val textColorResId: Int,
     private val onSuccess: () -> Unit
 ) : RecyclerView.Adapter<OnboardingGameAdapter.NormalItemViewHolder>(),
     DraggableItemAdapter<OnboardingGameAdapter.NormalItemViewHolder> {
@@ -43,7 +44,7 @@ class OnboardingGameAdapter(
     ) = NormalItemViewHolder(LayoutInflater.from(parent.context).inflate(
         R.layout.game_item, parent, false
     ).apply {
-        text1.setTextColor(ContextCompat.getColor(context, R.color.darkPurple))
+        word.setTextColor(ContextCompat.getColor(context, textColorResId))
     })
 
     override fun onBindViewHolder(holder: NormalItemViewHolder, position: Int) {
@@ -100,6 +101,6 @@ class OnboardingGameAdapter(
 
     class NormalItemViewHolder(v: View) : AbstractDraggableItemViewHolder(v) {
         var container: FrameLayout = v.findViewById(R.id.container)
-        var word: TextView = v.findViewById(R.id.text1)
+        var word: TextView = v.findViewById(R.id.word)
     }
 }

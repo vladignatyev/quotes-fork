@@ -1,5 +1,9 @@
 package com.quote.mosaic.data.model
 
+import android.os.Parcelable
+import kotlinx.android.parcel.Parcelize
+
+@Parcelize
 data class QuoteDO(
     val id: Int,
     val text: String,
@@ -8,4 +12,4 @@ data class QuoteDO(
     val beautiful: String,
     val complete: Boolean,
     val splitted: List<String>
-)
+): Parcelable

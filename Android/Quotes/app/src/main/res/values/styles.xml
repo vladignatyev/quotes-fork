@@ -14,6 +14,11 @@
         <item name="android:statusBarColor">@color/bar_background_blue</item>
     </style>
 
+    <style name="DialogAnimation">
+        <item name="android:windowEnterAnimation">@anim/enter_from_right</item>
+        <item name="android:windowExitAnimation">@anim/exit_to_right</item>
+    </style>
+
     <!-- ######### Button ######### -->
     <style name="Widget.App.Button" parent="@style/Widget.AppCompat.Button">
         <item name="android:gravity">center</item>
@@ -60,8 +65,8 @@
         <item name="android:textSize">11sp</item>
     </style>
 
+    <!-- ####### ProgressBar ####### -->
     <style name="progressBarGold" parent="@style/Theme.AppCompat">
         <item name="colorAccent">@color/gold</item>
     </style>
-
 </resources>

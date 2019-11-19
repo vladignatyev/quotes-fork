@@ -12,6 +12,8 @@
     <string name="shared_label_hints">Подсказки</string>
     <string name="shared_label_send">Отправить</string>
     <string name="shared_label_ura">Ура!</string>
+    <string name="shared_label_ok">Понятно</string>
+    <string name="shared_label_remember">Запомнил!</string>
 
     <string name="error_label_title">Упс!</string>
     <string name="error_label_subtitle">Что-то пошло не так, попробуйте еще раз!</string>

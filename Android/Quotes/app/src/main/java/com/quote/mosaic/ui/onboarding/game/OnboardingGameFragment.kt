@@ -82,7 +82,7 @@ class OnboardingGameFragment : AppFragment() {
 
         dataProvider = ExampleDataProvider()
         dataProvider.addQuote("Через тернии к звездам")
-        gameAdapter = OnboardingGameAdapter { onSuccess() }
+        gameAdapter = OnboardingGameAdapter(R.color.darkPurple) { onSuccess() }
         gameAdapter.setDataProvider(dataProvider)
 
         initGameManager()

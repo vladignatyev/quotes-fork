@@ -1,16 +1,14 @@
 package com.quote.mosaic.core.di.module
 
-import com.quote.mosaic.data.UserManager
-import com.quote.mosaic.data.api.ApiClient
 import com.quote.mosaic.core.Schedulers
 import com.quote.mosaic.core.manager.UserPreferences
+import com.quote.mosaic.data.UserManager
+import com.quote.mosaic.data.api.ApiClient
 import com.quote.mosaic.data.manager.BillingManager
+import com.quote.mosaic.ui.game.GameViewModel
+import com.quote.mosaic.ui.game.hint.HintViewModel
 import com.quote.mosaic.ui.main.MainViewModel
 import com.quote.mosaic.ui.main.play.OverviewViewModel
-import com.quote.mosaic.ui.game.GameViewModel
-import com.quote.mosaic.ui.game.lamp.GameLampViewModel
-import com.quote.mosaic.ui.game.lamp.buy.GameBuyViewModel
-import com.quote.mosaic.ui.game.lamp.hints.GameHintsViewModel
 import com.quote.mosaic.ui.main.play.topic.TopicMapper
 import com.quote.mosaic.ui.main.play.topic.TopicViewModel
 import com.quote.mosaic.ui.main.play.topup.TopupViewModel
@@ -96,16 +94,6 @@ class ViewModelModule {
 
     @Provides
     @Singleton
-    fun gameHintModelFactory(
-        schedulers: Schedulers,
-        apiClient: ApiClient
-    ) = GameLampViewModel.Factory(
-        schedulers,
-        apiClient
-    )
-
-    @Provides
-    @Singleton
     fun topupViewModelFactory(
         schedulers: Schedulers,
         apiClient: ApiClient
@@ -130,24 +118,12 @@ class ViewModelModule {
 
     @Provides
     @Singleton
-    fun gameHintsViewModelFactory(
+    fun hintViewModelFactory(
         schedulers: Schedulers,
         apiClient: ApiClient
-    ) = GameHintsViewModel.Factory(
+    ) = HintViewModel.Factory(
         schedulers,
         apiClient
-    )
-
-    @Provides
-    @Singleton
-    fun gameButViewModelFactory(
-        schedulers: Schedulers,
-        apiClient: ApiClient,
-        billingManager: BillingManager
-    ) = GameBuyViewModel.Factory(
-        schedulers,
-        apiClient,
-        billingManager
     )
 
 }

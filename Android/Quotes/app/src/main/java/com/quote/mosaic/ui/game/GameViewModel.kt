@@ -67,9 +67,10 @@ class GameViewModel(
     private fun handleLevelChanges() {
         val quotes = state.allQuotes.get()!!
         state.totalLevel.set(quotes.count().toString())
-        state.currentLevel.set(quotes.filter { it.complete }.count().toString())
+        state.currentLevel.set(quotes.filter { it.complete }.count().plus(1).toString())
 
         val currentQuote = quotes.first { !it.complete }
+        state.currentQuote.set(currentQuote)
         quoteLoadedTrigger.onNext(currentQuote.splitted.joinToString(separator = " "))
     }
 
@@ -80,8 +81,10 @@ class GameViewModel(
     data class State(
         val currentLevel: ObservableField<String> = ObservableField(""),
         val totalLevel: ObservableField<String> = ObservableField(""),
+        val balance: ObservableField<String> = ObservableField("100"),
         val selectedCategory: ObservableField<Int> = ObservableField(),
         val allQuotes: ObservableField<List<QuoteDO>> = ObservableField(),
+        val currentQuote: ObservableField<QuoteDO> = ObservableField(),
         val quote: ObservableField<String> = ObservableField(),
 
         val quoteLoadedTrigger: Flowable<String>,
