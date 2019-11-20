@@ -599,8 +599,6 @@ class CategoryUnlockPurchase(models.Model):
 
                 new_balance = profile.balance - self.category_to_unlock.price_to_unlock
 
-                print(f'New balance {new_balance}')
-
                 if new_balance >= 0:
                     self.status = CategoryUnlockPurchaseStatus.COMPLETE
                     self.save()
@@ -620,5 +618,20 @@ class CategoryUnlockPurchase(models.Model):
                 else:
                     raise InvalidPurchaseStatus('Tried to unlock category, but the status of IAP purchase was invalid.')
 
+        elif self.type == CategoryUnlockTypes.NULL_UNLOCK:
+            raise ValueError('CategoryUnlockPurchase should be one of type specified in CategoryUnlockTypes, except NULL_UNLOCK')
+
+
+    def undo_unlock(self):  # TODO: cover with tests
+        if self.type == CategoryUnlockTypes.UNLOCK_FOR_COINS:
+            with transaction.atomic():
+                profile = Profile.objects.select_for_update().get(pk=self.profile.pk)
+
+                new_balance = profile.balance + self.category_to_unlock.price_to_unlock
+                profile.save()
+            self.delete()
+
+        elif self.type == CategoryUnlockTypes.UNLOCK_BY_PURCHASE:
+            self.delete()
         elif self.type == CategoryUnlockTypes.NULL_UNLOCK:
             raise ValueError('CategoryUnlockPurchase should be one of type specified in CategoryUnlockTypes, except NULL_UNLOCK')
