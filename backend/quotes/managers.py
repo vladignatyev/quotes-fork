@@ -56,13 +56,3 @@ class ProfileManager(models.Manager):
     def get_by_auth_token(self, auth_token):
         session = DeviceSession.objects.get(auth_token=auth_token)
         return self.get_by_session(session)
-    #
-    # def unlock_category(self, profile, quote_category):
-    #     balance = profile.balance
-    #     price = quote_category.price_to_unlock
-    #     new_balance = balance - price
-    #     if new_balance < 0:
-    #         return (False, 'Not enough funds.')
-    #     profile.balance = new_balance
-    #     quote_category.available_to_users.add(profile)
-    #     return (True,'')
