@@ -32,9 +32,9 @@ from .itemimage import ItemWithImageMixin
 
 from quoterank.quoterank import handle_rank_update
 
-
-
 from django.utils.html import escape
+
+
 
 class QuoteAuthor(models.Model):
     name = models.CharField("Автор цитаты", max_length=256)
@@ -78,7 +78,9 @@ class AchievementReceiving(models.Model):
 
 class Topic(RewardableEntity):
     title = models.CharField("Название Темы", max_length=256)
-    hidden = models.BooleanField("Тема скрыта?", default=False)
+
+    # Publishing status
+    is_published = models.BooleanField("Тема опубликована?", default=True, blank=True)
 
     def __str__(self):
         return _truncate(f'{self.title}')
@@ -100,7 +102,6 @@ class Topic(RewardableEntity):
     def handle_complete(self, profile, save_profile=True):
         return super(Topic, self).handle_complete(profile, save_profile)
 
-    # todo: extract such methods into separate ModelView
     # todo: enable per-profile caching of required data
     def get_flat(self, profile):
         '''
@@ -116,9 +117,9 @@ class Topic(RewardableEntity):
         # if result is not None:
         #     return result
 
-        sections = Section.objects.filter(topic=self).all()
+        sections = Section.objects.filter(topic=self, is_published=True).all()
         # categories = QuoteCategory.objects.filter(section__topic=self).all()
-        categories = QuoteCategory.objects.filter(section__in=sections).all()
+        categories = QuoteCategory.objects.filter(section__in=sections, is_published=True).all()
 
         flat_topic = {
             'id': self.pk,
@@ -151,6 +152,9 @@ class Topic(RewardableEntity):
 class Section(RewardableEntity):
     title = models.CharField("Название Раздела", max_length=256)
     topic = models.ForeignKey(Topic, verbose_name="Тема", on_delete=models.CASCADE)
+
+    # Publishing status
+    is_published = models.BooleanField("Раздел (секция) опубликован?", default=True, blank=True)
 
     def __str__(self):
         return _truncate(f'{self.title}')
@@ -230,6 +234,9 @@ class QuoteCategory(RewardableEntity, ItemWithImageMixin):
     section = models.ForeignKey(Section, verbose_name="Раздел", on_delete=models.CASCADE, default=None, null=True)
     title = models.CharField("Название Категории", max_length=256)
     icon = models.CharField("Название иконки", max_length=256, default='', blank=True)
+
+    # Publishing status
+    is_published = models.BooleanField("Категория опубликована?", default=True, blank=True)
 
     # Events
     is_event = models.BooleanField("Это событие?", default=False)

@@ -28,7 +28,7 @@ class BaseView(SafeView):
 class TopicDetailView(BaseView):
     def get(self, request, *args, **kwargs):
         try:
-            topic = Topic.objects.get(pk=kwargs['pk'], hidden=False)
+            topic = Topic.objects.get(pk=kwargs['pk'], is_published=True)
             res_obj = {
                 'objects': [topic.get_flat(profile=self.request.user_profile)],
                 'meta': {}
@@ -39,7 +39,7 @@ class TopicDetailView(BaseView):
 
 
 class TopicListView(BaseView):
-    queryset = Topic.objects.filter(hidden=False)
+    queryset = Topic.objects.filter(is_published=True)
     ordering = '-pk'
     detail_url = 'topic-detail'
 

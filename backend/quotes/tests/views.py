@@ -746,7 +746,7 @@ class TopicDetailViewTest(AuthenticatedTestCase, ContentMixin):
         # Given
         self._create_content_hierarchy()
         self._create_multiple_quotes(category=self.category, author=self.author)
-        self.topic.hidden = True
+        self.topic.is_published = False
         self.topic.save()
         url = reverse('topic-detail', kwargs={'pk': self.topic.pk})
 

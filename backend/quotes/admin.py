@@ -23,7 +23,7 @@ class QuoteCategoryAdmin(admin.ModelAdmin):
     inlines = [QuotesInline,]
 
     exclude = ('is_event', 'event_due_date', 'event_title', 'event_icon', 'event_description','event_win_achievement', 'available_to_users', 'complete_by_users')
-    fields = ( 'title', 'section', 'bonus_reward', 'is_payable', 'price_to_unlock', 'on_complete_achievement', 'icon', 'item_image', 'item_image_view')
+    fields = ( 'title', 'section', 'bonus_reward', 'is_payable', 'price_to_unlock', 'on_complete_achievement', 'icon', 'item_image', 'item_image_view', 'is_published',)
     search_fields = ['title']
 
 
@@ -52,14 +52,14 @@ class QuoteAdmin(admin.ModelAdmin):
 @admin.register(Topic)
 class TopicAdmin(admin.ModelAdmin):
     list_display = ('title',)
-    fields = ( 'title', 'bonus_reward', 'on_complete_achievement', 'hidden',)
+    fields = ( 'title', 'bonus_reward', 'on_complete_achievement', 'is_published',)
     search_fields = ['title']
 
 
 @admin.register(Section)
 class SectionAdmin(admin.ModelAdmin):
     list_display = ('title', 'topic')
-    fields = ( 'title', 'topic', 'bonus_reward', 'on_complete_achievement',)
+    fields = ( 'title', 'topic', 'bonus_reward', 'on_complete_achievement', 'is_published',)
     search_fields = ['title']
 
 

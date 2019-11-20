@@ -39,14 +39,16 @@ class GameBalanceMixin(TestCase):
 class ContentMixin:
     def _create_content_hierarchy(self):
         topic = Topic.objects.create(title='Test topic',
-                                     hidden=False)
+                                     is_published=True)
         section = Section.objects.create(title='Test section',
-                                         topic=topic)
+                                         topic=topic,
+                                         is_published=True)
 
         category = QuoteCategory.objects.create(
             section=section,
             title='Test category',
-            is_payable=False
+            is_payable=False,
+            is_published=True
         )
 
         authors_name = 'Lewis Carroll'
