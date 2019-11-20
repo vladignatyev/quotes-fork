@@ -71,7 +71,7 @@ ext {
             lottieVersion       : "3.0.7",
             shimmer             : "2.1.0",
             konfetti            : "1.1.2",
-            billing             : "1.2",
+            billing             : "2.0.1",
             colorPicker         : "2.2.2",
             glide               : "4.10.0"
 

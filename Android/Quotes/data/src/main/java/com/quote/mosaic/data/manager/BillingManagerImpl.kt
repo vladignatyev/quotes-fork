@@ -19,7 +19,8 @@ class BillingManagerImpl(
 
     private val purchasesUpdatesRelay = BehaviorRelay.createDefault<Int>(-100)
 
-    private val billingStatusRelay = BehaviorRelay.createDefault<BillingStatus>(BillingStatus.UNKNOWN)
+    private val billingStatusRelay =
+        BehaviorRelay.createDefault<BillingStatus>(BillingStatus.UNKNOWN)
 
     override fun subscribePurchaseUpdates(): Observable<Int> = purchasesUpdatesRelay.hide()
 
@@ -31,22 +32,23 @@ class BillingManagerImpl(
                 billingClient = BillingClient
                     .newBuilder(context)
                     .setListener(this)
+                    .enablePendingPurchases()
                     .build()
             }
             billingClient?.startConnection(object : BillingClientStateListener {
-                override fun onBillingSetupFinished(@BillingClient.BillingResponse billingResponseCode: Int) {
-                    if (billingResponseCode == BillingClient.BillingResponse.OK) {
+                override fun onBillingServiceDisconnected() {
+                    billingStatusRelay.accept(BillingStatus.DISCONNECTED)
+                    println("BILLING | onBillingServiceDisconnected | DISCONNECTED")
+                }
+
+                override fun onBillingSetupFinished(billingResult: BillingResult?) {
+                    if (billingResult?.responseCode == BillingClient.BillingResponseCode.OK) {
                         billingStatusRelay.accept(BillingStatus.CONNECTED)
                         println("BILLING | startConnection | RESULT OK")
                     } else {
                         billingStatusRelay.accept(BillingStatus.UNWANTEDCONNECTION)
-                        println("BILLING | startConnection | RESULT: $billingResponseCode")
+                        println("BILLING | startConnection | RESULT: ${billingResult?.responseCode}")
                     }
-                }
-
-                override fun onBillingServiceDisconnected() {
-                    billingStatusRelay.accept(BillingStatus.DISCONNECTED)
-                    println("BILLING | onBillingServiceDisconnected | DISCONNECTED")
                 }
             })
         }
@@ -60,10 +62,10 @@ class BillingManagerImpl(
                 .build()
             billingClient?.querySkuDetailsAsync(params) { responseCode, skuDetailsList ->
                 println("querySkuDetailsAsync, responseCode: $responseCode")
-                if (responseCode == BillingClient.BillingResponse.OK) {
+                if (responseCode.responseCode == BillingClient.BillingResponseCode.OK) {
                     emitter.onSuccess(skuDetailsList)
                 } else {
-                    emitter.onError(BillingError(responseCode))
+                    emitter.onError(BillingError(responseCode.responseCode))
                     Timber.e("Can't querySkuDetailsAsync, responseCode: $responseCode")
                 }
             }
@@ -73,12 +75,18 @@ class BillingManagerImpl(
         .create { emitter ->
             val purchase = purchases?.first()
             if (purchase != null) {
-                billingClient?.consumeAsync(purchase.purchaseToken) { responseCode, purchaseToken ->
-                    if (responseCode == BillingClient.BillingResponse.OK && purchaseToken != null) {
+
+                val params = ConsumeParams
+                    .newBuilder()
+                    .setDeveloperPayload(purchase.developerPayload)
+                    .setPurchaseToken(purchase.purchaseToken)
+                    .build()
+                billingClient?.consumeAsync(params) { result, purchaseToken ->
+                    if (result.responseCode == BillingClient.BillingResponseCode.OK && purchaseToken != null) {
                         emitter.onSuccess(purchase)
                     } else {
-                        println("Can't allowMultiplePurchases, responseCode: $responseCode")
-                        emitter.onError(BillingError(responseCode))
+                        println("Can't allowMultiplePurchases, responseCode: ${result.responseCode}")
+                        emitter.onError(BillingError(result.responseCode))
                     }
                 }
             } else {
@@ -86,32 +94,42 @@ class BillingManagerImpl(
             }
         }
 
-    override fun launchBuyWorkFlow(activity: Activity, skuDetails: SkuDetails): Completable = Completable
-        .fromCallable {
-            val billingFlowParams = BillingFlowParams
-                .newBuilder()
-                .setSkuDetails(skuDetails)
-                .build()
-            billingClient?.launchBillingFlow(activity, billingFlowParams)
-        }
+    override fun launchBuyWorkFlow(activity: Activity, skuDetails: SkuDetails): Completable =
+        Completable
+            .fromCallable {
+                val billingFlowParams = BillingFlowParams
+                    .newBuilder()
+                    .setSkuDetails(skuDetails)
+                    .build()
+                billingClient?.launchBillingFlow(activity, billingFlowParams)
+            }
 
     override fun clearHistory(): Completable = Completable.fromAction {
         billingClient
             ?.queryPurchases(BillingClient.SkuType.INAPP)
             ?.purchasesList
-            ?.forEach {
-                billingClient?.consumeAsync(it.purchaseToken) { responseCode, purchaseToken ->
-                    if (responseCode == BillingClient.BillingResponse.OK && purchaseToken != null) {
+            ?.forEach { purchase ->
+                val params = ConsumeParams
+                    .newBuilder()
+                    .setDeveloperPayload(purchase.developerPayload)
+                    .setPurchaseToken(purchase.purchaseToken)
+                    .build()
+                billingClient?.consumeAsync(params) { response, purchaseToken ->
+                    if (response.responseCode == BillingClient.BillingResponseCode.OK && purchaseToken != null) {
                         println("onPurchases Updated consumeAsync, purchases token dealed: $purchaseToken")
                     } else {
-                        println("onPurchases some troubles happened: $responseCode")
+                        println("onPurchases some troubles happened: ${response.responseCode}")
                     }
                 }
             }
     }
 
-    override fun onPurchasesUpdated(responseCode: Int, purchases: MutableList<Purchase>?) {
+    override fun onPurchasesUpdated(
+        billingResult: BillingResult?,
+        purchases: MutableList<Purchase>?
+    ) {
         this.purchases = purchases
-        purchasesUpdatesRelay.accept(responseCode)
+        println("----------- $billingResult")
+        purchasesUpdatesRelay.accept(billingResult?.responseCode)
     }
 }

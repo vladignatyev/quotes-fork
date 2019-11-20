@@ -83,7 +83,8 @@ class GameActivity : AppActivity(),
         }.untilStopped()
 
         vm.state.levelCompletedTrigger.subscribe {
-            GameSuccessFragment.newInstance().show(supportFragmentManager, null)
+            GameSuccessFragment.newInstance(vm.state.currentQuote.get()!!)
+                .show(supportFragmentManager, null)
         }.untilStopped()
     }
 
