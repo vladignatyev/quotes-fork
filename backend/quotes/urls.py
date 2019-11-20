@@ -41,8 +41,7 @@ urlpatterns = [
 
     # User profile
     path('profile/', ProfileView.as_view(), name='profile-view'),
-    # path('profile/update/', ProfileUpdateView.as_view(), name='profile-update-view'),
-    # path('profile/ban/', ProfileCheckBanView.as_view(), name='profile-checkban-view'),
+    path('profile/update/', ProfileUpdateView.as_view(), name='profile-update-view'),
 
     # List of user achievements
     path('achievements/', AchievementListView.as_view(), name='achievements-list'),

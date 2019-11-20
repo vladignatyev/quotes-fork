@@ -130,6 +130,8 @@ class ProfileView(BaseView):
         except ValueError:
             return HttpResponse(status=404)
 
+
+
 class FormBasedView(BaseView):
     PAYLOAD_MAX_LENGTH = 512
 
@@ -142,6 +144,35 @@ class FormBasedView(BaseView):
         except json.decoder.JSONDecodeError:
             deserialized = None
         return self.form_cls(deserialized)
+
+
+class ProfileUpdateForm(forms.Form):
+    nickname = forms.CharField(label='New nickname for user', max_length=256)
+
+
+class ProfileUpdateView(FormBasedView):
+    form_cls = ProfileUpdateForm
+
+    def post(self, request, *args, **kwargs):
+        form = self.make_form_from_request(request)
+        if not form or not form.is_valid():
+            return HttpResponse(status=400)
+
+        cleaned_data = form.clean()
+
+        try:
+            self.request.user_profile.nickname = cleaned_data['nickname']
+            self.request.user_profile.save()
+
+            updated_profile = Profile.objects.get(pk=self.request.user_profile.pk)
+            res_dict = {
+                "objects": [updated_profile.get_flat()],
+                "meta": {}
+            }
+
+            return json_response(res_dict)
+        except ValueError:
+            return HttpResponse(status=404)
 
 
 class GooglePlayIAPForm(forms.Form):

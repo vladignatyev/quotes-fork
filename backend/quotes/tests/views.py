@@ -698,7 +698,7 @@ class ProfileViewTest(AuthenticatedTestCase):
         url = reverse('profile-view')
 
         expected_fields = ('id', 'balance', 'last_active', 'nickname', 'initial_profile_balance',
-                           'reward_per_level_completion', 'reward_per_doubleup')
+                           'reward_per_level_completion', 'reward_per_doubleup', 'top_position_change_since_last_update', 'is_banned')
 
         # When
         response = self.client.get(url, **self.auth())
@@ -706,6 +706,22 @@ class ProfileViewTest(AuthenticatedTestCase):
         # Then
         profile_flat = json.loads(response.content)['objects'][0]
         self.assertEqual(set(profile_flat.keys()), set(expected_fields))
+
+class ProfileUpdateViewTest(AuthenticatedTestCase):
+    def test_should_update_username(self):
+        # Given
+        url = reverse('profile-update-view')
+        profile = self.profile
+
+        new_nickname = 'test nickname'
+
+        # When
+        params = {'nickname': new_nickname}
+        response = self.client.post(url, params, content_type='application/json', **self.auth())
+
+        # Then
+        self.assertEqual(200, response.status_code)
+        self.assertEqual(new_nickname, Profile.objects.get(pk=self.profile.pk).nickname)
 
 
 class TopicDetailViewTest(AuthenticatedTestCase, ContentMixin):

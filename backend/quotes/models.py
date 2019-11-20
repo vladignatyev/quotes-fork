@@ -531,6 +531,8 @@ class Profile(models.Model):
             'last_active': self.last_active.strftime('%Y-%m-%dT%H:%M:%S%z'),
             'nickname': self.nickname,
             'balance': self.balance,
+            'is_banned': self.is_banned,
+            'top_position_change_since_last_update': self.profilerank.position_change_since_last_update,
             'reward_per_level_completion': self.settings.reward_per_level_completion,
             'reward_per_doubleup': self.settings.reward_per_doubleup,
             'initial_profile_balance': self.settings.initial_profile_balance
