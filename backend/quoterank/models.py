@@ -7,10 +7,14 @@ from django.utils import timezone
 
 
 class ProfileRankManager(models.Manager):
-    pass
-    # def create_if_not_exist(self, profile):
-    #     o, created = ProfileRank.objects.get_or_create(profile=profile)
-    #     return o
+    def get_top_by_profile(self, profile_infocus, top_up=5, top_down=5):
+        pr = ProfileRank.objects.select_related('profile').get(profile=profile_infocus)
+        return list(ProfileRank.objects.select_related('profile').filter(rank_cached__gt=pr.rank_cached).order_by('-rank_cached')[:top_up]) + \
+        [ pr ] + \
+        list(ProfileRank.objects.select_related('profile').filter(rank_cached__lt=pr.rank_cached).order_by('-rank_cached')[:top_down])
+
+    def get_global_top(self, limit=10):
+        return ProfileRank.objects.select_related('profile').order_by('-rank_cached')[:limit]
 
 
 def create_ranking_for_profile(sender, instance, created, **kwargs):
@@ -98,10 +102,3 @@ class ProfileRank(models.Model):
 
     def get_position_in_overall_top_by_rank(self, rank):
         return ProfileRank.objects.filter(rank_cached__gt=rank).count() + 1
-
-    @classmethod
-    def get_top(self, profile_infocus, top_up=5, top_down=5):
-        pr = ProfileRank.objects.select_related('profile').get(profile=profile_infocus)
-        return list(ProfileRank.objects.select_related('profile').filter(rank_cached__gt=pr.rank_cached).order_by('-rank_cached')[:top_up]) + \
-        [ pr ] + \
-        list(ProfileRank.objects.select_related('profile').filter(rank_cached__lt=pr.rank_cached).order_by('-rank_cached')[:top_down])

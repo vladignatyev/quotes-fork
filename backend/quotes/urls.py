@@ -41,6 +41,8 @@ urlpatterns = [
 
     # User profile
     path('profile/', ProfileView.as_view(), name='profile-view'),
+    # path('profile/update/', ProfileUpdateView.as_view(), name='profile-update-view'),
+    # path('profile/ban/', ProfileCheckBanView.as_view(), name='profile-checkban-view'),
 
     # List of user achievements
     path('achievements/', AchievementListView.as_view(), name='achievements-list'),
@@ -56,6 +58,10 @@ urlpatterns = [
     path('purchase/play/products/', PurchaseableProductsListView.as_view(), name='purchase-products-list'),
 
     path('quote/preview/<int:quote_pk>/', QuotePreview.as_view(), name='quote-preview'),
+
+    path('quoterank/globaltop/preview/', QuoteRankHtmlPreview.as_view(), name='quoterank-globaltop-preview'),
+    path('quoterank/preview/<int:quote_pk>/', QuotePreview.as_view(), name='quote-preview'),
+
 
     # Push notifications
     path('notifications/subscribe/', PushNotificationSubscriptionView.as_view(), name='notifications-subscribe')

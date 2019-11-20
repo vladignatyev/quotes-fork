@@ -87,10 +87,15 @@ class PurchaseStatus:
     IN_PROGRESS = 'inprogress'
     INVALID = 'invalid'
 
+    PURCHASED = 'purchased'
+    CANCELLED = 'cancelled'
+
     choices = (('unknown', 'Unknown'),
                ('valid', 'Valid'),
                ('inprogress', 'In progress'),
-               ('invalid', 'Invalid'))
+               ('invalid', 'Invalid'),
+               ('purchased', 'Purchased'),
+               ('cancelled', 'Cancelled'))
 
 
 class Purchase(models.Model):
@@ -101,12 +106,6 @@ class Purchase(models.Model):
 
     class Meta:
         abstract = True
-
-    def validate(self):
-        pass
-
-    def is_valid(self):
-        return self.status == PurchaseStatus.VALID
 
 
 class GooglePlayProduct(models.Model):
@@ -127,7 +126,9 @@ class GooglePlayIAPPurchase(Purchase):
 
     # according to: https://developer.android.com/google/play/billing/billing_overview
     purchase_token = models.CharField(max_length=256, blank=True)
-    order_id = models.CharField(max_length=256, blank=True)
+
+    # should be unique, see https://developer.android.com/google/play/billing/billing_best_practices#validating-purchase-server
+    order_id = models.CharField(max_length=256, blank=True, unique=True)
 
     date_created = models.DateTimeField(auto_now_add=True)
     date_updated = models.DateTimeField(auto_now=True)

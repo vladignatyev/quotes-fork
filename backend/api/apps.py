@@ -32,6 +32,27 @@ def check_settings(app_configs, **kwargs):
             )
         )]
 
+
+    if getattr(settings, 'GOOGLE_IAP_CREDENTIALS', None) is None:
+        errors += [(
+            Warning(
+                'Missed GOOGLE_IAP_CREDENTIALS in your `settings.py`',
+                hint='If you are using IAP Validation feature for Android apps, please provide GOOGLE_IAP_CREDENTIALS path to Service Account credentials in your Django `settings.py`',
+                obj=None,
+                id='api.W002',
+            )
+        )]
+
+    if getattr(settings, 'GOOGLE_PLAY_BUNDLE_ID', None) is None:
+        errors += [(
+            Warning(
+                'Missed GOOGLE_PLAY_BUNDLE_ID in your `settings.py`',
+                hint='If you are using IAP Validation feature for Android apps, please provide GOOGLE_PLAY_BUNDLE_ID path to Service Account credentials in your Django `settings.py`',
+                obj=None,
+                id='api.W003',
+            )
+        )]
+
     if getattr(settings, 'SECRET_KEY', None) is None:
         errors += [(
             Error(

@@ -15,6 +15,7 @@ from .models import *
 
 from api.views import AuthenticationForm, AuthenticateView, SafeView, PushSubscriptionView
 
+from quoterank.views import QuoteRankPreview
 
 from .utils import json_response
 
@@ -159,45 +160,49 @@ class PurchaseCoinsView(FormBasedView):
     form_cls = RechargeForm
 
     def post(self, request, *args, **kwargs):
-        form = self.make_form_from_request(request)
-        if not form or not form.is_valid():
-            return HttpResponse(status=400)
-
-        Purchase = apps.get_model('api.GooglePlayIAPPurchase')
-
-        cleaned_data = form.clean()
-
-        try:
-            existing_purchase = Purchase.objects.get(order_id=cleaned_data['order_id'],
-                                                  purchase_token=cleaned_data['purchase_token'])
-            res_dict = {
-                "objects":[{
-                    "purchase_id": existing_purchase.id
-                }],
-                "meta": {}
-            }
-            return json_response(res_dict)
-        except Purchase.DoesNotExist:
-            pass
-
-        try:
-            recharge = BalanceRechargeProduct.objects.get(id=cleaned_data['balance_recharge'])
-
-            purchase = Purchase.objects.create(product=recharge.google_play_product,
-                                               device_session=request.device_session,
-                                               order_id=cleaned_data['order_id'],
-                                               purchase_token=cleaned_data['purchase_token'])
-            res_dict = {
-                "objects":[{
-                    "purchase_id": purchase.id
-                }],
-                "meta": {}
-            }
-            return json_response(res_dict)
-        except BalanceRechargeProduct.DoesNotExist:
-            return HttpResponse(status=404)
-
-        return HttpResponse(status=501)
+        # todo:
+        # - check purchase in billing API
+        # - 
+        pass
+        # form = self.make_form_from_request(request)
+        # if not form or not form.is_valid():
+        #     return HttpResponse(status=400)
+        #
+        # Purchase = apps.get_model('api.GooglePlayIAPPurchase')
+        #
+        # cleaned_data = form.clean()
+        #
+        # try:
+        #     existing_purchase = Purchase.objects.get(order_id=cleaned_data['order_id'],
+        #                                           purchase_token=cleaned_data['purchase_token'])
+        #     res_dict = {
+        #         "objects":[{
+        #             "purchase_id": existing_purchase.id
+        #         }],
+        #         "meta": {}
+        #     }
+        #     return json_response(res_dict)
+        # except Purchase.DoesNotExist:
+        #     pass
+        #
+        # try:
+        #     recharge = BalanceRechargeProduct.objects.get(id=cleaned_data['balance_recharge'])
+        #
+        #     purchase = Purchase.objects.create(product=recharge.google_play_product,
+        #                                        device_session=request.device_session,
+        #                                        order_id=cleaned_data['order_id'],
+        #                                        purchase_token=cleaned_data['purchase_token'])
+        #     res_dict = {
+        #         "objects":[{
+        #             "purchase_id": purchase.id
+        #         }],
+        #         "meta": {}
+        #     }
+        #     return json_response(res_dict)
+        # except BalanceRechargeProduct.DoesNotExist:
+        #     return HttpResponse(status=404)
+        #
+        # return HttpResponse(status=501)
 
 
 class PurchaseUnlockView(FormBasedView):
@@ -400,4 +405,9 @@ class QuotesAuthenticateView(AuthenticateView):
 
 
 class PushNotificationSubscriptionView(PushSubscriptionView):
+    pass
+
+
+
+class QuoteRankHtmlPreview(QuoteRankPreview):
     pass
