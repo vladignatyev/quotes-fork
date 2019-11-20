@@ -65,7 +65,7 @@ class SectionAdmin(admin.ModelAdmin):
 
 @admin.register(Profile)
 class ProfileAdmin(admin.ModelAdmin):
-    list_display = ('nickname', 'balance', )
+    list_display = ('nickname', 'balance', 'is_banned')
     date_hierarchy = 'last_active'
     exclude = ('device_sessions',)
 

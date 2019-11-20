@@ -514,6 +514,8 @@ class Profile(models.Model):
 
     settings = models.ForeignKey('GameBalance', verbose_name="Соответствующий объект Игрового баланса", on_delete=models.CASCADE, null=True, default=None)
 
+    is_banned = models.BooleanField("Забанен?", default=False, blank=True)
+
     objects = ProfileManager()
 
     class Meta:

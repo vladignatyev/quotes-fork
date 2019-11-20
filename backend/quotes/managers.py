@@ -48,10 +48,10 @@ class ProfileManager(models.Manager):
         return profile
 
     def get_by_session(self, device_session):
-        return self.get(device_sessions__pk__contains=device_session.pk)
+        return self.select_for_update().get(device_sessions__pk__contains=device_session.pk)
 
     def get_by_token(self, device_session_token):
-        return self.get(device_sessions__token__contains=device_session_token)
+        return self.select_for_update().get(device_sessions__token__contains=device_session_token)
 
     def get_by_auth_token(self, auth_token):
         session = DeviceSession.objects.get(auth_token=auth_token)

@@ -3,6 +3,8 @@ logger = logging.getLogger(__name__)
 
 from .models import *
 
+from django.db import transaction
+
 
 # todo: replace when auth get done
 def create_profile_on_new_device_session(sender, instance, created, **kwargs):
@@ -23,7 +25,7 @@ def create_profile_on_new_device_session(sender, instance, created, **kwargs):
 def recharge_profile_on_purchase(sender, instance, created, **kwargs):
     if created:
         return
-    if instance.status != PurchaseStatus.PURCHASED:
+    if instance.status not in (PurchaseStatus.PURCHASED, PurchaseStatus.CANCELLED):
         return
     purchase = instance
 
@@ -32,9 +34,18 @@ def recharge_profile_on_purchase(sender, instance, created, **kwargs):
     try:
         app_product = BalanceRechargeProduct.objects.get_by_store_product(purchase.product)
 
-        profile = Profile.objects.get_by_session(purchase.device_session)
-        profile.balance = profile.balance + app_product.balance_recharge
-        profile.save()
+        # todo: extract to Profile.recharge(...)
+        with transaction.atomic():
+            profile = Profile.objects.get_by_session(purchase.device_session)
+            if instance.status == PurchaseStatus.PURCHASED:
+                profile.balance = profile.balance + app_product.balance_recharge
+            elif instance.status == PurchaseStatus.CANCELLED:
+                new_balance = profile.balance - app_product.balance_recharge
+                if new_balance < 0:
+                    profile.is_banned = True
+                profile.balance = new_balance
+
+            profile.save()
 
         logger.debug('Profile recharged: %s', profile)
     except BalanceRechargeProduct.DoesNotExist:
@@ -45,7 +56,7 @@ def recharge_profile_on_purchase(sender, instance, created, **kwargs):
 def unlock_category_on_purchase(sender, instance, created, **kwargs):
     if created:
         return
-    if instance.status != PurchaseStatus.PURCHASED:
+    if instance.status not in (PurchaseStatus.PURCHASED, PurchaseStatus.CANCELLED):
         return
     purchase = instance
     logger.debug('New valid purchase: %s', purchase)
@@ -54,7 +65,10 @@ def unlock_category_on_purchase(sender, instance, created, **kwargs):
 
     try:
         unlock = CategoryUnlockPurchase.objects.get(google_play_purchase=purchase)
-        unlock.do_unlock()
+        if instance.status == PurchaseStatus.PURCHASED:
+            unlock.do_unlock()
+        elif instance.status == PurchaseStatus.CANCELLED:
+            unlock.undo_unlock()
     except CategoryUnlockPurchase.DoesNotExist:
         logger.debug('CategoryUnlockPurchase.DoesNotExist: Google Play Purchase %s', purchase.pk)
         pass
