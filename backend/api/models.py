@@ -83,16 +83,12 @@ class PurchaseTypes:
 
 class PurchaseStatus:
     DEFAULT = UNKNOWN = 'unknown'
-    VALID = 'valid'
-    IN_PROGRESS = 'inprogress'
     INVALID = 'invalid'
 
     PURCHASED = 'purchased'
     CANCELLED = 'cancelled'
 
     choices = (('unknown', 'Unknown'),
-               ('valid', 'Valid'),
-               ('inprogress', 'In progress'),
                ('invalid', 'Invalid'),
                ('purchased', 'Purchased'),
                ('cancelled', 'Cancelled'))

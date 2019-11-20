@@ -133,7 +133,7 @@ class ProfileTest(GameBalanceMixin, TimeAssert):
         # When
         purchase = GooglePlayIAPPurchase.objects.create(product=google_play_product,
                                                         device_session=session)
-        purchase.status = PurchaseStatus.VALID  # manually 'validated' purchase
+        purchase.status = PurchaseStatus.PURCHASED  # manually 'validated' purchase
         purchase.save()
 
         # Then
@@ -250,7 +250,7 @@ class ProfileCategoryPurchaseUnlock(GameBalanceMixin):
         purchase.save()
 
         # When
-        google_play_purchase.status = PurchaseStatus.VALID  # manually 'validated' purchase
+        google_play_purchase.status = PurchaseStatus.PURCHASED  # manually 'validated' purchase
         google_play_purchase.save()
 
         # Then

@@ -612,7 +612,7 @@ class CategoryUnlockPurchase(models.Model):
 
         elif self.type == CategoryUnlockTypes.UNLOCK_BY_PURCHASE:
             with transaction.atomic():
-                if self.google_play_purchase.status == PurchaseStatus.VALID:
+                if self.google_play_purchase.status == PurchaseStatus.PURCHASED:
                     self.status = CategoryUnlockPurchaseStatus.COMPLETE
                     self.save()
                 else:

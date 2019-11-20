@@ -188,7 +188,7 @@ class LevelsListTest(AuthenticatedTestCase, ContentMixin):
                                               category_to_unlock=self.category,
                                               google_play_purchase=purchase)
 
-        purchase.status = PurchaseStatus.VALID  # manually 'validated' purchase
+        purchase.status = PurchaseStatus.PURCHASED  # manually 'validated' purchase
         purchase.save()  # do_unlock will be called on save see `signals.py`
 
 
@@ -360,7 +360,7 @@ class PurchaseStatusViewTest(AuthenticatedTestCase, ContentMixin):
 
         # Then
         self.assertEqual(200, response.status_code)
-        self.assertNotEqual(PurchaseStatus.VALID, json.loads(response.content)['objects'][0]['status'])
+        self.assertNotEqual(PurchaseStatus.PURCHASED, json.loads(response.content)['objects'][0]['status'])
         self.assertEqual(PurchaseStatus.DEFAULT, json.loads(response.content)['objects'][0]['status'])
 
     def test_should_return_actual_status2(self):

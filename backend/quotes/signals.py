@@ -23,7 +23,7 @@ def create_profile_on_new_device_session(sender, instance, created, **kwargs):
 def recharge_profile_on_purchase(sender, instance, created, **kwargs):
     if created:
         return
-    if instance.status != PurchaseStatus.VALID:
+    if instance.status != PurchaseStatus.PURCHASED:
         return
     purchase = instance
 
@@ -45,7 +45,7 @@ def recharge_profile_on_purchase(sender, instance, created, **kwargs):
 def unlock_category_on_purchase(sender, instance, created, **kwargs):
     if created:
         return
-    if instance.status != PurchaseStatus.VALID:
+    if instance.status != PurchaseStatus.PURCHASED:
         return
     purchase = instance
     logger.debug('New valid purchase: %s', purchase)
