@@ -12,7 +12,8 @@ import com.quote.mosaic.ui.main.MainViewModel
 import com.quote.mosaic.ui.main.play.OverviewViewModel
 import com.quote.mosaic.ui.main.play.topic.TopicMapper
 import com.quote.mosaic.ui.main.play.topic.TopicViewModel
-import com.quote.mosaic.ui.main.play.topup.TopupViewModel
+import com.quote.mosaic.ui.main.play.topup.TopUpProductMapper
+import com.quote.mosaic.ui.main.play.topup.TopUpViewModel
 import com.quote.mosaic.ui.main.profile.ProfileViewModel
 import com.quote.mosaic.ui.main.top.TopViewModel
 import com.quote.mosaic.ui.onboarding.login.LoginViewModel
@@ -97,10 +98,14 @@ class ViewModelModule {
     @Singleton
     fun topupViewModelFactory(
         schedulers: Schedulers,
-        apiClient: ApiClient
-    ) = TopupViewModel.Factory(
+        apiClient: ApiClient,
+        billingManager: BillingManager,
+        productsMapper: TopUpProductMapper
+    ) = TopUpViewModel.Factory(
         schedulers,
-        apiClient
+        apiClient,
+        billingManager,
+        productsMapper
     )
 
     @Provides

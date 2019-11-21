@@ -45,6 +45,7 @@
                     android:textColor="@color/white"
                     android:textSize="22sp"
                     android:textStyle="bold"
+                    android:transitionName="title"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
@@ -55,6 +56,8 @@
                     android:layout_height="0dp"
                     android:alpha="0.98"
                     android:background="@drawable/background_topup"
+                    android:foreground="?selectableItemBackgroundBorderless"
+                    android:transitionName="topup"
                     app:cardBackgroundColor="@color/white"
                     app:cardCornerRadius="16dp"
                     app:cardElevation="8dp"
@@ -70,7 +73,7 @@
                     android:layout_marginTop="16dp"
                     android:layout_marginEnd="16dp"
                     android:layout_marginBottom="16dp"
-                    android:drawableStart="@drawable/ic_money_white"
+                    android:drawableStart="@drawable/ic_coins"
                     android:drawablePadding="8dp"
                     android:elevation="20dp"
                     android:onClick="@{() -> fragment.topupClicked()}"
@@ -79,6 +82,7 @@
                     android:textColor="@color/gold"
                     android:textSize="26sp"
                     android:textStyle="bold"
+                    android:transitionName="balance"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
@@ -125,7 +129,6 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             tools:visibility="visible" />
-
 
         <ImageView
             android:id="@+id/logo"

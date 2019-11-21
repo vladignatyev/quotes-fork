@@ -2,10 +2,7 @@ package com.quote.mosaic.data.api
 
 import com.quote.mosaic.data.UserManager
 import com.quote.mosaic.data.error.ResponseErrorMessageExtractor
-import com.quote.mosaic.data.model.MainTopicDO
-import com.quote.mosaic.data.model.QuoteDO
-import com.quote.mosaic.data.model.TopicDO
-import com.quote.mosaic.data.model.UserDO
+import com.quote.mosaic.data.model.*
 import com.quote.mosaic.data.network.NetworkStatusProvider
 import com.quote.mosaic.data.transform.EmptyResponseTransform
 import com.quote.mosaic.data.transform.ResponseTransform
@@ -66,6 +63,9 @@ class NetworkApiClient(
 
     override fun completeLevel(id: Int): Completable =
         apiService.completeLevel(userManager.getSession(), id).transformToCompletable()
+
+    override fun getSkuList(): Single<AvailableProductsDO> =
+        apiService.getSkuList(userManager.getSession()).transform().map { it.objects.first() }
 
     private fun <T> Single<Response<T>>.transform() =
         compose(

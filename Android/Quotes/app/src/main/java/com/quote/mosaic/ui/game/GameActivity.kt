@@ -6,6 +6,7 @@ import android.graphics.Color
 import android.graphics.Rect
 import android.os.Bundle
 import android.view.ViewGroup
+import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProviders
@@ -121,6 +122,7 @@ class GameActivity : AppActivity(),
 
     override fun onHintReceived(hint: String) {
         val snackbar = Snackbar.make(binding.root, hint, Snackbar.LENGTH_INDEFINITE)
+        snackbar.view.findViewById<TextView>(com.google.android.material.R.id.snackbar_text).maxLines = 5
         snackbar
             .setAction(R.string.shared_label_remember) { snackbar.dismiss() }
             .setActionTextColor(ContextCompat.getColor(this, R.color.white))
@@ -168,7 +170,7 @@ class GameActivity : AppActivity(),
  * Logic connected with game drag & drop mechanics
  *
  * */
-fun GameActivity.showGame(quote: String) {
+fun GameActivity.showGame(quote: List<String>) {
     if (gameWrapperAdapter != null) return
 
     dataProvider = ExampleDataProvider()

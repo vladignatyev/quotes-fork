@@ -1,34 +1,123 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <data>
 
         <variable
             name="fragment"
-            type="com.quote.mosaic.ui.main.play.topup.TopupFragment" />
+            type="com.quote.mosaic.ui.main.play.topup.TopUpFragment" />
 
         <variable
             name="viewModel"
-            type="com.quote.mosaic.ui.main.play.topup.TopupViewModel" />
+            type="com.quote.mosaic.ui.main.play.topup.TopUpViewModel" />
 
     </data>
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <LinearLayout
         android:id="@+id/container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@drawable/shape_solid_dark_indigo_rounded_corners">
+        android:background="@color/blue"
+        android:orientation="vertical">
 
-        <TextView
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <ImageView
+                    android:id="@+id/close"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:alpha="0.8"
+                    android:clickable="true"
+                    android:foreground="?selectableItemBackgroundBorderless"
+                    android:onClick="@{() -> fragment.goBack()}"
+                    android:padding="16dp"
+                    android:src="@drawable/ic_arrow_back"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="@+id/topup" />
+
+                <TextView
+                    android:id="@+id/title"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginEnd="8dp"
+                    android:text="@{String.format(@string/topup_label_title, viewModel.state.name)}"
+                    android:textColor="@color/white"
+                    android:textSize="22sp"
+                    android:textStyle="bold"
+                    android:transitionName="title"
+                    app:layout_constraintEnd_toStartOf="@+id/topup"
+                    app:layout_constraintStart_toEndOf="@+id/close"
+                    app:layout_constraintTop_toTopOf="@+id/topup"
+                    tools:text="@string/topup_label_title" />
+
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/topup"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:alpha="0.98"
+                    android:background="@drawable/background_topup"
+                    android:foreground="?selectableItemBackgroundBorderless"
+                    android:transitionName="topup"
+                    app:cardBackgroundColor="@color/white"
+                    app:cardCornerRadius="16dp"
+                    app:cardElevation="8dp"
+                    app:layout_constraintBottom_toBottomOf="@+id/balance"
+                    app:layout_constraintEnd_toEndOf="@+id/balance"
+                    app:layout_constraintStart_toStartOf="@+id/balance"
+                    app:layout_constraintTop_toTopOf="@+id/balance" />
+
+                <TextView
+                    android:id="@+id/balance"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginEnd="16dp"
+                    android:layout_marginBottom="16dp"
+                    android:drawableStart="@drawable/ic_coins"
+                    android:drawablePadding="8dp"
+                    android:elevation="20dp"
+                    android:padding="8dp"
+                    android:text="@{viewModel.state.balance}"
+                    android:textColor="@color/gold"
+                    android:textSize="26sp"
+                    android:textStyle="bold"
+                    android:transitionName="balance"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:text="100" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+        </FrameLayout>
+
+        <ProgressBar
+            android:id="@+id/progressbar"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:gravity="center"
-            android:text="WORKS"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            android:layout_gravity="center"
+            android:theme="@style/progressBarGold"
+            app:visible="@{viewModel.state.loading}" />
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/items"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:clipToPadding="false"
+            android:layoutAnimation="@anim/layout_animation_fall_down"
+            android:paddingTop="16dp"
+            app:invisible="@{viewModel.state.loading}"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+            tools:itemCount="5"
+            tools:listitem="@layout/topup_product_item" />
+    </LinearLayout>
 </layout>

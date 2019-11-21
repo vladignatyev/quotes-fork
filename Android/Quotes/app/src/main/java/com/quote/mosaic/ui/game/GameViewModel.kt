@@ -18,7 +18,7 @@ class GameViewModel(
     private val apiClient: ApiClient
 ) : AppViewModel() {
 
-    private val quoteLoadedTrigger = BehaviorProcessor.create<String>()
+    private val quoteLoadedTrigger = BehaviorProcessor.create<List<String>>()
     private val levelCompletedTrigger = ClearableBehaviorProcessor.create<Unit>()
 
     val state = State(
@@ -71,7 +71,7 @@ class GameViewModel(
 
         val currentQuote = quotes.first { !it.complete }
         state.currentQuote.set(currentQuote)
-        quoteLoadedTrigger.onNext(currentQuote.splitted.joinToString(separator = " "))
+        quoteLoadedTrigger.onNext(currentQuote.splitted)
     }
 
     fun reset() {
@@ -87,7 +87,7 @@ class GameViewModel(
         val currentQuote: ObservableField<QuoteDO> = ObservableField(),
         val quote: ObservableField<String> = ObservableField(),
 
-        val quoteLoadedTrigger: Flowable<String>,
+        val quoteLoadedTrigger: Flowable<List<String>>,
         val levelCompletedTrigger: Flowable<Unit>
     )
 

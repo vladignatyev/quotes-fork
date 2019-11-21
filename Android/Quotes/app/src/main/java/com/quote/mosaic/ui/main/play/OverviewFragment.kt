@@ -6,11 +6,13 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProviders
+import androidx.navigation.fragment.FragmentNavigatorExtras
 import androidx.navigation.fragment.findNavController
 import com.quote.mosaic.R
 import com.quote.mosaic.core.AppFragment
 import com.quote.mosaic.data.UserManager
 import com.quote.mosaic.databinding.OverviewFragmentBinding
+import com.quote.mosaic.ui.main.play.topup.TopUpFragment
 import javax.inject.Inject
 
 class OverviewFragment : AppFragment() {
@@ -59,7 +61,23 @@ class OverviewFragment : AppFragment() {
     }
 
     fun topupClicked() {
-        findNavController().navigate(R.id.action_overviewFragment_to_topupFragment)
+        val extras = FragmentNavigatorExtras(
+            binding().title to "title",
+            binding().balance to "balance",
+            binding().topup to "topup"
+        )
+
+        val params = Bundle().apply {
+            putString(TopUpFragment.KEY_USER_NAME, vm.state.name.get())
+            putString(TopUpFragment.KEY_USER_BALANCE, vm.state.balance.get())
+        }
+
+        findNavController().navigate(
+            R.id.action_overviewFragment_to_topupFragment,
+            params,
+            null,
+            extras
+        )
     }
 
     private fun binding() = viewBinding<OverviewFragmentBinding>()

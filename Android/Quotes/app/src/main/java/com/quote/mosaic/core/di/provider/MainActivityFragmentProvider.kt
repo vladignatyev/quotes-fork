@@ -3,7 +3,7 @@ package com.quote.mosaic.core.di.provider
 import com.quote.mosaic.ui.main.play.OverviewFragment
 import com.quote.mosaic.ui.game.success.GameSuccessFragment
 import com.quote.mosaic.ui.main.play.topic.TopicFragment
-import com.quote.mosaic.ui.main.play.topup.TopupFragment
+import com.quote.mosaic.ui.main.play.topup.TopUpFragment
 import com.quote.mosaic.ui.main.profile.ProfileFragment
 import com.quote.mosaic.ui.main.top.TopFragment
 import dagger.Module
@@ -16,7 +16,7 @@ abstract class MainActivityFragmentProvider {
     abstract fun bindsTopicFragment(): TopicFragment
 
     @ContributesAndroidInjector
-    abstract fun bindsTopupFragment(): TopupFragment
+    abstract fun bindsTopupFragment(): TopUpFragment
 
     @ContributesAndroidInjector
     abstract fun bindsOverviewFragment(): OverviewFragment

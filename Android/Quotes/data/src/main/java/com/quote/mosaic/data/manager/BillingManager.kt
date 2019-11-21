@@ -19,8 +19,6 @@ interface BillingManager {
 
     fun subscribePurchaseUpdates(): Observable<Int>
 
-    fun subscribeConnectionStatus(): Observable<BillingStatus>
-
     fun clearHistory(): Completable
 
 }

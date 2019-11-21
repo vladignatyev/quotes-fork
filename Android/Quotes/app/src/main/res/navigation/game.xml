@@ -14,9 +14,9 @@
             android:id="@+id/action_overviewFragment_to_topupFragment"
             app:destination="@id/topupFragment" />
     </fragment>
-    <dialog
+    <fragment
         android:id="@+id/topupFragment"
-        android:name="com.quote.mosaic.ui.main.play.topup.TopupFragment"
+        android:name="com.quote.mosaic.ui.main.play.topup.TopUpFragment"
         android:label="TopupFragment"
         tools:layout="@layout/topup_fragment" />
 </navigation>

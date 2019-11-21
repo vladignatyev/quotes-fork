@@ -14,15 +14,20 @@ class ImageViewBindingAdapters {
         view.setImageResource(drawableRes)
     }
 
-    @BindingAdapter("imageUri", "imagePlaceholder", requireAll = false)
-    fun imageUriBindingAdapter(imageView: ImageView, imageUri: String?, imagePlaceholder: Int = 0) {
+    @BindingAdapter("imageUri", "imagePlaceholder", "rounded", requireAll = false)
+    fun imageUriBindingAdapter(
+        imageView: ImageView,
+        imageUri: String?,
+        imagePlaceholder: Int = 0,
+        rounded: Boolean = false
+    ) {
 
         Glide.with(imageView.context)
             .load(imageUri)
             .apply {
                 if (imagePlaceholder != 0) apply(RequestOptions().placeholder(imagePlaceholder))
 
-                    apply(RequestOptions.circleCropTransform())
+                if (rounded) apply(RequestOptions.circleCropTransform())
             }
             .into(imageView)
     }

@@ -48,4 +48,7 @@
     <string name="profile_label_email_title">Пожалуйста не удаляйте это!</string>
     <string name="profile_label_email_write">Напишите ваш отзыв или сообщите о проблеме:</string>
     <string name="profile_label_share_app">Привет! Рекомендую скачать эту классную игру:</string>
+
+    <!-- BUY -->
+    <string name="topup_label_title">Выбирай подходящий вариант, %s!</string>
 </resources>

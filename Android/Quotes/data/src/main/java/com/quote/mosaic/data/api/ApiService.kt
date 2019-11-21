@@ -52,4 +52,9 @@ interface ApiService {
         @Header("X-Client-Auth") token: String,
         @Body body: HashMap<String, String>
     ): Single<Response<Void>>
+
+    @GET("purchase/play/products/")
+    fun getSkuList(
+        @Header("X-Client-Auth") token: String
+    ): Single<Response<ResponseData<AvailableProductsDO>>>
 }

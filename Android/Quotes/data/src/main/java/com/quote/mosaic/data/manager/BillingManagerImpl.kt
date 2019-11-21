@@ -8,6 +8,7 @@ import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.Single
 import timber.log.Timber
+import java.util.concurrent.TimeUnit
 
 class BillingManagerImpl(
     private val context: Context
@@ -17,17 +18,12 @@ class BillingManagerImpl(
 
     private var purchases: MutableList<Purchase>? = null
 
-    private val purchasesUpdatesRelay = BehaviorRelay.createDefault<Int>(-100)
-
-    private val billingStatusRelay =
-        BehaviorRelay.createDefault<BillingStatus>(BillingStatus.UNKNOWN)
+    private val purchasesUpdatesRelay = BehaviorRelay.createDefault(-100)
 
     override fun subscribePurchaseUpdates(): Observable<Int> = purchasesUpdatesRelay.hide()
 
-    override fun subscribeConnectionStatus(): Observable<BillingStatus> = billingStatusRelay.hide()
-
     override fun start(): Completable = Completable
-        .fromAction {
+        .unsafeCreate { emitter ->
             if (billingClient == null) {
                 billingClient = BillingClient
                     .newBuilder(context)
@@ -37,17 +33,15 @@ class BillingManagerImpl(
             }
             billingClient?.startConnection(object : BillingClientStateListener {
                 override fun onBillingServiceDisconnected() {
-                    billingStatusRelay.accept(BillingStatus.DISCONNECTED)
-                    println("BILLING | onBillingServiceDisconnected | DISCONNECTED")
+                    emitter.onError(Throwable("BILLING | onBillingServiceDisconnected | DISCONNECTED"))
                 }
 
                 override fun onBillingSetupFinished(billingResult: BillingResult?) {
                     if (billingResult?.responseCode == BillingClient.BillingResponseCode.OK) {
-                        billingStatusRelay.accept(BillingStatus.CONNECTED)
                         println("BILLING | startConnection | RESULT OK")
+                        emitter.onComplete()
                     } else {
-                        billingStatusRelay.accept(BillingStatus.UNWANTEDCONNECTION)
-                        println("BILLING | startConnection | RESULT: ${billingResult?.responseCode}")
+                        emitter.onError(Throwable("Billing startConnection failed with code: ${billingResult?.responseCode}"))
                     }
                 }
             })
@@ -95,14 +89,13 @@ class BillingManagerImpl(
         }
 
     override fun launchBuyWorkFlow(activity: Activity, skuDetails: SkuDetails): Completable =
-        Completable
-            .fromCallable {
-                val billingFlowParams = BillingFlowParams
-                    .newBuilder()
-                    .setSkuDetails(skuDetails)
-                    .build()
-                billingClient?.launchBillingFlow(activity, billingFlowParams)
-            }
+        Completable.fromCallable {
+            val billingFlowParams = BillingFlowParams
+                .newBuilder()
+                .setSkuDetails(skuDetails)
+                .build()
+            billingClient?.launchBillingFlow(activity, billingFlowParams)
+        }
 
     override fun clearHistory(): Completable = Completable.fromAction {
         billingClient
@@ -129,7 +122,6 @@ class BillingManagerImpl(
         purchases: MutableList<Purchase>?
     ) {
         this.purchases = purchases
-        println("----------- $billingResult")
         purchasesUpdatesRelay.accept(billingResult?.responseCode)
     }
 }

@@ -6,7 +6,7 @@ import io.reactivex.Single
 
 interface ApiClient {
 
-    //User
+    // User
     fun login(
         deviceId: String, timestamp: String, signature: String, nickname: String
     ): Single<String>
@@ -15,16 +15,19 @@ interface ApiClient {
 
     fun subscribePushNotifications(): Completable
 
-    //Topics
+    // Topics
     fun topics(): Single<List<MainTopicDO>>
 
     fun topic(id: Int, force: Boolean = false): Single<TopicDO>
 
-    //Categories
+    // Categories
     fun openCategory(id: Int): Completable
 
     fun quotesList(id: Int): Single<List<QuoteDO>>
 
     fun completeLevel(id: Int): Completable
+
+    // Purchases
+    fun getSkuList(): Single<AvailableProductsDO>
 
 }
