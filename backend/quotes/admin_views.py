@@ -38,5 +38,5 @@ class QuotesBulkPreview(View):
         if not request.user.is_authenticated:
             raise Http404()
 
-        quotes = Quote.objects.all()
+        quotes = Quote.objects.select_related('category').all()
         return TemplateResponse(request, self.template, {'levels': quotes})
