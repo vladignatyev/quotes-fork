@@ -465,10 +465,13 @@ class Quote(RewardableEntity):
 
 
 def beautiful_text(text):
-    capitalized = text.capitalize()
-    whitespace_removed = re.sub('\s+', ' ', capitalized)
-    whitespace_followed_by_non_word_removed = re.sub('(\s+)(\W)', '\g<2>', whitespace_removed)
-    return whitespace_followed_by_non_word_removed
+    if '^' in text:
+        text = text.replace('^', '')
+    beautified = text.capitalize()
+    beautified = re.sub('(\s+)(["\'“”«»-–—])', ' \g<2>', beautified)
+    beautified = re.sub('(\s+)([\?!¿])', '\g<2>', beautified)
+    beautified = re.sub('\s+', ' ', beautified)
+    return beautified
 
 
 class BalanceRechargeProduct(models.Model):

@@ -374,6 +374,24 @@ class QuoteSplit(TestCase):
         self.assertEqual('А что если?',
                          beautiful_text(q2))
 
+    def test_beautiful_text_shouldnt_return_special_char_and_deal_with_quotes_fairly(self):
+        q1 = 'and what ^is the use of a book, ^without “pictures” or ^conversations?'
+
+        self.assertEqual('And what is the use of a book, without “pictures” or conversations?',
+                         beautiful_text(q1))
+
+    def test_beautiful_text_should_avoid_multiple_spaces_before_question_mark(self):
+        q1 = 'and what conversations    ?'
+
+        self.assertEqual('And what conversations?',
+                         beautiful_text(q1))
+
+    def test_beautiful_text_shouldnt_eat_space_before_quote(self):
+        q1 = 'without “pictures”'
+
+        self.assertEqual('Without “pictures”',
+                         beautiful_text(q1))
+
     def test_beautiful_text_should_remove_multiple_spaces(self):
         q1 = 'and what is the   use of a book without pictures or conversations?'
         q2 = 'а что  если ?'
