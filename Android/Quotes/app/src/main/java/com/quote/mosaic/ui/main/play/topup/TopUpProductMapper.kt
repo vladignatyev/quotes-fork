@@ -37,7 +37,7 @@ class TopUpProductMapperImpl : TopUpProductMapper {
                 val remoteProduct = products[index]
                 val billingProduct = billingProducts.first { it.sku == remoteProduct.sku }
 
-                if (index == 2) {
+                if (remoteProduct.isFeatured) {
                     localProducts.add(
                         TopUpProductModel.Featured(
                             id = remoteProduct.id,

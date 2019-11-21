@@ -8,5 +8,7 @@ data class SkuDO(
     val title: String?,
     @JsonProperty("balance_recharge")
     val balanceRecharge: Int?,
+    @JsonProperty("is_featured")
+    val isFeatured: Boolean,
     val sku: String
 )
