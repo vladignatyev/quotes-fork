@@ -8,6 +8,7 @@ import com.quote.mosaic.core.AppViewModel
 import com.quote.mosaic.core.Schedulers
 import com.quote.mosaic.core.common.toFlowable
 import com.quote.mosaic.core.manager.UserPreferences
+import com.quote.mosaic.core.rx.ClearableBehaviorProcessor
 import com.quote.mosaic.core.rx.NonNullObservableField
 import com.quote.mosaic.data.UserManager
 import com.quote.mosaic.data.api.ApiClient
@@ -22,10 +23,12 @@ class ProfileViewModel(
     private val userPreferences: UserPreferences
 ) : AppViewModel() {
 
+    private val successTrigger = ClearableBehaviorProcessor.create<Unit>()
     private val logoutTrigger = BehaviorProcessor.create<Unit>()
 
     val state = State(
-        logoutTrigger = logoutTrigger
+        logoutTrigger = logoutTrigger,
+        successTrigger = successTrigger.clearable()
     )
 
     override fun initialise() {
@@ -57,11 +60,31 @@ class ProfileViewModel(
     }
 
     fun save() {
+        val newName = state.nameText.get()
+        state.loading.set(true)
+        apiClient
+            .changeUserName(newName)
+            .subscribeOn(schedulers.io())
+            .observeOn(schedulers.ui())
+            .subscribe({
+                state.loading.set(false)
+                userManager.saveUserName(it.nickname)
+                userManager.setUser(it)
+                successTrigger.onNext(Unit)
+            }, {
+                state.loading.set(false)
+                Timber.w(it, "Failed to change username")
+            }).untilCleared()
+    }
 
+    fun reset() {
+        successTrigger.clear()
     }
 
     data class State(
         val logoutTrigger: Flowable<Unit>,
+        val successTrigger: Flowable<Unit>,
+
         val color: ObservableInt = ObservableInt(),
         val nameText: NonNullObservableField<String> = NonNullObservableField(""),
         val saveEnabled: ObservableBoolean = ObservableBoolean(),

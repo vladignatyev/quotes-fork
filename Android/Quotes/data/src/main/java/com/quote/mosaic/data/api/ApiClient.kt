@@ -13,6 +13,8 @@ interface ApiClient {
 
     fun profile(): Single<UserDO>
 
+    fun changeUserName(newName: String): Single<UserDO>
+
     fun subscribePushNotifications(): Completable
 
     // Topics

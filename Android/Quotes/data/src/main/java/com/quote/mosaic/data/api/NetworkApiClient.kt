@@ -31,6 +31,15 @@ class NetworkApiClient(
     override fun profile(): Single<UserDO> =
         apiService.profile(userManager.getSession()).transform().map { it.objects.first() }
 
+    override fun changeUserName(newName: String): Single<UserDO> {
+        val session = userManager.getSession()
+
+        val body = HashMap<String, String>()
+        body["nickname"] = newName
+
+        return apiService.changeUserName(session, body).transform().map { it.objects.first() }
+    }
+
     override fun subscribePushNotifications(): Completable =
         if (!userManager.getDeviceToken().isNullOrEmpty()) {
             val body = HashMap<String, String>()

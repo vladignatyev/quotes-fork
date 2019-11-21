@@ -12,6 +12,17 @@ interface ApiService {
         @Body body: HashMap<String, String>
     ): Single<Response<TokenDO>>
 
+    @GET("profile/")
+    fun profile(
+        @Header("X-Client-Auth") token: String
+    ): Single<Response<ResponseData<UserDO>>>
+
+    @POST("profile/update/")
+    fun changeUserName(
+        @Header("X-Client-Auth") token: String,
+        @Body body: HashMap<String, String>
+    ): Single<Response<ResponseData<UserDO>>>
+
     @GET("topic/list/")
     fun topics(
         @Header("X-Client-Auth") token: String
@@ -23,11 +34,6 @@ interface ApiService {
         @Header("Cache-Control") cacheControl: String?,
         @Path("id") id: Int
     ): Single<Response<ResponseData<TopicDO>>>
-
-    @GET("profile/")
-    fun profile(
-        @Header("X-Client-Auth") token: String
-    ): Single<Response<ResponseData<UserDO>>>
 
     @POST("category/{id}/unlock")
     fun openCategory(

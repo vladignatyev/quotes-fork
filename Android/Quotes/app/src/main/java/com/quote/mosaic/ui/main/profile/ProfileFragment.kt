@@ -7,9 +7,11 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProviders
+import com.google.android.material.snackbar.Snackbar
 import com.quote.mosaic.BuildConfig
 import com.quote.mosaic.R
 import com.quote.mosaic.core.AppFragment
+import com.quote.mosaic.core.common.utils.Ime
 import com.quote.mosaic.data.UserManager
 import com.quote.mosaic.databinding.ProfileFragmentBinding
 import com.quote.mosaic.ui.onboarding.OnboardingActivity
@@ -54,6 +56,15 @@ class ProfileFragment : AppFragment(), SimpleDialog.OnDialogResultListener {
             startActivity(OnboardingActivity.newIntent(requireContext()))
             requireActivity().finishAffinity()
         }.untilStopped()
+
+        vm.state.successTrigger.subscribe {
+            Ime.hide(binding().nameEditText)
+            Snackbar.make(
+                binding().root, R.string.shared_label_saved, Snackbar.LENGTH_LONG
+            ).show()
+            vm.reset()
+        }.untilStopped()
+
     }
 
     override fun onResult(dialogTag: String, which: Int, extras: Bundle): Boolean {
