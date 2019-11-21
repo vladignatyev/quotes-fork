@@ -467,7 +467,7 @@ class Quote(RewardableEntity):
 def beautiful_text(text):
     if '^' in text:
         text = text.replace('^', ' ')
-    beautified = text.capitalize()
+    beautified = text[0].capitalize() + text[1:]
     beautified = re.sub('(\s+)(["\'“”«»-–—])', ' \g<2>', beautified)
     beautified = re.sub('(\s+)([\?!¿])', '\g<2>', beautified)
     beautified = re.sub('\s+', ' ', beautified)

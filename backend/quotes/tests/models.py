@@ -380,6 +380,12 @@ class QuoteSplit(TestCase):
         self.assertEqual('And what is the use of a book, without “pictures” or conversations?',
                          beautiful_text(q1))
 
+    def test_beautiful_text_should_capitalize_first_only(self):
+        q1 = 'capitalize? Only First Letter.'
+
+        self.assertEqual('Capitalize? Only First Letter.',
+                         beautiful_text(q1))
+
     def test_beautiful_text_should_avoid_multiple_spaces_before_question_mark(self):
         q1 = 'and what conversations    ?'
 
