@@ -81,6 +81,8 @@ class Topic(RewardableEntity):
 
     # Publishing status
     is_published = models.BooleanField("Тема опубликована?", default=True, blank=True)
+    order = models.PositiveIntegerField("Порядок сортировки: чем ниже значение, тем выше Тема в списке", default=1000, blank=True)
+    tags = models.ManyToManyField('quotes.Tag', blank=True)
 
     def __str__(self):
         return _truncate(f'{self.title}')
@@ -117,14 +119,15 @@ class Topic(RewardableEntity):
         # if result is not None:
         #     return result
 
-        sections = Section.objects.filter(topic=self, is_published=True).all()
+        sections = Section.objects.filter(topic=self, is_published=True).order_by('order').select_related('on_complete_achievement').all()
         # categories = QuoteCategory.objects.filter(section__topic=self).all()
-        categories = QuoteCategory.objects.filter(section__in=sections, is_published=True).all()
+        categories = QuoteCategory.objects.filter(section__in=sections, is_published=True).select_related('on_complete_achievement').order_by('order').all()
 
         flat_topic = {
             'id': self.pk,
             'title': self.title,
             'bonus_reward': self.bonus_reward,
+            'order': self.order,
             'on_complete_achievement': self.on_complete_achievement.id if self.on_complete_achievement else None,
             'sections': [section.get_flat() for section in sections]
         }
@@ -148,6 +151,12 @@ class Topic(RewardableEntity):
         return flat_topic
 
 
+class Tag(models.Model):
+    tag_value = models.CharField("Значение tag для клиента", max_length=256, default='')
+
+    def __str__(self):
+        return self.tag_value
+
 
 class Section(RewardableEntity):
     title = models.CharField("Название Раздела", max_length=256)
@@ -155,6 +164,9 @@ class Section(RewardableEntity):
 
     # Publishing status
     is_published = models.BooleanField("Раздел (секция) опубликован?", default=True, blank=True)
+    order = models.PositiveIntegerField("Порядок сортировки: чем ниже значение, тем выше Секция в Теме", default=1000, blank=True)
+
+    tags = models.ManyToManyField('quotes.Tag', blank=True)
 
     def __str__(self):
         return _truncate(f'{self.title}')
@@ -181,6 +193,8 @@ class Section(RewardableEntity):
         return {
             'id': self.pk,
             'title': self.title,
+            'order': self.order,
+            'tags': list(self.tags.all()),
             'bonus_reward': self.bonus_reward,
             'on_complete_achievement': self.on_complete_achievement.id if self.on_complete_achievement else None
         }
@@ -206,7 +220,8 @@ def quote_split(quote_item_text,
 
 
 def get_levels(category_pk, profile):
-    category = QuoteCategory.objects.get(pk=category_pk)
+    category = QuoteCategory.objects.get(pk=category_pk, is_published=True)
+
     if not category.is_available_to_user(profile):
         return None
 
@@ -237,6 +252,7 @@ class QuoteCategory(RewardableEntity, ItemWithImageMixin):
 
     # Publishing status
     is_published = models.BooleanField("Категория опубликована?", default=True, blank=True)
+    order = models.PositiveIntegerField("Порядок сортировки: чем ниже значение, тем выше Категория в Разделе", default=1000, blank=True)
 
     # Events
     is_event = models.BooleanField("Это событие?", default=False)
@@ -258,8 +274,7 @@ class QuoteCategory(RewardableEntity, ItemWithImageMixin):
                                                 through='CategoryUnlockPurchase',
                                                 related_name='availability_to_profile')
 
-
-
+    tags = models.ManyToManyField('quotes.Tag', blank=True)
 
     def __str__(self):
         return _truncate(f'{self.section.topic.title} > {self.section.title} > {self.title}')

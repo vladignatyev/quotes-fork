@@ -28,7 +28,7 @@ class BaseView(SafeView):
 class TopicDetailView(BaseView):
     def get(self, request, *args, **kwargs):
         try:
-            topic = Topic.objects.get(pk=kwargs['pk'], is_published=True)
+            topic = Topic.objects.select_related('on_complete_achievement').get(pk=kwargs['pk'], is_published=True)
             res_obj = {
                 'objects': [topic.get_flat(profile=self.request.user_profile)],
                 'meta': {}
@@ -39,7 +39,7 @@ class TopicDetailView(BaseView):
 
 
 class TopicListView(BaseView):
-    queryset = Topic.objects.filter(is_published=True)
+    queryset = Topic.objects.select_related('on_complete_achievement').filter(is_published=True)
     ordering = '-pk'
     detail_url = 'topic-detail'
 
@@ -48,6 +48,7 @@ class TopicListView(BaseView):
             'id': topic.pk,
             'title': topic.title,
             'bonus_reward': topic.bonus_reward,
+            'order': topic.order,
             'on_complete_achievement': topic.on_complete_achievement.pk if topic.on_complete_achievement else None,
             'uri': reverse(self.detail_url, kwargs={'pk': topic.pk})
         }

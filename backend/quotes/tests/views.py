@@ -737,7 +737,7 @@ class TopicDetailViewTest(AuthenticatedTestCase, ContentMixin):
         self.assertEqual(200, response.status_code)
         response_objs = json.loads(response.content)['objects']
 
-        expected_fields = ['id', 'title', 'bonus_reward', 'on_complete_achievement', 'sections']
+        expected_fields = ['id', 'title', 'bonus_reward', 'on_complete_achievement', 'sections', 'order']
         self.assertEqual(set(expected_fields), set(response_objs[0].keys()))
 
         # objects = json.loads(response.content)['objects']
@@ -769,7 +769,7 @@ class TopicListView(AuthenticatedTestCase, ContentMixin):
         response_objs = json.loads(response.content)['objects']
 
         self.assertEqual(1, len(response_objs))
-        expected_fields = ['id', 'title', 'bonus_reward', 'on_complete_achievement', 'uri']
+        expected_fields = ['id', 'title', 'bonus_reward', 'on_complete_achievement', 'uri', 'order']
         self.assertEqual(set(expected_fields), set(response_objs[0].keys()))
 
 

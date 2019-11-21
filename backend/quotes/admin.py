@@ -4,6 +4,23 @@ from .models import *
 from api.models import PushSubscription
 
 from django import forms
+from django.db.models import Count
+
+
+
+def unpublish(modeladmin, request, queryset):
+    for item in queryset:
+        item.is_published = False
+        item.save()
+unpublish.short_description = 'Unpublish selected items'
+
+def publish(modeladmin, request, queryset):
+    for item in queryset:
+        item.is_published = True
+        item.save()
+publish.short_description = 'Publish selected items'
+
+
 
 
 @admin.register(PushSubscription)
@@ -13,21 +30,41 @@ class PushSubscriptionAdmin(admin.ModelAdmin):
 
 class QuotesInline(admin.TabularInline):
     model = Quote
-    exclude = ['order_in_category', 'on_complete_achievement', 'bonus_reward', 'complete_by_users']
+    exclude = [ 'on_complete_achievement', 'bonus_reward', 'complete_by_users']
+    autocomplete_fields = ['author']
 
 
 @admin.register(QuoteCategory)
 class QuoteCategoryAdmin(admin.ModelAdmin):
-    list_display = ('title', 'section')
+    list_display = ('title', 'section', 'num_subitems', 'order')
 
     inlines = [QuotesInline,]
 
-    exclude = ('is_event', 'event_due_date', 'event_title', 'event_icon', 'event_description','event_win_achievement', 'available_to_users', 'complete_by_users')
-    fields = ( 'title', 'section', 'bonus_reward', 'is_payable', 'price_to_unlock', 'on_complete_achievement', 'icon', 'item_image', 'item_image_view', 'is_published',)
+    exclude = ('is_event', 'event_due_date', 'event_title', 'event_icon',
+               'event_description','event_win_achievement',
+               'available_to_users', 'complete_by_users')
+    fields = ( 'title', 'section', 'bonus_reward', 'is_payable',
+               'price_to_unlock', 'on_complete_achievement', 'icon',
+               'item_image', 'item_image_view', 'is_published', 'tags',
+               'order')
     search_fields = ['title']
 
+    autocomplete_fields = ['tags', 'on_complete_achievement', 'section']
 
     readonly_fields = ('item_image_view',)
+    actions = [unpublish, publish]
+    ordering = ('order',)
+
+    def num_subitems(self, obj):
+        return obj.num_subitems
+    num_subitems.short_description = "# quotes"
+
+    def get_queryset(self, request):
+        """Use this so we can annotate with additional info."""
+
+        qs = super(QuoteCategoryAdmin, self).get_queryset(request).select_related('section')
+        return qs.annotate(num_subitems=Count('quote', distinct=True))
+
 
 
 class QuoteForm(forms.ModelForm):
@@ -38,29 +75,65 @@ class QuoteForm(forms.ModelForm):
         fields = '__all__'
 
 
+
+@admin.register(Tag)
+class TagAdmin(admin.ModelAdmin):
+    search_fields = ['tag_value']
+
 @admin.register(Quote)
 class QuoteAdmin(admin.ModelAdmin):
     list_display = ('text', 'author', 'category')
     exclude = ('available_to_users',)
-    fields = ('text', 'author', 'order_in_category', 'on_complete_achievement', 'category')
+    ordering = ('order_in_category',)
+    fields = ('text', 'author', 'order_in_category', 'on_complete_achievement', 'category',)
     search_fields = ['text', 'author']
     view_on_site = True
+
+    autocomplete_fields = ['author', 'on_complete_achievement', 'category']
 
     form = QuoteForm
 
 
+
 @admin.register(Topic)
 class TopicAdmin(admin.ModelAdmin):
-    list_display = ('title',)
-    fields = ( 'title', 'bonus_reward', 'on_complete_achievement', 'is_published',)
+    list_display = ('title', 'num_subitems', 'order', )
+    ordering = ('order',)
+    fields = ( 'title', 'bonus_reward', 'on_complete_achievement', 'is_published', 'tags', 'order')
     search_fields = ['title']
+    autocomplete_fields = ['tags', 'on_complete_achievement']
+    actions = [unpublish, publish]
+
+
+    def num_subitems(self, obj):
+        return obj.num_subitems
+    num_subitems.short_description = "# sections"
+
+    def get_queryset(self, request):
+        """Use this so we can annotate with additional info."""
+
+        qs = super(TopicAdmin, self).get_queryset(request)
+        return qs.annotate(num_subitems=Count('section', distinct=True))
 
 
 @admin.register(Section)
 class SectionAdmin(admin.ModelAdmin):
-    list_display = ('title', 'topic')
-    fields = ( 'title', 'topic', 'bonus_reward', 'on_complete_achievement', 'is_published',)
+    list_display = ('title', 'topic', 'num_subitems', 'order')
+    fields = ( 'title', 'topic', 'bonus_reward', 'on_complete_achievement', 'is_published', 'tags', 'order')
     search_fields = ['title']
+    autocomplete_fields = ['tags', 'on_complete_achievement', 'topic']
+    actions = [unpublish, publish]
+    ordering = ('order',)
+
+
+    def num_subitems(self, obj):
+        return obj.num_subitems
+    num_subitems.short_description = "# categories"
+
+    def get_queryset(self, request):
+        qs = super(SectionAdmin, self).get_queryset(request).select_related('topic')
+        return qs.annotate(num_subitems=Count('quotecategory', distinct=True))
+
 
 
 @admin.register(Profile)
@@ -101,4 +174,4 @@ class GameBalanceAdmin(admin.ModelAdmin):
 
 @admin.register(QuoteAuthor)
 class QuoteAuthorAdmin(admin.ModelAdmin):
-    pass
+    search_fields = ['name']
