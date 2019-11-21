@@ -7,28 +7,46 @@
     <title>Предварительный просмотр цитаты №{{ quote.id }}</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.5/css/bulma.min.css">
     <script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
+    <style media="screen">
+      span {
+        display: inline-block;
+        background: #ddd;
+        padding: 0 1em;
+        margin: 0.2em;
+        border-radius: 10px;
+        font-size: 0.8em;
+      }
+
+      body { font-size: 70%;
+      }
+    </style>
 </head>
 <body>
-  <table class="table is-hoverable is-fullwidth">
-    <thead>
-      <th>ID</th>
-      <th>Категория</th>
-      <th>Текст цитаты</th>
-      <th>,f,kfs</th>
-      <th>Красивый текст цитаты</th>
-      <th></th>
-    </thead>
-    <tbody>
-      {% for level in levels %}
-      <tr>
-        <td>{{ level.pk }}</td>
-        <td>{{ level.category }}</td>
-        <td>{{ level.text }}</td>
-        <td>{% for q in level.get_splitted %}<span>{{ q }}</span>{% endfor %}</td>
-        <td>{{ level.get_beautiful }} </td>
-        <td><a target="_blank" href="{% url 'admin:quotes_quote_change' level.pk %}"><i class="fas fa-edit"></i> Редактировать</a></td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
+  <div class="content">
+    <table class="table is-hoverable">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Категория</th>
+          <th>Текст цитаты</th>
+          <th>В виде баблов</th>
+          <th>Красивый текст цитаты</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for level in levels %}
+        <tr>
+          <td>{{ level.pk }}</td>
+          <td>{{ level.category }}</td>
+          <td>{{ level.text }}</td>
+          <td>{% for q in level.get_splitted %}<span>{{ q }}</span>{% endfor %}</td>
+          <td>{{ level.get_beautiful }} </td>
+          <td><a target="_blank" href="{% url 'admin:quotes_quote_change' level.pk %}"><i class="fas fa-edit"></i> Редактировать</a></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
 </html>

@@ -35,11 +35,8 @@ class QuotesBulkPreview(View):
     template = 'admin/bulk-levels-preview.html'
 
     def get(self, request, *args, **kwargs):
-        # if not request.user.is_authenticated:
-        #     raise Http404()
+        if not request.user.is_authenticated:
+            raise Http404()
 
-        # try:
         quotes = Quote.objects.all()
         return TemplateResponse(request, self.template, {'levels': quotes})
-        # except Quote.DoesNotExist:
-        #     raise Http404()
