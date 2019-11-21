@@ -481,6 +481,8 @@ class BalanceRechargeProduct(models.Model):
                                             on_delete=models.SET_NULL, null=True, blank=True)
     # app_store_product = models.ForeignKey('api.AppStoreProduct', on_delete=models.SET_NULL, null=True, blank=True)
 
+    is_featured = models.BooleanField("Показывать как самый выгодный?", default=False, blank=True)
+
     objects = ProductManager()
 
     class Meta:
@@ -488,7 +490,7 @@ class BalanceRechargeProduct(models.Model):
         verbose_name_plural = 'продукты'
 
     def get_flat(self):
-        flat = model_to_dict(self, fields=('id', 'admin_title', 'balance_recharge'))
+        flat = model_to_dict(self, fields=('id', 'admin_title', 'balance_recharge', 'is_featured'))
         try:
             flat['sku'] = self.google_play_product.sku
         except ValueError:

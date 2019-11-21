@@ -649,7 +649,7 @@ class PurchaseableProductsListViewTest(AuthenticatedTestCase, ContentMixin):
         self.assertEqual(3, len(other_products))
 
         for o in recharge_products:
-            fields = ('id', 'balance_recharge', 'admin_title', 'sku')
+            fields = ('id', 'balance_recharge', 'admin_title', 'sku', 'is_featured')
             self.assertEqual(set(fields), set(o.keys()))
 
         for o in other_products:
