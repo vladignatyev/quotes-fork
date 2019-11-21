@@ -38,7 +38,7 @@
         {% for level in levels %}
         <tr>
           <td>{{ level.pk }}</td>
-          <td>{{ level.category }}</td>
+          <td><a target="_blank" href="{% url 'admin:quotes_quotecategory_change' level.category.pk %}">{{ level.category }}</a></td>
           <td>{{ level.text }}</td>
           <td>{% for q in level.get_splitted %}<span>{{ q }}</span>{% endfor %}</td>
           <td>{{ level.get_beautiful }} </td>
