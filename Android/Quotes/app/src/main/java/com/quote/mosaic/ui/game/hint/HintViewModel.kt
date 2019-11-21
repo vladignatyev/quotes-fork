@@ -19,9 +19,9 @@ class HintViewModel(
     private val hintTrigger = BehaviorProcessor.create<String>()
     private val skipTrigger = BehaviorProcessor.create<Unit>()
 
-    fun setUp(remoteQuote: QuoteDO, variantQuote: String) {
+    fun setUp(remoteQuote: QuoteDO, variantQuote: ArrayList<String>) {
         state.correctQuote.set(remoteQuote.splitted)
-        state.variantQuote.set(variantQuote)
+        state.variantQuote.set(variantQuote.toList())
         state.author.set(remoteQuote.author)
     }
 
@@ -45,7 +45,7 @@ class HintViewModel(
 
     fun findNextWord() {
         val correctQuote = state.correctQuote.get().orEmpty()
-        val variantQuote = state.variantQuote.get().orEmpty().split(" ")
+        val variantQuote = state.variantQuote.get().orEmpty()
 
         var hint = ""
         correctQuote.forEachIndexed { index, word ->
@@ -73,7 +73,7 @@ class HintViewModel(
 
         val author: ObservableField<String> = ObservableField(""),
         val correctQuote: ObservableField<List<String>> = ObservableField(),
-        val variantQuote: ObservableField<String> = ObservableField("")
+        val variantQuote: ObservableField<List<String>> = ObservableField()
     )
 
     class Factory(

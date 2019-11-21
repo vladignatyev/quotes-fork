@@ -4,21 +4,18 @@ import java.util.*
 
 class ExampleDataProvider : AbstractDataProvider() {
 
-    private lateinit var quote: String
+    private lateinit var quote: List<String>
 
     private val data: MutableList<ConcreteData> = LinkedList()
 
     override val count: Int get() = data.size
 
-    fun addQuote(quote: String) {
+    fun addQuote(quote: List<String>) {
         this.quote = quote
         val quoteArr = quote
-            .replace("\u00A0", " ")
-            .split(SEPARATOR_WHITESPACE)
             .shuffled()
-            .toTypedArray()
 
-        if (quote == quoteArr.joinToString(separator = SEPARATOR_WHITESPACE)) {
+        if (quote == quoteArr) {
             quoteArr.toList().shuffled().toTypedArray()
         }
         fillInData(quoteArr)
@@ -39,15 +36,15 @@ class ExampleDataProvider : AbstractDataProvider() {
         data.add(toPosition, item)
     }
 
-    override fun getFullQuote(): String {
-        return quote.replace("\u00A0", " ")
+    override fun getFullQuote(): List<String> {
+        return quote
     }
 
-    override fun getCurrentQuote(): String {
-        return data.joinToString(separator = SEPARATOR_WHITESPACE)
+    override fun getCurrentQuote(): List<String> {
+        return data.map { it.text }
     }
 
-    private fun fillInData(quoteArr: Array<String>) {
+    private fun fillInData(quoteArr: List<String>) {
         for (j in quoteArr.indices) {
             val id = data.size.toLong()
             val viewType = 0
@@ -63,9 +60,5 @@ class ExampleDataProvider : AbstractDataProvider() {
     ) : Data() {
 
         override fun toString() = text
-    }
-
-    companion object {
-        const val SEPARATOR_WHITESPACE = " "
     }
 }

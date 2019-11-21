@@ -81,7 +81,7 @@ class OnboardingGameFragment : AppFragment() {
         if (gameWrapperAdapter != null) return
 
         dataProvider = ExampleDataProvider()
-        dataProvider.addQuote("Через тернии к звездам")
+        dataProvider.addQuote(listOf("Через", "тернии", "к", "звездам"))
         gameAdapter = OnboardingGameAdapter(R.color.darkPurple) { onSuccess() }
         gameAdapter.setDataProvider(dataProvider)
 

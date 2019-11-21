@@ -16,7 +16,7 @@ abstract class AbstractDataProvider {
 
     abstract fun moveItem(fromPosition: Int, toPosition: Int)
 
-    abstract fun getCurrentQuote(): String
+    abstract fun getCurrentQuote(): List<String>
 
-    abstract fun getFullQuote(): String
+    abstract fun getFullQuote(): List<String>
 }

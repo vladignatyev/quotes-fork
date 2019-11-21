@@ -38,7 +38,7 @@ class HintFragment : AppDialogFragment() {
         vm = ViewModelProviders
             .of(this, vmFactory)
             .get(HintViewModel::class.java)
-        vm.setUp(args().getParcelable(KEY_HINT_QUOTE)!!, args().getString(KEY_HINT_USER_VARIANT)!!)
+        vm.setUp(args().getParcelable(KEY_HINT_QUOTE)!!, args().getStringArrayList(KEY_HINT_USER_VARIANT)!!)
         vm.init()
     }
 
@@ -107,10 +107,10 @@ class HintFragment : AppDialogFragment() {
         private const val KEY_HINT_QUOTE = "KEY_HINT_QUOTE"
         private const val KEY_HINT_USER_VARIANT = "KEY_HINT_USER_VARIANT"
 
-        fun newInstance(quoteDO: QuoteDO, userVariant: String) = HintFragment().apply {
+        fun newInstance(quoteDO: QuoteDO, userVariant: List<String>) = HintFragment().apply {
             arguments = Bundle().apply {
                 putParcelable(KEY_HINT_QUOTE, quoteDO)
-                putString(KEY_HINT_USER_VARIANT, userVariant)
+                putStringArrayList(KEY_HINT_USER_VARIANT, ArrayList(userVariant))
             }
         }
     }
