@@ -220,7 +220,7 @@ def quote_split(quote_item_text,
 
 
 def get_levels(category_pk, profile):
-    category = QuoteCategory.objects.get(pk=category_pk, is_published=True)
+    category = QuoteCategory.objects.select_related('author').get(pk=category_pk, is_published=True)
 
     if not category.is_available_to_user(profile):
         return None
@@ -233,7 +233,7 @@ def get_levels(category_pk, profile):
         flat_item = {
             'id': item.id,
             'text': item.text,
-            'author': item.author.name,
+            'author': item.author.name if item.author else None,
             'reward': item.get_reward(profile),
             'beautiful': beautiful_text(item.text),
             'order': item.order_in_category,
