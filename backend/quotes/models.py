@@ -491,9 +491,9 @@ class BalanceRechargeProduct(models.Model):
 
     def get_flat(self):
         flat = model_to_dict(self, fields=('id', 'admin_title', 'balance_recharge', 'is_featured'))
-        try:
+        if self.google_play_product is not None:
             flat['sku'] = self.google_play_product.sku
-        except ValueError:
+        else:
             flat['sku'] = ''
         flat['id'] = self.id
         return flat
