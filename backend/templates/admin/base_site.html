@@ -1,0 +1,9 @@
+{% extends 'admin/base_site.html' %}
+
+{% load static %}
+
+{% block title %}Quotes{% endblock %}
+{% block branding %}
+<h1 id="site-name"><a href="{% url 'admin:index' %}">Quote Mosaic</a></h1>
+{% endblock %}
+{% block nav-global %}<div id="user-tools">&nbsp;<a target="_blank" href="/api/v1/quote/preview/all/">Витрина контента</a></div>{% endblock %}

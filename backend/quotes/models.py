@@ -452,6 +452,9 @@ class Quote(RewardableEntity):
     def get_splitted(self):
         return quote_split(self.text)
 
+    def get_beautiful(self):
+        return beautiful_text(self.text)
+
     def get_reward(self, profile):
         return profile.settings.reward_per_level_completion
 
