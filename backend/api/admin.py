@@ -13,7 +13,8 @@ class DeviceSessionAdmin(admin.ModelAdmin):
 class PushSubscriptionAdmin(admin.ModelAdmin):
     list_display = ('device_session', 'token')
 
-    autocomplete_fields = ['device_session', 'token']
+    autocomplete_fields = ['device_session']
+    search_fields = ['token']
 
     def get_queryset(self, request):
         qs = super(PushSubscriptionAdmin, self).get_queryset(request)

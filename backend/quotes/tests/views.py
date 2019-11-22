@@ -806,3 +806,9 @@ class PushNotificationSubscriptionView(AuthenticatedTestCase, ContentMixin):
         # Then
         self.assertEqual(200, response.status_code)
         self.assertEqual(pushsub.token, register_token)
+
+
+class ProfileRankSimpleTest(AuthenticatedTestCase, ContentMixin):
+
+    def test_should_present(self):
+        self.profile.get_flat()
