@@ -625,7 +625,7 @@ class Profile(models.Model):
             'nickname': self.nickname,
             'balance': self.balance,
             'is_banned': self.is_banned,
-            'top_position_change_since_last_update':  self.profilerank.position_change_since_last_update if self.profilerank else 0,
+            # 'top_position_change_since_last_update':  self.profilerank.position_change_since_last_update if self.profilerank else 0,
             'reward_per_level_completion': self.settings.reward_per_level_completion,
             'reward_per_doubleup': self.settings.reward_per_doubleup,
             'initial_profile_balance': self.settings.initial_profile_balance
