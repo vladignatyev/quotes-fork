@@ -24,10 +24,10 @@ publish.short_description = 'Publish selected items'
 
 
 
-
-@admin.register(PushSubscription)
-class PushSubscriptionAdmin(admin.ModelAdmin):
-    pass
+#
+# @admin.register(PushSubscription)
+# class PushSubscriptionAdmin(admin.ModelAdmin):
+#     pass
 
 
 class QuotesInline(admin.TabularInline):
