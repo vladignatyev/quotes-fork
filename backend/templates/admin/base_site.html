@@ -5,5 +5,13 @@
 {% block title %}Quotes{% endblock %}
 {% block branding %}
 <h1 id="site-name"><a href="{% url 'admin:index' %}">Quote Mosaic</a></h1>
+<style media="screen">
+.bubbles span {
+display: inline-block;
+background: #ddd;
+padding: 0 1em;
+margin: 0.2em;
+border-radius: 10px;
+}</style>
 {% endblock %}
 {% block nav-global %}<div id="user-tools">&nbsp;<a target="_blank" href="{% url 'quote-bulk-preview' %}">Витрина контента</a></div>{% endblock %}

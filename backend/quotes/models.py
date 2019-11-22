@@ -461,14 +461,7 @@ class Quote(RewardableEntity):
     @mark_safe
     def bubbles(self, obj=None):
         markup = """
-            <style media="screen">
-          .bubbles span {
-            display: inline-block;
-            background: #ddd;
-            padding: 0 1em;
-            margin: 0.2em;
-            border-radius: 10px;
-          }</style><span class="bubbles">
+        <span class="bubbles">
         """
         obj = obj or self
         for q in obj.get_splitted():
