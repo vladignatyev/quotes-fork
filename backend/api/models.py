@@ -147,7 +147,7 @@ def generate_secret(secret_key=None):
 
 class Credentials(models.Model):
     google_play_bundle_id = models.CharField("Play Market Bundle ID", default='', max_length=256)
-    google_play_api_key = models.CharField("Google Play API Key", default='', max_length=256)
+    # google_play_api_key = models.CharField("Google Play API Key", default='', max_length=256)
     # appstore_bundle_id = models.CharField("AppStore Bundle ID", default='', max_length=256)
 
     date_added = models.DateTimeField(auto_now_add=True)
