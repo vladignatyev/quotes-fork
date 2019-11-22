@@ -32,6 +32,8 @@ from .itemimage import ItemWithImageMixin
 
 from quoterank.quoterank import handle_rank_update
 
+from quoterank.models import ProfileRank
+
 from django.utils.html import escape
 
 
@@ -618,6 +620,10 @@ class Profile(models.Model):
     def __str__(self):
         return f'#{self.pk} ({self.nickname})'
 
+    def get_profilerank(self):
+        profile, created = ProfileRank.objects.get_or_create(profile=self)
+        return profile
+
     def get_flat(self):
         return {
             'id': self.pk,
@@ -625,7 +631,7 @@ class Profile(models.Model):
             'nickname': self.nickname,
             'balance': self.balance,
             'is_banned': self.is_banned,
-            # 'top_position_change_since_last_update':  self.profilerank.position_change_since_last_update if self.profilerank else 0,
+            'top_position_change_since_last_update':  self.get_profilerank().position_change_since_last_update,
             'reward_per_level_completion': self.settings.reward_per_level_completion,
             'reward_per_doubleup': self.settings.reward_per_doubleup,
             'initial_profile_balance': self.settings.initial_profile_balance
