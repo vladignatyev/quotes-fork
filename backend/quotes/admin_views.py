@@ -29,14 +29,14 @@ class QuotePreview(View):
             return TemplateResponse(request, self.template, {'quote': quote})
         except Quote.DoesNotExist:
             raise Http404()
-
-
-class QuotesBulkPreview(View):
-    template = 'admin/bulk-levels-preview.html'
-
-    def get(self, request, *args, **kwargs):
-        if not request.user.is_authenticated:
-            raise Http404()
-
-        quotes = Quote.objects.select_related('category').all()
-        return TemplateResponse(request, self.template, {'levels': quotes})
+#
+#
+# class QuotesBulkPreview(View):
+#     template = 'admin/bulk-levels-preview.html'
+#
+#     def get(self, request, *args, **kwargs):
+#         if not request.user.is_authenticated:
+#             raise Http404()
+#
+#         quotes = Quote.objects.select_related('category').all()
+#         return TemplateResponse(request, self.template, {'levels': quotes})

@@ -56,7 +56,7 @@ urlpatterns = [
     path('purchase/play/status/<uuid:purchase_id>/', PurchaseStatusView.as_view(), name='purchase-status-view'),
     path('purchase/play/products/', PurchaseableProductsListView.as_view(), name='purchase-products-list'),
 
-    path('quote/preview/all/', QuotesBulkPreview.as_view(), name='quote-bulk-preview'),
+    # path('quote/preview/all/', QuotesBulkPreview.as_view(), name='quote-bulk-preview'),
     path('quote/preview/<int:quote_pk>/', QuotePreview.as_view(), name='quote-preview'),
 
     path('quoterank/globaltop/preview/', QuoteRankHtmlPreview.as_view(), name='quoterank-globaltop-preview'),
