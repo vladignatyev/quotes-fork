@@ -6,10 +6,16 @@ from longjob.admin import LongJobAdmin
 
 class DeviceSessionAdmin(admin.ModelAdmin):
     date_hierarchy = 'timestamp'
+    list_display = ('timestamp', 'token', 'auth_token')
 
 
 class PushSubscriptionAdmin(admin.ModelAdmin):
-    pass
+    list_display = ('device_session', 'token')
+
+    def get_queryset(self, request):
+        qs = super(PushSubscriptionAdmin, self).get_queryset(request)
+        return qs.select_related('device_session')
+
 
 
 class GooglePlayIAPSubscriptionAdmin(admin.ModelAdmin):
@@ -30,9 +36,11 @@ class GooglePlayIAPPurchaseAdmin(admin.ModelAdmin):
 
 class CredentialsAdmin(admin.ModelAdmin):
     date_hierarchy = 'date_added'
+    list_display = ('google_play_bundle_id', 'date_added', 'shared_secret')
 
 
 class GooglePlayProductAdmin(admin.ModelAdmin):
+    list_display = ('id', 'sku',)
     pass
 
 # class AppStoreProductAdmin(admin.ModelAdmin):
@@ -55,4 +63,4 @@ admin.site.register(Credentials, CredentialsAdmin)
 
 @admin.register(PushNotificationQueueItem)
 class PushNotificationQueueItemAdmin(LongJobAdmin):
-    list_display = ['title'] + LongJobAdmin.list_display
+    list_display = ['title', 'is_broadcast'] + LongJobAdmin.list_display
