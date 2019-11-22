@@ -162,7 +162,7 @@ class Credentials(models.Model):
         verbose_name_plural = 'Credentials'
 
     def __str__(self):
-        return f'{self.date_added:%Y-%m-%d %H:%M:%S}: {self.google_play_bundle_id} / {self.google_play_api_key} '
+        return f'{self.date_added:%Y-%m-%d %H:%M:%S}: {self.google_play_bundle_id}'
 
 
 
