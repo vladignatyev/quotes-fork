@@ -455,6 +455,32 @@ class Quote(RewardableEntity):
     def get_beautiful(self):
         return beautiful_text(self.text)
 
+    get_beautiful.short_description = 'Красивый текст'
+
+
+    @mark_safe
+    def bubbles(self, obj=None):
+        markup = """
+            <style media="screen">
+          .bubbles span {
+            display: inline-block;
+            background: #ddd;
+            padding: 0 1em;
+            margin: 0.2em;
+            border-radius: 10px;
+          }</style><span class="bubbles">
+        """
+        obj = obj or self
+        for q in obj.get_splitted():
+            markup += f'<span>{q}</span>'
+
+        markup += "</span>"
+        return markup
+
+    bubbles.short_description = 'Предпросмотр'
+    bubbles.allow_tags = True
+
+
     def get_reward(self, profile):
         return profile.settings.reward_per_level_completion
 

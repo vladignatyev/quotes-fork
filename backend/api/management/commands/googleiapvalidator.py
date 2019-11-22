@@ -12,6 +12,8 @@ from django.core.management.base import BaseCommand, CommandError
 from api.models import GooglePlayIAPPurchase, PurchaseStatus
 from api.billing import create_google_validator
 
+from django.db.models import Q
+
 
 class Worker:
     time_delay = 3

@@ -7,9 +7,6 @@ from io import BytesIO
 
 
 
-# from django.db import models
-
-
 class ItemWithImageMixin:
     BLANK_IMAGE_PATH = 'https://via.placeholder.com/512'
 

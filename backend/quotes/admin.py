@@ -7,6 +7,8 @@ from django import forms
 from django.db.models import Count
 
 
+from django.utils.safestring import mark_safe
+
 
 def unpublish(modeladmin, request, queryset):
     for item in queryset:
@@ -82,16 +84,20 @@ class TagAdmin(admin.ModelAdmin):
 
 @admin.register(Quote)
 class QuoteAdmin(admin.ModelAdmin):
-    list_display = ('text', 'author', 'category')
+    list_display = ('text', 'author', 'category', 'get_beautiful', 'bubbles')
     exclude = ('available_to_users',)
     ordering = ('order_in_category',)
-    fields = ('text', 'author', 'order_in_category', 'on_complete_achievement', 'category',)
+    fields = ('text', 'author', 'order_in_category', 'on_complete_achievement', 'category', 'bubbles', 'get_beautiful')
     search_fields = ['text', 'author']
     view_on_site = True
+    readonly_fields = ['bubbles', 'get_beautiful']
 
     autocomplete_fields = ['author', 'on_complete_achievement', 'category']
 
     form = QuoteForm
+
+
+
 
 
 
