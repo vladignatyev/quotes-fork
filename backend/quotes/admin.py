@@ -38,7 +38,7 @@ class QuotesInline(admin.TabularInline):
 
 @admin.register(QuoteCategory)
 class QuoteCategoryAdmin(admin.ModelAdmin):
-    list_display = ('title', 'section', 'num_subitems', 'order')
+    list_display = ('item_preview_image_view', 'title', 'section', 'num_subitems', 'order', )
 
     inlines = [QuotesInline,]
 
@@ -53,7 +53,7 @@ class QuoteCategoryAdmin(admin.ModelAdmin):
 
     autocomplete_fields = ['tags', 'on_complete_achievement', 'section']
 
-    readonly_fields = ('item_image_view',)
+    readonly_fields = ('item_image_view', 'item_preview_image_view')
     actions = [unpublish, publish]
     ordering = ('order',)
 

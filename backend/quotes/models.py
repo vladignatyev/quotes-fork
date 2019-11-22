@@ -297,6 +297,12 @@ class QuoteCategory(RewardableEntity, ItemWithImageMixin):
     item_image_view.short_description = 'Картинка категории'
     item_image_view.allow_tags = True
 
+    @mark_safe
+    def item_preview_image_view(self):
+        return u'<img width="128" src="%s" />' % escape(self.get_image_preview_url())
+    item_preview_image_view.short_description = 'Картинка категории'
+    item_preview_image_view.allow_tags = True
+
 
     def is_available_to_user(self, profile):
         return not self.is_payable or self.is_unlocked_by(profile)
