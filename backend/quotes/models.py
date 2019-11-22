@@ -299,7 +299,7 @@ class QuoteCategory(RewardableEntity, ItemWithImageMixin):
 
     @mark_safe
     def item_preview_image_view(self):
-        return u'<img width="128" src="%s" />' % escape(self.get_image_preview_url())
+        return u'<img width="128" src="%s" />' % escape(self.get_image_url())
     item_preview_image_view.short_description = 'Картинка категории'
     item_preview_image_view.allow_tags = True
 
