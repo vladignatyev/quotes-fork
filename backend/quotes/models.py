@@ -47,7 +47,7 @@ class QuoteAuthor(models.Model):
         verbose_name_plural = 'авторы цитат'
 
 
-class Achievement(models.Model):
+class Achievement(models.Model, ItemWithImageMixin):
     icon = models.CharField("Имя иконки в приложении", max_length=256)
     title = models.CharField("Название", max_length=256)
     received_text = models.TextField("Текст для юзера при вручении ему достижения", default='')
@@ -61,6 +61,22 @@ class Achievement(models.Model):
     class Meta:
         verbose_name = 'достижение'
         verbose_name_plural = 'достижения'
+
+    item_image = models.FileField('Картинка 512х512', upload_to='achievements', null=True, blank=True)
+    item_image_preview = models.FileField('Превью картинки 256х256', upload_to='achievements-preview', null=True, blank=True)
+
+    @mark_safe
+    def item_image_view(self):
+        return u'<img src="%s" />' % escape(self.get_image_url())
+    item_image_view.short_description = 'Картинка'
+    item_image_view.allow_tags = True
+
+    @mark_safe
+    def item_preview_image_view(self):
+        return u'<img width="128" src="%s" />' % escape(self.get_image_url())
+    item_preview_image_view.short_description = 'Картинка'
+    item_preview_image_view.allow_tags = True
+
 
 
 class AchievementReceiving(models.Model):
@@ -157,6 +173,10 @@ class Tag(models.Model):
     def __str__(self):
         return self.tag_value
 
+    class Meta:
+        verbose_name = 'тег'
+        verbose_name_plural = 'теги'
+
 
 class Section(RewardableEntity):
     title = models.CharField("Название Раздела", max_length=256)
@@ -220,7 +240,7 @@ def quote_split(quote_item_text,
 
 
 def get_levels(category_pk, profile):
-    category = QuoteCategory.objects.select_related('author').get(pk=category_pk, is_published=True)
+    category = QuoteCategory.objects.get(pk=category_pk, is_published=True)
 
     if not category.is_available_to_user(profile):
         return None
@@ -388,19 +408,19 @@ def clean_profile_progress_cache(profile):
 # Content cacheable
 # @lru_cache(maxsize=2**16)
 def get_all_levels_in_category(category_pk):
-    return list(Quote.objects.filter(category=category_pk).order_by('-order_in_category').order_by('-date_added').all())
+    return list(Quote.objects.select_related('author').filter(category=category_pk).order_by('-order_in_category').order_by('-date_added').all())
 
 # @lru_cache(maxsize=2**16)
 def get_all_levels_in_category_count(category_pk):
-    return Quote.objects.filter(category=category_pk).count()
+    return Quote.objects.select_related('author').filter(category=category_pk).count()
 
 # @lru_cache(maxsize=2**16)
 def get_all_levels_in_section_count(section_pk):
-    return Quote.objects.filter(category__section=section_pk).count()
+    return Quote.objects.select_related('author').filter(category__section=section_pk).count()
 
 # @lru_cache(maxsize=2**16)
 def get_all_levels_in_topic_count(topic_pk):
-    return Quote.objects.filter(category__section__topic=topic_pk).count()
+    return Quote.objects.select_related('author').filter(category__section__topic=topic_pk).count()
 # --
 
 
@@ -517,7 +537,7 @@ def beautiful_text(text):
     return beautified
 
 
-class BalanceRechargeProduct(models.Model):
+class BalanceRechargeProduct(models.Model, ItemWithImageMixin):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     admin_title = models.CharField("Название продукта для юзера", max_length=256)
     balance_recharge = models.IntegerField("Сумма пополнения баланса", default=1)
@@ -532,8 +552,8 @@ class BalanceRechargeProduct(models.Model):
     objects = ProductManager()
 
     class Meta:
-        verbose_name = 'Продукт «Начисление монеток»'
-        verbose_name_plural = 'продукты'
+        verbose_name = 'Продукт «Монеты»'
+        verbose_name_plural = 'продукты «монеты»'
 
     def get_flat(self):
         flat = model_to_dict(self, fields=('id', 'admin_title', 'balance_recharge', 'is_featured'))
@@ -541,8 +561,26 @@ class BalanceRechargeProduct(models.Model):
             flat['sku'] = self.google_play_product.sku
         else:
             flat['sku'] = ''
+        flat['image_url'] = self.get_image_url()
         flat['id'] = self.id
         return flat
+
+
+    item_image = models.FileField('Картинка 512х512', upload_to='rechargeproducts', null=True, blank=True)
+    item_image_preview = models.FileField('Превью картинки 256х256', upload_to='rechargeproducts-preview', null=True, blank=True)
+
+    @mark_safe
+    def item_image_view(self):
+        return u'<img src="%s" />' % escape(self.get_image_url())
+    item_image_view.short_description = 'Картинка'
+    item_image_view.allow_tags = True
+
+    @mark_safe
+    def item_preview_image_view(self):
+        return u'<img width="128" src="%s" />' % escape(self.get_image_url())
+    item_preview_image_view.short_description = 'Картинка'
+    item_preview_image_view.allow_tags = True
+
 
 
 class GameBalance(models.Model):

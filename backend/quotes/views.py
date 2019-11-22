@@ -395,6 +395,7 @@ class AllAchievementListView(BaseView):
                 'id': o.pk,
                 'title': o.title,
                 'icon': o.icon,
+                'image_url': o.get_image_url(),
                 'received_text': o.received_text,
                 'description_text': o.description_text
             }

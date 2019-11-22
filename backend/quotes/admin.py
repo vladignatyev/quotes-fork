@@ -151,9 +151,11 @@ class ProfileAdmin(admin.ModelAdmin):
 
 @admin.register(Achievement)
 class AchievementAdmin(admin.ModelAdmin):
-    list_display = ('title', 'icon',)
+    list_display = ('item_preview_image_view', 'title', 'icon')
     exclude = ('opened_by_users',)
     search_fields = ['title']
+
+    readonly_fields = ('item_image_view', 'item_preview_image_view')
 
 @admin.register(AchievementReceiving)
 class AchievementReceivingAdmin(admin.ModelAdmin):
@@ -170,7 +172,9 @@ class CategoryUnlockPurchaseAdmin(admin.ModelAdmin):
 
 @admin.register(BalanceRechargeProduct)
 class BalanceRechargeProductAdmin(admin.ModelAdmin):
-    list_display = ('admin_title', 'google_play_product',) # 'app_store_product')
+    list_display = ('item_preview_image_view', 'admin_title', 'google_play_product', ) # 'app_store_product')
+    readonly_fields = ('item_image_view',)
+    exclude = ('item_preview_image_view',)
 
 
 @admin.register(GameBalance)
