@@ -7,10 +7,13 @@ from longjob.admin import LongJobAdmin
 class DeviceSessionAdmin(admin.ModelAdmin):
     date_hierarchy = 'timestamp'
     list_display = ('timestamp', 'token', 'auth_token')
+    search_fields = ['token', 'auth_token', 'timestamp']
 
 
 class PushSubscriptionAdmin(admin.ModelAdmin):
     list_display = ('device_session', 'token')
+
+    autocomplete_fields = ['device_session', 'token']
 
     def get_queryset(self, request):
         qs = super(PushSubscriptionAdmin, self).get_queryset(request)
@@ -48,7 +51,7 @@ class GooglePlayProductAdmin(admin.ModelAdmin):
 
 
 admin.site.register(DeviceSession, DeviceSessionAdmin)
-# admin.site.register(PushSubscription, PushSubscriptionAdmin)
+admin.site.register(PushSubscription, PushSubscriptionAdmin)
 
 admin.site.register(GooglePlayProduct, GooglePlayProductAdmin)
 # admin.site.register(GooglePlayIAPSubscription, GooglePlayIAPSubscriptionAdmin)
