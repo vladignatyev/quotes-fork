@@ -1,5 +1,7 @@
 package com.quote.mosaic.ui.main.play.topup
 
+import android.app.AlertDialog
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -10,10 +12,17 @@ import androidx.transition.TransitionInflater
 import com.quote.mosaic.R
 import com.quote.mosaic.core.AppFragment
 import com.quote.mosaic.core.common.args
+import com.quote.mosaic.core.ext.supportEmailIntent
+import com.quote.mosaic.data.manager.UserManager
+import com.quote.mosaic.databinding.TopupCompletePopupBinding
+import com.quote.mosaic.databinding.TopupFailedPopupBinding
 import com.quote.mosaic.databinding.TopupFragmentBinding
 import javax.inject.Inject
 
 class TopUpFragment : AppFragment() {
+
+    @Inject
+    lateinit var userManager: UserManager
 
     @Inject
     lateinit var vmFactory: TopUpViewModel.Factory
@@ -55,7 +64,61 @@ class TopUpFragment : AppFragment() {
             adapter.submitList(it)
             binding().items.scheduleLayoutAnimation()
         }.untilStopped()
+
+        vm.state.failureTrigger.subscribe {
+            vm.reset()
+            showError()
+        }.untilStopped()
+
+        vm.state.successTrigger.subscribe {
+            vm.reset()
+            showSuccess()
+        }.untilStopped()
     }
+
+    private fun showError() {
+        val binding: TopupFailedPopupBinding =
+            DataBindingUtil.inflate(
+                LayoutInflater.from(requireContext()), R.layout.topup_failed_popup, null, true
+            )
+
+        val alert = AlertDialog.Builder(requireContext())
+            .setCancelable(false)
+            .setView(binding.root)
+            .show()
+
+        binding.tryAgain.setOnClickListener {
+            alert.dismiss()
+        }
+
+        binding.askSupport.setOnClickListener {
+            alert.dismiss()
+            val intent = Intent.createChooser(
+                Intent().supportEmailIntent(requireContext(), userManager),
+                requireContext().getString(R.string.shared_label_send)
+            )
+            startActivity(intent)
+        }
+
+    }
+
+    private fun showSuccess() {
+        val binding: TopupCompletePopupBinding =
+            DataBindingUtil.inflate(
+                LayoutInflater.from(requireContext()), R.layout.topup_complete_popup, null, true
+            )
+
+        val alert = AlertDialog.Builder(requireContext())
+            .setCancelable(false)
+            .setView(binding.root)
+            .show()
+
+        binding.grab.setOnClickListener {
+            alert.dismiss()
+            goBack()
+        }
+    }
+
 
     private fun binding() = viewBinding<TopupFragmentBinding>()
 

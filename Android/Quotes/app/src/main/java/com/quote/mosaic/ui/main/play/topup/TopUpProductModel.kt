@@ -3,30 +3,36 @@ package com.quote.mosaic.ui.main.play.topup
 import com.android.billingclient.api.SkuDetails
 
 sealed class TopUpProductModel(
+    open val id: String,
     open val billingProduct: SkuDetails
 ) {
 
     data class Item(
-        val id: String,
+        override val id: String,
+        override val billingProduct: SkuDetails,
         val title: String,
         val iconUrl: String,
-        val price: String,
-        override val billingProduct: SkuDetails
-    ) : TopUpProductModel(billingProduct)
+        val price: String
+    ) : TopUpProductModel(id, billingProduct)
 
     data class Featured(
-        val id: String,
+        override val id: String,
+        override val billingProduct: SkuDetails,
         val title: String,
         val iconUrl: String,
-        val price: String,
-        override val billingProduct: SkuDetails
-    ) : TopUpProductModel(billingProduct)
+        val price: String
+    ) : TopUpProductModel(id, billingProduct)
 
     data class Free(
-        val id: String,
+        override val id: String,
+        override val billingProduct: SkuDetails,
         val title: String,
         val iconUrl: String,
-        val price: String,
+        val price: String
+    ) : TopUpProductModel(id, billingProduct)
+
+    data class Loading(
+        override val id: String,
         override val billingProduct: SkuDetails
-    ) : TopUpProductModel(billingProduct)
+    ) : TopUpProductModel(id, billingProduct)
 }

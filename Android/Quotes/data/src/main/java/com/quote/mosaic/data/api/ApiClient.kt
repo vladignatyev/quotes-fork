@@ -4,6 +4,8 @@ import com.quote.mosaic.data.model.overview.MainTopicDO
 import com.quote.mosaic.data.model.overview.QuoteDO
 import com.quote.mosaic.data.model.overview.TopicDO
 import com.quote.mosaic.data.model.purchase.AvailableProductsDO
+import com.quote.mosaic.data.model.purchase.PurchaseIdDO
+import com.quote.mosaic.data.model.purchase.PurchaseStatusDO
 import com.quote.mosaic.data.model.user.UserDO
 import io.reactivex.Completable
 import io.reactivex.Single
@@ -35,5 +37,9 @@ interface ApiClient {
 
     // Purchases
     fun getSkuList(): Single<AvailableProductsDO>
+
+    fun getPurchaseStatus(token: String): Single<PurchaseStatusDO>
+
+    fun registerPurchase(orderId: String, purchaseToken: String, balanceRecharge: String): Single<PurchaseIdDO>
 
 }

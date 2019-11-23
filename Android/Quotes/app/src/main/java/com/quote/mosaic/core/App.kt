@@ -3,13 +3,13 @@ package com.quote.mosaic.core
 import android.app.Application
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.databinding.DataBindingUtil
-import com.quote.mosaic.BuildConfig
 import com.quote.mosaic.core.analytics.CrashlyticsTimberTree
 import com.quote.mosaic.core.di.AppComponent
 import com.quote.mosaic.core.di.DaggerAppComponent
 import com.quote.mosaic.core.di.AppDataBindingComponent
 import com.crashlytics.android.Crashlytics
 import com.quote.mosaic.core.manager.FirebaseManager
+import com.quote.mosaic.core.manager.billing.BillingManager
 import dagger.android.AndroidInjector
 import dagger.android.DispatchingAndroidInjector
 import dagger.android.HasAndroidInjector
@@ -29,6 +29,7 @@ class App : Application(), HasAndroidInjector {
 
     //Don't remove, needed to have up-to-date data on application start.
     @Inject lateinit var firebaseManager: FirebaseManager
+    @Inject lateinit var billingManager: BillingManager
 
     override fun onCreate() {
         super.onCreate()

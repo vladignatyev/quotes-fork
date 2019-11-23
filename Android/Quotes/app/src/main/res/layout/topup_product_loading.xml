@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+
+        <variable
+            name="item"
+            type="com.quote.mosaic.ui.main.play.topup.TopUpProductModel.Loading" />
+    </data>
+
+
+    <io.supercharge.shimmerlayout.ShimmerLayout
+        android:id="@+id/container"
+        android:layout_width="match_parent"
+        android:layout_height="96dp"
+        app:shimmer_color="#1A000000">
+
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:paddingBottom="32dp"
+            app:cardBackgroundColor="#FFF"
+            app:cardCornerRadius="32dp"
+            app:cardElevation="4dp" />
+    </io.supercharge.shimmerlayout.ShimmerLayout>
+</layout>

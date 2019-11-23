@@ -8,9 +8,9 @@ import com.quote.mosaic.core.AppViewModel
 import com.quote.mosaic.core.Schedulers
 import com.quote.mosaic.core.manager.UserPreferences
 import com.quote.mosaic.core.rx.ClearableBehaviorProcessor
-import com.quote.mosaic.data.manager.UserManager
 import com.quote.mosaic.data.api.ApiClient
 import com.quote.mosaic.data.error.ResponseException
+import com.quote.mosaic.data.manager.UserManager
 import com.quote.mosaic.data.model.user.UserDO
 import com.quote.mosaic.ui.main.play.topic.section.SectionModel
 import io.reactivex.Flowable
@@ -80,13 +80,20 @@ class TopicViewModel(
     fun refresh() {
         state.isRefreshing.set(true)
         val id = state.id.get() ?: 0
+
         apiClient
-            .topic(id, true)
-            .map { mapper.toLocalModel(it) }
+            .profile()
+            .flatMap { user ->
+                apiClient
+                    .topic(id, true)
+                    .subscribeOn(schedulers.io())
+                    .map { Pair(mapper.toLocalModel(it), user) }
+            }
             .subscribeOn(schedulers.io())
             .observeOn(schedulers.ui())
-            .subscribe({ topics ->
+            .subscribe({ (topics: List<SectionModel>, user: UserDO) ->
                 state.isRefreshing.set(false)
+                userManager.setUser(user)
                 if (topics.isEmpty()) {
                     sections.onNext(mapper.errorState())
                 } else {

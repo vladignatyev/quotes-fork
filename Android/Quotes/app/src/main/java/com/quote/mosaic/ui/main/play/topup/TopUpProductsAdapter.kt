@@ -10,6 +10,7 @@ import com.quote.mosaic.R
 import com.quote.mosaic.databinding.TopupProductFeaturedBinding
 import com.quote.mosaic.databinding.TopupProductFreeBinding
 import com.quote.mosaic.databinding.TopupProductItemBinding
+import com.quote.mosaic.databinding.TopupProductLoadingBinding
 import com.quote.mosaic.ui.common.dialog.PaddingDividerDecoration
 import com.quote.mosaic.ui.common.dialog.PaddingDividerDecoration.Companion.ORIENTATION_HORIZONTAL
 
@@ -43,6 +44,13 @@ class TopUpProductsAdapter(
                 container.setOnClickListener { onProductClicked(item!!) }
             })
         }
+        R.layout.topup_product_loading -> {
+            ViewHolder.Loading(
+                TopupProductLoadingBinding.inflate(
+                    LayoutInflater.from(parent.context), parent, false
+                )
+            )
+        }
         else -> throw IllegalArgumentException("Unexpected view type: $viewType")
     }
 
@@ -57,6 +65,10 @@ class TopUpProductsAdapter(
             is TopUpProductModel.Free -> {
                 (holder as ViewHolder.Free).binding.item = item
             }
+            is TopUpProductModel.Loading -> {
+                (holder as ViewHolder.Loading).binding.item = item
+                holder.binding.container.startShimmerAnimation()
+            }
         }
         holder.binding.executePendingBindings()
     }
@@ -65,12 +77,14 @@ class TopUpProductsAdapter(
         is TopUpProductModel.Item -> R.layout.topup_product_item
         is TopUpProductModel.Featured -> R.layout.topup_product_featured
         is TopUpProductModel.Free -> R.layout.topup_product_free
+        is TopUpProductModel.Loading -> R.layout.topup_product_loading
     }
 
     sealed class ViewHolder(open val binding: ViewDataBinding) :
         RecyclerView.ViewHolder(binding.root) {
-        class Item(override val binding: TopupProductItemBinding) : ViewHolder(binding)
         class Featured(override val binding: TopupProductFeaturedBinding) : ViewHolder(binding)
+        class Loading(override val binding: TopupProductLoadingBinding) : ViewHolder(binding)
+        class Item(override val binding: TopupProductItemBinding) : ViewHolder(binding)
         class Free(override val binding: TopupProductFreeBinding) : ViewHolder(binding)
     }
 
@@ -82,6 +96,7 @@ class TopUpProductsAdapter(
                 is TopUpProductModel.Item -> newItem is TopUpProductModel.Item
                 is TopUpProductModel.Featured -> newItem is TopUpProductModel.Featured
                 is TopUpProductModel.Free -> newItem is TopUpProductModel.Free
+                is TopUpProductModel.Loading -> newItem is TopUpProductModel.Loading
             }
 
             override fun areContentsTheSame(
@@ -90,11 +105,13 @@ class TopUpProductsAdapter(
                 is TopUpProductModel.Item -> newItem is TopUpProductModel.Item
                 is TopUpProductModel.Featured -> newItem is TopUpProductModel.Featured
                 is TopUpProductModel.Free -> newItem is TopUpProductModel.Free
+                is TopUpProductModel.Loading -> newItem is TopUpProductModel.Loading
             }
         }
 
-        fun decoration(padding: Int): RecyclerView.ItemDecoration = PaddingDividerDecoration(ORIENTATION_HORIZONTAL) { _, _ ->
-            padding
-        }
+        fun decoration(padding: Int): RecyclerView.ItemDecoration =
+            PaddingDividerDecoration(ORIENTATION_HORIZONTAL) { _, _ ->
+                padding
+            }
     }
 }

@@ -5,6 +5,8 @@ import com.quote.mosaic.data.model.overview.MainTopicDO
 import com.quote.mosaic.data.model.overview.QuoteDO
 import com.quote.mosaic.data.model.overview.TopicDO
 import com.quote.mosaic.data.model.purchase.AvailableProductsDO
+import com.quote.mosaic.data.model.purchase.PurchaseIdDO
+import com.quote.mosaic.data.model.purchase.PurchaseStatusDO
 import com.quote.mosaic.data.model.user.TokenDO
 import com.quote.mosaic.data.model.user.UserDO
 import io.reactivex.Single
@@ -13,6 +15,7 @@ import retrofit2.http.*
 
 interface ApiService {
 
+    // ---------------- USER ---------------- //
     @POST("auth/")
     fun login(
         @Body body: HashMap<String, String>
@@ -29,6 +32,13 @@ interface ApiService {
         @Body body: HashMap<String, String>
     ): Single<Response<ResponseData<UserDO>>>
 
+    @POST("notifications/subscribe/")
+    fun subscribePushNotifications(
+        @Header("X-Client-Auth") token: String,
+        @Body body: HashMap<String, String>
+    ): Single<Response<Void>>
+
+    // ---------------- TOPICS ---------------- //
     @GET("topic/list/")
     fun topics(
         @Header("X-Client-Auth") token: String
@@ -41,6 +51,7 @@ interface ApiService {
         @Path("id") id: Int
     ): Single<Response<ResponseData<TopicDO>>>
 
+    // ---------------- CATEGORIES ---------------- //
     @POST("category/{id}/unlock")
     fun openCategory(
         @Header("X-Client-Auth") token: String,
@@ -59,14 +70,21 @@ interface ApiService {
         @Path("id") id: Int
     ): Single<Response<ResponseData<QuoteDO>>>
 
-    @POST("notifications/subscribe/")
-    fun subscribePushNotifications(
-        @Header("X-Client-Auth") token: String,
-        @Body body: HashMap<String, String>
-    ): Single<Response<Void>>
-
+    // ---------------- PURCHASES ---------------- //
     @GET("purchase/play/products/")
     fun getSkuList(
         @Header("X-Client-Auth") token: String
     ): Single<Response<ResponseData<AvailableProductsDO>>>
+
+    @GET("purchase/play/status/{purchaseToken}/")
+    fun getPurchaseStatus(
+        @Header("X-Client-Auth") token: String,
+        @Path("purchaseToken") purchaseToken: String
+    ): Single<Response<ResponseData<PurchaseStatusDO>>>
+
+    @POST("purchase/play/coins/")
+    fun registerPurchase(
+        @Header("X-Client-Auth") token: String,
+        @Body body: HashMap<String, String>
+    ): Single<Response<ResponseData<PurchaseIdDO>>>
 }

@@ -13,12 +13,13 @@
     <string name="shared_label_send">Отправить</string>
     <string name="shared_label_ura">Ура!</string>
     <string name="shared_label_ok">Понятно</string>
+    <string name="shared_label_ask_support">Обратиться в поддержку</string>
     <string name="shared_label_remember">Запомнил!</string>
     <string name="shared_label_saved">Сохранено:)</string>
+    <string name="shared_label_try_again">Пробую!</string>
+    <string name="shared_label_error_title">Упс!</string>
 
-    <string name="error_label_title">Упс!</string>
     <string name="error_label_subtitle">Что-то пошло не так, попробуйте еще раз!</string>
-    <string name="error_button_refresh">Пробую!</string>
 
     <string name="navigation_label_game">Игра</string>
     <string name="navigation_label_top">Топ</string>
@@ -52,4 +53,6 @@
 
     <!-- BUY -->
     <string name="topup_label_title">Выбирай подходящий вариант, %s!</string>
+    <string name="topup_label_billing_failed">Что-то пошло не так, попробуйте еще раз или обратитесь в поддержку.</string>
+    <string name="topup_label_billing_success">Монеты уже на твоем балансе, пользуйся!</string>
 </resources>

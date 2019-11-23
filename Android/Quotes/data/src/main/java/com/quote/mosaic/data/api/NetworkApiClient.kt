@@ -6,6 +6,8 @@ import com.quote.mosaic.data.model.overview.MainTopicDO
 import com.quote.mosaic.data.model.overview.QuoteDO
 import com.quote.mosaic.data.model.overview.TopicDO
 import com.quote.mosaic.data.model.purchase.AvailableProductsDO
+import com.quote.mosaic.data.model.purchase.PurchaseIdDO
+import com.quote.mosaic.data.model.purchase.PurchaseStatusDO
 import com.quote.mosaic.data.model.user.UserDO
 import com.quote.mosaic.data.network.NetworkStatusProvider
 import com.quote.mosaic.data.transform.EmptyResponseTransform
@@ -21,6 +23,7 @@ class NetworkApiClient(
     private val userManager: UserManager
 ) : ApiClient {
 
+    // ---------------- USER ---------------- //
     override fun login(
         deviceId: String, timestamp: String, signature: String, nickname: String
     ): Single<String> {
@@ -48,38 +51,54 @@ class NetworkApiClient(
         if (!userManager.getDeviceToken().isNullOrEmpty()) {
             val body = HashMap<String, String>()
             body["token"] = userManager.getDeviceToken().orEmpty()
-            apiService
-                .subscribePushNotifications(userManager.getSession(), body)
+            apiService.subscribePushNotifications(userManager.getSession(), body)
                 .transformToCompletable()
         } else {
             Completable.complete()
         }
 
+    // ---------------- TOPICS ---------------- //
     override fun topics(): Single<List<MainTopicDO>> =
         apiService.topics(userManager.getSession()).transform().map { it.objects.requireNoNulls() }
 
     override fun topic(id: Int, force: Boolean): Single<TopicDO> =
         apiService.topic(
-            userManager.getSession(),
-            force.toCacheHeader(),
-            id
+            userManager.getSession(), force.toCacheHeader(), id
         ).transform().map { it.objects.first() }
 
+    // ---------------- CATEGORIES ---------------- //
     override fun openCategory(id: Int): Completable =
         apiService.openCategory(userManager.getSession(), id).transformToCompletable()
 
     override fun quotesList(id: Int): Single<List<QuoteDO>> =
         apiService.categoryInfo(
-            userManager.getSession(),
-            id
+            userManager.getSession(), id
         ).transform().map { it.objects.requireNoNulls() }
 
     override fun completeLevel(id: Int): Completable =
         apiService.completeLevel(userManager.getSession(), id).transformToCompletable()
 
+    // ---------------- PURCHASES ---------------- //
     override fun getSkuList(): Single<AvailableProductsDO> =
         apiService.getSkuList(userManager.getSession()).transform().map { it.objects.first() }
 
+    override fun getPurchaseStatus(token: String): Single<PurchaseStatusDO> =
+        apiService.getPurchaseStatus(
+            userManager.getSession(), token
+        ).transform().map { it.objects.first() }
+
+    override fun registerPurchase(
+        orderId: String, purchaseToken: String, balanceRecharge: String
+    ): Single<PurchaseIdDO> {
+        val body = HashMap<String, String>()
+        body["order_id"] = orderId
+        body["purchase_token"] = purchaseToken
+        body["balance_recharge"] = balanceRecharge
+
+        return apiService.registerPurchase(userManager.getSession(), body).transform().map { it.objects.first() }
+    }
+
+    // ---------------- COMMON ---------------- //
     private fun <T> Single<Response<T>>.transform() =
         compose(
             ResponseTransform(

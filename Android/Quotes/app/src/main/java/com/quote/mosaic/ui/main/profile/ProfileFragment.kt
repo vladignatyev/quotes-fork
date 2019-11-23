@@ -8,10 +8,11 @@ import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProviders
 import com.google.android.material.snackbar.Snackbar
-import com.quote.mosaic.BuildConfig
 import com.quote.mosaic.R
 import com.quote.mosaic.core.AppFragment
 import com.quote.mosaic.core.common.utils.Ime
+import com.quote.mosaic.core.ext.shareAppIntent
+import com.quote.mosaic.core.ext.supportEmailIntent
 import com.quote.mosaic.data.manager.UserManager
 import com.quote.mosaic.databinding.ProfileFragmentBinding
 import com.quote.mosaic.ui.onboarding.OnboardingActivity
@@ -98,43 +99,16 @@ class ProfileFragment : AppFragment(), SimpleDialog.OnDialogResultListener {
     }
 
     fun shareClicked() {
-        val sendIntent = Intent().apply {
-            action = Intent.ACTION_SEND
-            putExtra(
-                Intent.EXTRA_TEXT,
-                "${getString(R.string.profile_label_share_app)} ${getString(R.string.app_link)}"
-            )
-            type = "text/plain"
-        }
-        startActivity(sendIntent)
+        val intent = Intent().shareAppIntent(requireContext())
+        startActivity(intent)
     }
 
     fun feedbackClicked() {
-        val intent = Intent(Intent.ACTION_SEND).apply {
-            type = "text/html"
-            putExtra(Intent.EXTRA_EMAIL, arrayOf("feedback.quotes.puzzle@gmail.com"))
-            putExtra(Intent.EXTRA_TEXT, generateEmailText())
-        }
-
-        startActivity(Intent.createChooser(intent, getString(R.string.shared_label_send)))
-    }
-
-    private fun generateEmailText(): String {
-        val userSession = userManager.getSession()
-        val trimmed = userSession.substring(0, userSession.length - 16)
-        val appVersion = "${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})"
-
-        return "" +
-                "-----------------------\n" +
-                "\n" +
-                "${getString(R.string.profile_label_email_title)}\n" +
-                "\n" +
-                "$appVersion | $trimmed | \n" +
-                "\n" +
-                "-----------------------\n" +
-                "\n" +
-                "${getString(R.string.profile_label_email_write)}\n" +
-                "\n"
+        val intent = Intent.createChooser(
+            Intent().supportEmailIntent(requireContext(), userManager),
+            requireContext().getString(R.string.shared_label_send)
+        )
+        startActivity(intent)
     }
 
     private fun binding() = viewBinding<ProfileFragmentBinding>()

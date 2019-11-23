@@ -9,6 +9,8 @@ interface TopUpProductMapper {
         remoteProducts: AvailableProductsDO,
         billingProducts: List<SkuDetails>
     ): List<TopUpProductModel>
+
+    fun toLoadingState(): List<TopUpProductModel>
 }
 
 class TopUpProductMapperImpl : TopUpProductMapper {
@@ -62,4 +64,13 @@ class TopUpProductMapperImpl : TopUpProductMapper {
         }
         return localProducts
     }
+
+    override fun toLoadingState(): List<TopUpProductModel> = listOf(
+        TopUpProductModel.Loading("1", SkuDetails("{}")),
+        TopUpProductModel.Loading("2", SkuDetails("{}")),
+        TopUpProductModel.Loading("3", SkuDetails("{}")),
+        TopUpProductModel.Loading("4", SkuDetails("{}")),
+        TopUpProductModel.Loading("5", SkuDetails("{}"))
+    )
+
 }
