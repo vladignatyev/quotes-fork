@@ -13,8 +13,6 @@ import androidx.lifecycle.ViewModelProviders
 import com.quote.mosaic.R
 import com.quote.mosaic.core.AppDialogFragment
 import com.quote.mosaic.core.common.args
-import com.quote.mosaic.core.common.parentAs
-import com.quote.mosaic.data.model.overview.QuoteDO
 import com.quote.mosaic.databinding.GameSuccessFragmentBinding
 import javax.inject.Inject
 
@@ -24,13 +22,6 @@ class GameSuccessFragment : AppDialogFragment() {
     lateinit var vmFactory: GameSuccessViewModel.Factory
 
     private lateinit var vm: GameSuccessViewModel
-
-    private lateinit var listener: Listener
-
-    override fun onAttach(context: Context) {
-        super.onAttach(context)
-        listener = parentAs()
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -50,30 +41,12 @@ class GameSuccessFragment : AppDialogFragment() {
     ).apply {
         dialog?.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         dialog?.window?.requestFeature(Window.FEATURE_NO_TITLE)
-        listener = this@GameSuccessFragment.listener
         fragment = this@GameSuccessFragment
         viewModel = vm
         isCancelable = false
     }.root
 
-    fun onNextClicked() {
-        dismiss()
-        listener.onNextLevelClicked()
-    }
-
-    interface Listener {
-        fun goMainClicked()
-        fun onNextLevelClicked()
-    }
-
     companion object {
-
-        private const val KEY_QUOTE_SUCCESS = "KEY_QUOTE_SUCCESS"
-
-        fun newInstance(quote: QuoteDO) = GameSuccessFragment().apply {
-            arguments = Bundle().apply {
-                putParcelable(KEY_QUOTE_SUCCESS, quote)
-            }
-        }
+        const val KEY_QUOTE_SUCCESS = "KEY_QUOTE_SUCCESS"
     }
 }

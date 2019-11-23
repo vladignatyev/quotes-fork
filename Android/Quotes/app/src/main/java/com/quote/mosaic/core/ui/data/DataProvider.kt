@@ -4,21 +4,15 @@ import java.util.*
 
 class ExampleDataProvider : AbstractDataProvider() {
 
-    private lateinit var quote: List<String>
+    private lateinit var correctQuote: List<String>
 
     private val data: MutableList<ConcreteData> = LinkedList()
 
     override val count: Int get() = data.size
 
-    fun addQuote(quote: List<String>) {
-        this.quote = quote
-        val quoteArr = quote
-            .shuffled()
-
-        if (quote == quoteArr) {
-            quoteArr.toList().shuffled().toTypedArray()
-        }
-        fillInData(quoteArr)
+    fun addQuote(correctQuote: List<String>, mixed: List<String>) {
+        this.correctQuote = correctQuote
+        fillInData(mixed)
     }
 
     override fun getItem(index: Int): Data {
@@ -37,7 +31,7 @@ class ExampleDataProvider : AbstractDataProvider() {
     }
 
     override fun getFullQuote(): List<String> {
-        return quote
+        return correctQuote
     }
 
     override fun getCurrentQuote(): List<String> {

@@ -3,20 +3,41 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/game"
-    app:startDestination="@id/overviewFragment">
+    app:startDestination="@id/gameFragment">
 
     <fragment
-        android:id="@+id/overviewFragment"
-        android:name="com.quote.mosaic.ui.main.play.OverviewFragment"
+        android:id="@+id/gameFragment"
+        android:name="com.quote.mosaic.ui.game.GameFragment"
         android:label="GameFragment"
-        tools:layout="@layout/overview_fragment">
+        tools:layout="@layout/game_fragment">
         <action
-            android:id="@+id/action_overviewFragment_to_topupFragment"
-            app:destination="@id/topupFragment" />
+            android:id="@+id/action_gameFragment_to_hintFragment"
+            app:destination="@id/hintFragment" />
+        <action
+            android:id="@+id/action_gameFragment_to_gameSuccessFragment"
+            app:destination="@id/gameSuccessFragment" />
     </fragment>
+    <dialog
+        android:id="@+id/hintFragment"
+        android:name="com.quote.mosaic.ui.game.hint.HintFragment"
+        android:label="HintFragment"
+        tools:layout="@layout/hint_fragment">
+        <action
+            android:id="@+id/action_hintFragment_to_topUpFragment"
+            app:destination="@id/topUpFragment"
+            app:enterAnim="@anim/enter_from_right"
+            app:exitAnim="@anim/exit_to_left"
+            app:popEnterAnim="@anim/enter_from_left"
+            app:popExitAnim="@anim/exit_to_right" />
+    </dialog>
+    <dialog
+        android:id="@+id/gameSuccessFragment"
+        android:name="com.quote.mosaic.ui.game.success.GameSuccessFragment"
+        android:label="GameSuccessFragment"
+        tools:layout="@layout/game_success_fragment" />
     <fragment
-        android:id="@+id/topupFragment"
+        android:id="@+id/topUpFragment"
         android:name="com.quote.mosaic.ui.main.play.topup.TopUpFragment"
-        android:label="TopupFragment"
+        android:label="TopUpFragment"
         tools:layout="@layout/topup_fragment" />
 </navigation>

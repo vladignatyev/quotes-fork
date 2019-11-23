@@ -64,7 +64,7 @@ class MainActivity : AppActivity(), HasAndroidInjector {
     private fun setupBottomNavigationBar() {
         binding.bottomBar.itemIconTintList = null
         binding.bottomBar.setupWithNavController(
-            navGraphIds = listOf(R.navigation.game, R.navigation.top, R.navigation.profile),
+            navGraphIds = listOf(R.navigation.overview, R.navigation.top, R.navigation.profile),
             fragmentManager = supportFragmentManager,
             containerId = R.id.fragmentContainer,
             intent = intent

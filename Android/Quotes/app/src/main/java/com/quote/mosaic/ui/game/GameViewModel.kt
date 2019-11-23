@@ -3,26 +3,43 @@ package com.quote.mosaic.ui.game
 import androidx.databinding.ObservableField
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.quote.mosaic.data.api.ApiClient
-import com.quote.mosaic.data.model.overview.QuoteDO
 import com.quote.mosaic.core.AppViewModel
 import com.quote.mosaic.core.Schedulers
 import com.quote.mosaic.core.rx.ClearableBehaviorProcessor
+import com.quote.mosaic.core.rx.NonNullObservableField
+import com.quote.mosaic.data.api.ApiClient
+import com.quote.mosaic.data.manager.UserManager
+import com.quote.mosaic.data.model.overview.QuoteDO
+import com.quote.mosaic.ui.game.hint.HintModel
+import com.quote.mosaic.ui.game.hint.HintType
 import io.reactivex.Flowable
 import io.reactivex.processors.BehaviorProcessor
+import io.reactivex.processors.PublishProcessor
 import timber.log.Timber
+import java.util.*
 
 class GameViewModel(
     private val schedulers: Schedulers,
-    private val apiClient: ApiClient
+    private val apiClient: ApiClient,
+    private val userManager: UserManager
 ) : AppViewModel() {
 
-    private val quoteLoadedTrigger = BehaviorProcessor.create<List<String>>()
+    private val onNextLevelReceived = BehaviorProcessor.create<List<String>>()
+    private val onHintsReceived = BehaviorProcessor.create<List<HintModel>>()
     private val levelCompletedTrigger = ClearableBehaviorProcessor.create<Unit>()
 
+    private val showBalanceTrigger = PublishProcessor.create<Unit>()
+    private val showHintTriggered = PublishProcessor.create<String>()
+    private val skipLevelTriggered = PublishProcessor.create<Unit>()
+
     val state = State(
-        quoteLoadedTrigger = quoteLoadedTrigger,
-        levelCompletedTrigger = levelCompletedTrigger.clearable()
+        onNextLevelReceived = onNextLevelReceived,
+        onHintsReceived = onHintsReceived,
+
+        levelCompletedTrigger = levelCompletedTrigger.clearable(),
+        showBalanceTrigger = showBalanceTrigger,
+        showHintTriggered = showHintTriggered,
+        skipLevelTriggered = skipLevelTriggered
     )
 
     fun setUp(id: Int) {
@@ -30,21 +47,20 @@ class GameViewModel(
     }
 
     override fun initialise() {
-        val selectedCategoryId = state.selectedCategory.get() ?: 0
+        loadLevel()
 
-        apiClient
-            .quotesList(selectedCategoryId)
+        apiClient.profile()
             .subscribeOn(schedulers.io())
             .observeOn(schedulers.ui())
-            .subscribe({ quotes ->
-                state.allQuotes.set(quotes)
-                handleLevelChanges()
+            .subscribe({
+                state.userName.set(it.nickname)
+                state.balance.set(it.balance.toString())
             }, {
-                Timber.e(it, "GameViewModel init failed")
+                Timber.w(it, "User loading failed")
             }).untilCleared()
     }
 
-    fun completeLevel() {
+    fun markLevelAsCompleted() {
         val currentQuote = state.allQuotes.get().orEmpty().first { !it.complete }
         val selectedCategoryId = state.selectedCategory.get() ?: 0
 
@@ -53,51 +69,118 @@ class GameViewModel(
             .andThen(apiClient.quotesList(selectedCategoryId))
             .subscribeOn(schedulers.io())
             .observeOn(schedulers.ui())
-            .subscribe({ quotes ->
-                state.allQuotes.set(quotes)
-                handleLevelChanges()
+            .subscribe({
                 levelCompletedTrigger.onNext(Unit)
             }, {
                 Timber.e(it, "completeLevel failed")
             }).untilCleared()
-
     }
 
-    private fun handleLevelChanges() {
-        val quotes = state.allQuotes.get()!!
-        state.totalLevel.set(quotes.count().toString())
-        state.currentLevel.set(quotes.filter { it.complete }.count().plus(1).toString())
+    fun loadHints() {
+        //TODO: change
+        val hints = mutableListOf<HintModel>().apply {
+            add(HintModel.Balance(state.balance.get() ?: "0"))
+            add(HintModel.CoinHint(HintType.NEXT_WORD, "Узнать следующее слово", "5"))
+            add(HintModel.SkipHint("Пропустить Уровень", "30"))
 
-        val currentQuote = quotes.first { !it.complete }
-        state.currentQuote.set(currentQuote)
-        quoteLoadedTrigger.onNext(currentQuote.splitted)
+            state.currentQuote.get()?.author?.let {
+                add(HintModel.CoinHint(HintType.AUTHOR, "Узнать автора цитаты", "1"))
+            }
+
+            add(HintModel.Close)
+        }
+        onHintsReceived.onNext(hints)
     }
 
-    fun reset() {
-        levelCompletedTrigger.clear()
+    fun loadLevel() {
+        val selectedCategoryId = state.selectedCategory.get() ?: 0
+
+        apiClient
+            .quotesList(selectedCategoryId)
+            .subscribeOn(schedulers.io())
+            .observeOn(schedulers.ui())
+            .subscribe({ quotes ->
+                state.allQuotes.set(quotes)
+                state.totalLevel.set(quotes.count().toString())
+                state.currentLevel.set(quotes.filter { it.complete }.count().plus(1).toString())
+
+                val currentQuote = quotes.first { !it.complete }
+                state.currentQuote.set(currentQuote)
+                onNextLevelReceived.onNext(mixedQuote(currentQuote.splitted))
+            }, {
+                Timber.e(it, "GameViewModel init failed")
+            }).untilCleared()
     }
+
+    fun findNextWord() {
+        val correctQuote = state.currentQuote.get()?.splitted!!
+        val userVariantQuote = state.userVariantQuote.get().orEmpty()
+
+        if (correctQuote.size == userVariantQuote.size) {
+            var hint = ""
+            correctQuote.forEachIndexed { index, word ->
+                if (word != userVariantQuote[index]) {
+                    showHintTriggered.onNext("$hint$word")
+                    return
+                } else {
+                    hint += "$word "
+                }
+            }
+        }
+    }
+
+    fun findAuthor() {
+        state.currentQuote.get()?.author?.let {
+            showHintTriggered.onNext(it)
+        }
+    }
+
+    fun skipLevel() {
+        skipLevelTriggered.onNext(Unit)
+    }
+
+    fun showBalance() {
+        showBalanceTrigger.onNext(Unit)
+    }
+
+    fun setCurrentVariant(currentQuote: List<String>) {
+        state.userVariantQuote.set(currentQuote)
+        onNextLevelReceived.onNext(currentQuote)
+    }
+
+    private fun mixedQuote(quote: List<String>): List<String> =
+        quote.shuffled(Random(quote.size.toLong()))
 
     data class State(
-        val currentLevel: ObservableField<String> = ObservableField(""),
-        val totalLevel: ObservableField<String> = ObservableField(""),
-        val balance: ObservableField<String> = ObservableField("100"),
         val selectedCategory: ObservableField<Int> = ObservableField(),
+
+        val currentLevel: NonNullObservableField<String> = NonNullObservableField(""),
+        val totalLevel: NonNullObservableField<String> = NonNullObservableField(""),
+        val balance: NonNullObservableField<String> = NonNullObservableField(""),
+        val userName: NonNullObservableField<String> = NonNullObservableField(""),
+
         val allQuotes: ObservableField<List<QuoteDO>> = ObservableField(),
         val currentQuote: ObservableField<QuoteDO> = ObservableField(),
-        val quote: ObservableField<String> = ObservableField(),
+        val userVariantQuote: ObservableField<List<String>> = ObservableField(),
 
-        val quoteLoadedTrigger: Flowable<List<String>>,
-        val levelCompletedTrigger: Flowable<Unit>
+        val onNextLevelReceived: Flowable<List<String>>,
+        val onHintsReceived: Flowable<List<HintModel>>,
+
+        val levelCompletedTrigger: Flowable<Unit>,
+        val showBalanceTrigger: Flowable<Unit>,
+        val showHintTriggered: Flowable<String>,
+        val skipLevelTriggered: Flowable<Unit>
     )
 
     class Factory(
         private val schedulers: Schedulers,
-        private val apiClient: ApiClient
+        private val apiClient: ApiClient,
+        private val userManager: UserManager
     ) : ViewModelProvider.Factory {
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
             if (modelClass.isAssignableFrom(GameViewModel::class.java)) {
                 @Suppress("UNCHECKED_CAST")
-                return GameViewModel(schedulers, apiClient) as T
+                return GameViewModel(schedulers, apiClient, userManager) as T
             }
             throw IllegalArgumentException("Unknown ViewModel class")
         }

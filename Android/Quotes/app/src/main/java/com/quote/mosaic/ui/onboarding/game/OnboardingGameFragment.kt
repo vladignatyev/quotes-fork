@@ -31,7 +31,8 @@ import javax.inject.Inject
 
 class OnboardingGameFragment : AppFragment() {
 
-    @Inject lateinit var userManager: UserManager
+    @Inject
+    lateinit var userManager: UserManager
 
     private lateinit var listener: Listener
 
@@ -63,7 +64,8 @@ class OnboardingGameFragment : AppFragment() {
 
     override fun onResume() {
         super.onResume()
-        binding().welcomeMsg.text = getString(R.string.onboarding_label_welcome_aboard, userManager.getUserName())
+        binding().welcomeMsg.text =
+            getString(R.string.onboarding_label_welcome_aboard, userManager.getUserName())
     }
 
     override fun onPause() {
@@ -81,7 +83,9 @@ class OnboardingGameFragment : AppFragment() {
         if (gameWrapperAdapter != null) return
 
         dataProvider = ExampleDataProvider()
-        dataProvider.addQuote(listOf("Через", "тернии", "к", "звездам"))
+        val correctQuote = listOf("Через", "тернии", "к", "звездам")
+        val mixedQuote = listOf("Через", "звездам", "тернии", "к")
+        dataProvider.addQuote(correctQuote, mixedQuote)
         gameAdapter = OnboardingGameAdapter(R.color.darkPurple) { onSuccess() }
         gameAdapter.setDataProvider(dataProvider)
 

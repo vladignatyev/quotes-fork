@@ -1,6 +1,5 @@
 package com.quote.mosaic.ui.game.hint
 
-import android.content.Context
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
@@ -8,44 +7,22 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
-import androidx.lifecycle.ViewModelProviders
+import androidx.fragment.app.activityViewModels
+import androidx.navigation.fragment.findNavController
 import com.quote.mosaic.R
 import com.quote.mosaic.core.AppDialogFragment
-import com.quote.mosaic.core.common.args
-import com.quote.mosaic.core.common.parentAs
-import com.quote.mosaic.data.model.overview.QuoteDO
 import com.quote.mosaic.databinding.HintFragmentBinding
-import javax.inject.Inject
+import com.quote.mosaic.ui.game.GameViewModel
 
 class HintFragment : AppDialogFragment() {
 
-    @Inject
-    lateinit var vmFactory: HintViewModel.Factory
-
-    private lateinit var vm: HintViewModel
-
-    private lateinit var listener: Listener
+    private val vm: GameViewModel by activityViewModels()
 
     private lateinit var adapter: HintAdapter
 
-    override fun onAttach(context: Context) {
-        super.onAttach(context)
-        listener = parentAs()
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        vm = ViewModelProviders
-            .of(this, vmFactory)
-            .get(HintViewModel::class.java)
-        vm.setUp(args().getParcelable(KEY_HINT_QUOTE)!!, args().getStringArrayList(KEY_HINT_USER_VARIANT)!!)
-        vm.init()
-    }
-
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
-        dialog?.window?.attributes?.windowAnimations = R.style.DialogAnimation
-        dialog?.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+        vm.loadHints()
     }
 
     override fun onCreateView(
@@ -55,12 +32,14 @@ class HintFragment : AppDialogFragment() {
     ): View = DataBindingUtil.inflate<HintFragmentBinding>(
         inflater, R.layout.hint_fragment, container, false
     ).apply {
+        dialog?.window?.attributes?.windowAnimations = R.style.DialogAnimation
+        dialog?.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         fragment = this@HintFragment
-        viewModel = vm
+
         adapter = HintAdapter({
             this@HintFragment.dismiss()
         }, {
-            listener.onShowBalanceClicked()
+            vm.showBalance()
         }, {
             onHintClicked(it)
         })
@@ -81,37 +60,20 @@ class HintFragment : AppDialogFragment() {
     override fun onStart() {
         super.onStart()
 
-        vm.state.items.subscribe {
+        vm.state.onHintsReceived.subscribe {
             adapter.submitList(it)
         }.untilStopped()
 
-        vm.state.hintTrigger.subscribe {
-            listener.onHintReceived(it)
+        vm.state.showHintTriggered.subscribe {
             dismiss()
         }.untilStopped()
 
-        vm.state.skipTrigger.subscribe {
-            listener.onSkipLevelClicked()
+        vm.state.skipLevelTriggered.subscribe {
             dismiss()
         }.untilStopped()
-    }
 
-    interface Listener {
-        fun onShowBalanceClicked()
-        fun onSkipLevelClicked()
-        fun onHintReceived(hint: String)
-    }
-
-    companion object {
-
-        private const val KEY_HINT_QUOTE = "KEY_HINT_QUOTE"
-        private const val KEY_HINT_USER_VARIANT = "KEY_HINT_USER_VARIANT"
-
-        fun newInstance(quoteDO: QuoteDO, userVariant: List<String>) = HintFragment().apply {
-            arguments = Bundle().apply {
-                putParcelable(KEY_HINT_QUOTE, quoteDO)
-                putStringArrayList(KEY_HINT_USER_VARIANT, ArrayList(userVariant))
-            }
-        }
+        vm.state.showBalanceTrigger.subscribe {
+            findNavController().navigate(R.id.action_hintFragment_to_topUpFragment)
+        }.untilStopped()
     }
 }

@@ -7,7 +7,7 @@ import kotlinx.android.parcel.Parcelize
 data class QuoteDO(
     val id: Int,
     val text: String,
-    val author: String,
+    val author: String?,
     val reward: Int,
     val beautiful: String,
     val complete: Boolean,

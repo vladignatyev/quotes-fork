@@ -11,7 +11,6 @@ import androidx.lifecycle.ViewModelProviders
 import androidx.transition.TransitionInflater
 import com.quote.mosaic.R
 import com.quote.mosaic.core.AppFragment
-import com.quote.mosaic.core.common.args
 import com.quote.mosaic.core.ext.supportEmailIntent
 import com.quote.mosaic.data.manager.UserManager
 import com.quote.mosaic.databinding.TopupCompletePopupBinding
@@ -38,7 +37,7 @@ class TopUpFragment : AppFragment() {
         vm = ViewModelProviders
             .of(this, vmFactory)
             .get(TopUpViewModel::class.java)
-        vm.setUp(args().getString(KEY_USER_NAME), args().getString(KEY_USER_BALANCE))
+        vm.setUp(userManager.getUserName(), userManager.getUserBalance())
         vm.init()
     }
 
@@ -119,12 +118,5 @@ class TopUpFragment : AppFragment() {
         }
     }
 
-
     private fun binding() = viewBinding<TopupFragmentBinding>()
-
-    companion object {
-        const val KEY_USER_NAME = "KEY_USER_NAME"
-        const val KEY_USER_BALANCE = "KEY_USER_BALANCE"
-    }
-
 }

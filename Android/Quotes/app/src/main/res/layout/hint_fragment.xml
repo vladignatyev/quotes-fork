@@ -7,10 +7,6 @@
         <variable
             name="fragment"
             type="com.quote.mosaic.ui.game.hint.HintFragment" />
-
-        <variable
-            name="viewModel"
-            type="com.quote.mosaic.ui.game.hint.HintViewModel" />
     </data>
 
     <FrameLayout

@@ -22,6 +22,9 @@
 
 # ====== BEGIN Project level ======
 -keep class com.quote.mosaic.** { *; }
+-keepnames class com.quote.mosaic.ParcelableArg
+-keepnames class com.quote.mosaic.SerializableArg
+-keepnames class com.quote.mosaic.EnumArg
 
 # ====== END Project level ======
 
