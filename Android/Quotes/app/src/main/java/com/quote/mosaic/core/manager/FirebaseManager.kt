@@ -1,7 +1,7 @@
 package com.quote.mosaic.core.manager
 
 import com.google.firebase.iid.FirebaseInstanceId
-import com.quote.mosaic.data.UserManager
+import com.quote.mosaic.data.manager.UserManager
 import timber.log.Timber
 
 class FirebaseManager(

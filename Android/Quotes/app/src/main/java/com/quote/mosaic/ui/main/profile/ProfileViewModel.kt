@@ -10,7 +10,7 @@ import com.quote.mosaic.core.common.toFlowable
 import com.quote.mosaic.core.manager.UserPreferences
 import com.quote.mosaic.core.rx.ClearableBehaviorProcessor
 import com.quote.mosaic.core.rx.NonNullObservableField
-import com.quote.mosaic.data.UserManager
+import com.quote.mosaic.data.manager.UserManager
 import com.quote.mosaic.data.api.ApiClient
 import io.reactivex.Flowable
 import io.reactivex.processors.BehaviorProcessor

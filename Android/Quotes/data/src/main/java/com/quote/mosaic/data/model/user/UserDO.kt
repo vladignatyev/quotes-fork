@@ -1,4 +1,4 @@
-package com.quote.mosaic.data.model
+package com.quote.mosaic.data.model.user
 
 import com.fasterxml.jackson.annotation.JsonProperty
 

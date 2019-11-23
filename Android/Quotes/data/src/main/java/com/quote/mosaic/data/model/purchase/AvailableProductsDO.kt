@@ -1,10 +1,10 @@
-package com.quote.mosaic.data.model
+package com.quote.mosaic.data.model.purchase
 
 import com.fasterxml.jackson.annotation.JsonProperty
 
 data class AvailableProductsDO(
     @JsonProperty("recharge_products")
-    val rechargeable: List<SkuDO>,
+    val rechargeable: List<RechargeableSkuDO>,
     @JsonProperty("other_products")
-    val others: List<SkuDO>
+    val others: List<OthersSkuDO>
 )

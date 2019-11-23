@@ -3,8 +3,8 @@ package com.quote.mosaic.ui.main.play.topic
 import android.content.Context
 import com.quote.mosaic.R
 import com.quote.mosaic.core.manager.UserPreferences
-import com.quote.mosaic.data.model.CategoryDO
-import com.quote.mosaic.data.model.TopicDO
+import com.quote.mosaic.data.model.overview.CategoryDO
+import com.quote.mosaic.data.model.overview.TopicDO
 import com.quote.mosaic.ui.main.play.topic.category.CategoryModel
 import com.quote.mosaic.ui.main.play.topic.section.SectionModel
 import kotlin.math.roundToInt

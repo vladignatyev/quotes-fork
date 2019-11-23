@@ -3,11 +3,11 @@ package com.quote.mosaic.core.di.module
 import android.content.Context
 import android.content.SharedPreferences
 import com.quote.mosaic.crypto.fs.sp.SecurePreferences
-import com.quote.mosaic.data.UserManager
+import com.quote.mosaic.data.manager.UserManager
 import com.quote.mosaic.core.manager.FirebaseManager
 import com.quote.mosaic.core.manager.UserPreferences
-import com.quote.mosaic.data.manager.BillingManager
-import com.quote.mosaic.data.manager.BillingManagerImpl
+import com.quote.mosaic.data.billing.BillingManager
+import com.quote.mosaic.data.billing.BillingManagerImpl
 import dagger.Module
 import dagger.Provides
 import javax.inject.Singleton
@@ -23,7 +23,8 @@ class ManagerModule {
     @Singleton
     fun providesUserManager(
         securePreferences: SecurePreferences
-    ): UserManager = UserManager(securePreferences)
+    ): UserManager =
+        UserManager(securePreferences)
 
     @Provides
     @Singleton

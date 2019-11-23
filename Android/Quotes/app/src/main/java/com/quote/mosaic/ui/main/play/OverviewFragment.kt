@@ -10,7 +10,7 @@ import androidx.navigation.fragment.FragmentNavigatorExtras
 import androidx.navigation.fragment.findNavController
 import com.quote.mosaic.R
 import com.quote.mosaic.core.AppFragment
-import com.quote.mosaic.data.UserManager
+import com.quote.mosaic.data.manager.UserManager
 import com.quote.mosaic.databinding.OverviewFragmentBinding
 import com.quote.mosaic.ui.main.play.topup.TopUpFragment
 import javax.inject.Inject

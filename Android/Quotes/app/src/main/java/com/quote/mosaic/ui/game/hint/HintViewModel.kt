@@ -6,7 +6,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.quote.mosaic.core.AppViewModel
 import com.quote.mosaic.core.Schedulers
 import com.quote.mosaic.data.api.ApiClient
-import com.quote.mosaic.data.model.QuoteDO
+import com.quote.mosaic.data.model.overview.QuoteDO
 import io.reactivex.Flowable
 import io.reactivex.processors.BehaviorProcessor
 

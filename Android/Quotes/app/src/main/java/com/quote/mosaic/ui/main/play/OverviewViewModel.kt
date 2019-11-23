@@ -8,9 +8,9 @@ import com.quote.mosaic.core.AppViewModel
 import com.quote.mosaic.core.Schedulers
 import com.quote.mosaic.core.rx.ClearableBehaviorProcessor
 import com.quote.mosaic.core.rx.NonNullObservableField
-import com.quote.mosaic.data.UserManager
+import com.quote.mosaic.data.manager.UserManager
 import com.quote.mosaic.data.api.ApiClient
-import com.quote.mosaic.data.model.UserDO
+import com.quote.mosaic.data.model.user.UserDO
 import com.quote.mosaic.ui.main.play.topic.TopicModel
 import io.reactivex.Flowable
 import io.reactivex.processors.BehaviorProcessor

@@ -1,4 +1,4 @@
-package com.quote.mosaic.data.manager
+package com.quote.mosaic.data.billing
 
 import android.app.Activity
 import com.android.billingclient.api.Purchase

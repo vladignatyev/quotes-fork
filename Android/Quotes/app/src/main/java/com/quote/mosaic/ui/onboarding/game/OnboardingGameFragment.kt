@@ -13,7 +13,7 @@ import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import androidx.transition.Explode
 import androidx.transition.Transition
 import androidx.transition.TransitionManager
-import com.quote.mosaic.data.UserManager
+import com.quote.mosaic.data.manager.UserManager
 import com.quote.mosaic.game.animator.DraggableItemAnimator
 import com.quote.mosaic.game.draggable.RecyclerViewDragDropManager
 import com.quote.mosaic.game.utils.WrapperAdapterUtils

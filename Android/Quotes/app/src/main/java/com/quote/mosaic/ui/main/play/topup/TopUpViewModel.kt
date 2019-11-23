@@ -9,8 +9,8 @@ import com.android.billingclient.api.SkuDetails
 import com.quote.mosaic.core.AppViewModel
 import com.quote.mosaic.core.Schedulers
 import com.quote.mosaic.data.api.ApiClient
-import com.quote.mosaic.data.manager.BillingManager
-import com.quote.mosaic.data.model.AvailableProductsDO
+import com.quote.mosaic.data.billing.BillingManager
+import com.quote.mosaic.data.model.purchase.AvailableProductsDO
 import io.reactivex.Flowable
 import io.reactivex.processors.BehaviorProcessor
 import timber.log.Timber

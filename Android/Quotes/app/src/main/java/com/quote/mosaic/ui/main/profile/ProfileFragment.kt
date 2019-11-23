@@ -12,7 +12,7 @@ import com.quote.mosaic.BuildConfig
 import com.quote.mosaic.R
 import com.quote.mosaic.core.AppFragment
 import com.quote.mosaic.core.common.utils.Ime
-import com.quote.mosaic.data.UserManager
+import com.quote.mosaic.data.manager.UserManager
 import com.quote.mosaic.databinding.ProfileFragmentBinding
 import com.quote.mosaic.ui.onboarding.OnboardingActivity
 import eltos.simpledialogfragment.SimpleDialog

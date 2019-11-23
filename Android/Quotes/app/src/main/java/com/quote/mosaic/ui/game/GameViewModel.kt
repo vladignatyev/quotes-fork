@@ -4,10 +4,9 @@ import androidx.databinding.ObservableField
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.quote.mosaic.data.api.ApiClient
-import com.quote.mosaic.data.model.QuoteDO
+import com.quote.mosaic.data.model.overview.QuoteDO
 import com.quote.mosaic.core.AppViewModel
 import com.quote.mosaic.core.Schedulers
-import com.quote.mosaic.core.manager.UserPreferences
 import com.quote.mosaic.core.rx.ClearableBehaviorProcessor
 import io.reactivex.Flowable
 import io.reactivex.processors.BehaviorProcessor

@@ -1,6 +1,12 @@
 package com.quote.mosaic.data.api
 
 import com.quote.mosaic.data.model.*
+import com.quote.mosaic.data.model.overview.MainTopicDO
+import com.quote.mosaic.data.model.overview.QuoteDO
+import com.quote.mosaic.data.model.overview.TopicDO
+import com.quote.mosaic.data.model.purchase.AvailableProductsDO
+import com.quote.mosaic.data.model.user.TokenDO
+import com.quote.mosaic.data.model.user.UserDO
 import io.reactivex.Single
 import retrofit2.Response
 import retrofit2.http.*

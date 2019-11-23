@@ -1,7 +1,7 @@
-package com.quote.mosaic.data
+package com.quote.mosaic.data.manager
 
 import com.quote.mosaic.crypto.fs.sp.SecurePreferences
-import com.quote.mosaic.data.model.UserDO
+import com.quote.mosaic.data.model.user.UserDO
 import io.reactivex.Completable
 import io.reactivex.Flowable
 import io.reactivex.processors.BehaviorProcessor
@@ -23,7 +23,12 @@ class UserManager(
     }
 
     fun setUser(user: UserDO) {
-        userTrigger.onNext(User(user.balance, user.nickname))
+        userTrigger.onNext(
+            User(
+                user.balance,
+                user.nickname
+            )
+        )
     }
 
     fun saveUserName(name: String) {

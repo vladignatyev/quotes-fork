@@ -1,7 +1,7 @@
 package com.quote.mosaic.core.di.module
 
 import android.content.Context
-import com.quote.mosaic.data.UserManager
+import com.quote.mosaic.data.manager.UserManager
 import com.quote.mosaic.data.api.ApiClient
 import com.quote.mosaic.data.api.ApiService
 import com.quote.mosaic.data.api.NetworkApiClient

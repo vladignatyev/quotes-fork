@@ -3,7 +3,7 @@ package com.quote.mosaic.ui.onboarding.login
 import androidx.databinding.ObservableBoolean
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.quote.mosaic.data.UserManager
+import com.quote.mosaic.data.manager.UserManager
 import com.quote.mosaic.data.api.ApiClient
 import com.quote.mosaic.BuildConfig
 import com.quote.mosaic.core.AppViewModel

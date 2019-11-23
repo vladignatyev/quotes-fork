@@ -14,7 +14,7 @@ import com.quote.mosaic.R
 import com.quote.mosaic.core.AppDialogFragment
 import com.quote.mosaic.core.common.args
 import com.quote.mosaic.core.common.parentAs
-import com.quote.mosaic.data.model.QuoteDO
+import com.quote.mosaic.data.model.overview.QuoteDO
 import com.quote.mosaic.databinding.GameSuccessFragmentBinding
 import javax.inject.Inject
 

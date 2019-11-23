@@ -1,4 +1,4 @@
-package com.quote.mosaic.data.model
+package com.quote.mosaic.data.model.overview
 
 import android.os.Parcelable
 import kotlinx.android.parcel.Parcelize

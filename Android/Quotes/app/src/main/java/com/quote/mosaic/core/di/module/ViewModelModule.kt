@@ -2,9 +2,9 @@ package com.quote.mosaic.core.di.module
 
 import com.quote.mosaic.core.Schedulers
 import com.quote.mosaic.core.manager.UserPreferences
-import com.quote.mosaic.data.UserManager
+import com.quote.mosaic.data.manager.UserManager
 import com.quote.mosaic.data.api.ApiClient
-import com.quote.mosaic.data.manager.BillingManager
+import com.quote.mosaic.data.billing.BillingManager
 import com.quote.mosaic.ui.game.GameViewModel
 import com.quote.mosaic.ui.game.hint.HintViewModel
 import com.quote.mosaic.ui.game.success.GameSuccessViewModel

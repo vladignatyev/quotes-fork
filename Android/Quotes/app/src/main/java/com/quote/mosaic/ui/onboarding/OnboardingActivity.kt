@@ -12,7 +12,7 @@ import com.quote.mosaic.R
 import com.quote.mosaic.core.AppActivity
 import com.quote.mosaic.core.common.utils.Ime
 import com.quote.mosaic.core.common.utils.TimedActionConfirmHelper
-import com.quote.mosaic.data.UserManager
+import com.quote.mosaic.data.manager.UserManager
 import com.quote.mosaic.databinding.OnboardingActivityBinding
 import com.quote.mosaic.databinding.OnboardingCompletePopupBinding
 import com.quote.mosaic.ui.main.MainActivity

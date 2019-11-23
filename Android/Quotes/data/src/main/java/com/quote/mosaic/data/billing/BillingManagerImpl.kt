@@ -1,4 +1,4 @@
-package com.quote.mosaic.data.manager
+package com.quote.mosaic.data.billing
 
 import android.app.Activity
 import android.content.Context
@@ -8,7 +8,6 @@ import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.Single
 import timber.log.Timber
-import java.util.concurrent.TimeUnit
 
 class BillingManagerImpl(
     private val context: Context

@@ -3,7 +3,7 @@ package com.quote.mosaic.ui
 import android.os.Bundle
 import com.quote.mosaic.R
 import com.quote.mosaic.core.AppActivity
-import com.quote.mosaic.data.UserManager
+import com.quote.mosaic.data.manager.UserManager
 import com.quote.mosaic.ui.main.MainActivity
 import com.quote.mosaic.ui.onboarding.OnboardingActivity
 import javax.inject.Inject
