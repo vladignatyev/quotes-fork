@@ -3,13 +3,13 @@ package com.quote.mosaic.core.di.module
 import android.content.Context
 import android.content.SharedPreferences
 import com.quote.mosaic.core.Schedulers
-import com.quote.mosaic.crypto.fs.sp.SecurePreferences
-import com.quote.mosaic.data.manager.UserManager
+import com.quote.mosaic.core.billing.BillingManager
+import com.quote.mosaic.core.billing.InAppBillingManager
 import com.quote.mosaic.core.manager.FirebaseManager
 import com.quote.mosaic.core.manager.UserPreferences
-import com.quote.mosaic.core.manager.billing.BillingManager
-import com.quote.mosaic.core.manager.billing.BillingManagerImpl
+import com.quote.mosaic.crypto.fs.sp.SecurePreferences
 import com.quote.mosaic.data.api.ApiClient
+import com.quote.mosaic.data.manager.UserManager
 import dagger.Module
 import dagger.Provides
 import javax.inject.Singleton
@@ -41,5 +41,5 @@ class ManagerModule {
         context: Context,
         schedulers: Schedulers,
         apiClient: ApiClient
-    ): BillingManager = BillingManagerImpl(context, schedulers, apiClient)
+    ): BillingManager = InAppBillingManager(context, schedulers, apiClient)
 }

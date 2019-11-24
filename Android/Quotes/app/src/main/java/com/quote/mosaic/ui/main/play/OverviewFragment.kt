@@ -10,11 +10,15 @@ import androidx.navigation.fragment.FragmentNavigatorExtras
 import androidx.navigation.fragment.findNavController
 import com.quote.mosaic.R
 import com.quote.mosaic.core.AppFragment
+import com.quote.mosaic.core.billing.BillingManager
 import com.quote.mosaic.data.manager.UserManager
 import com.quote.mosaic.databinding.OverviewFragmentBinding
 import javax.inject.Inject
 
 class OverviewFragment : AppFragment() {
+
+    @Inject
+    lateinit var billingManager: BillingManager
 
     @Inject
     lateinit var userManager: UserManager
@@ -57,6 +61,10 @@ class OverviewFragment : AppFragment() {
         userManager.lowBalanceTrigger().subscribe {
             topupClicked()
         }.untilStopped()
+    }
+    override fun onResume() {
+        super.onResume()
+        billingManager.warmUp()
     }
 
     fun topupClicked() {

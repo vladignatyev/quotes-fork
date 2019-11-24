@@ -1,4 +1,4 @@
-package com.quote.mosaic.core.manager.billing
+package com.quote.mosaic.core.billing
 
 import android.app.Activity
 import android.content.Context
@@ -16,44 +16,72 @@ import io.reactivex.rxkotlin.plusAssign
 import timber.log.Timber
 import java.util.concurrent.TimeUnit
 
-interface BillingManager {
-
-    fun start(): Completable
-
-    fun getBuyVariants(skuList: List<String>): Single<List<SkuDetails>>
-
-    fun launchBuyWorkFlow(activity: Activity, product: TopUpProductModel): Completable
-
-    fun billingResultTrigger(): Flowable<BillingManagerResult>
-
-}
-
-class BillingManagerImpl(
+class InAppBillingManager(
     private val context: Context,
     private val schedulers: Schedulers,
     private val apiClient: ApiClient
-) : PurchasesUpdatedListener, BillingManager {
+) : BillingManager, PurchasesUpdatedListener {
 
-    private val disposableBag = CompositeDisposable()
+    private val disposeBag = CompositeDisposable()
+    private val startBag = CompositeDisposable()
 
     private var billingClient: BillingClient? = null
-
-    private var pendingProduct: TopUpProductModel? = null
-
     private val resultTrigger = PublishProcessor.create<BillingManagerResult>()
 
-    init {
-        clearCachedHistory()
-    }
+    private val pendingVerificationProducts = mutableListOf<TopUpProductModel>()
+    private val inAppProducts = mutableListOf<SkuDetails>()
 
+    override fun availableSkus() = inAppProducts
     override fun billingResultTrigger(): Flowable<BillingManagerResult> = resultTrigger
 
-    override fun start(): Completable = Completable
+    override fun warmUp() {
+        clearCachedHistory()
+        startBag.clear()
+        startBag += start()
+            .andThen(apiClient.getSkuList().map { it.rechargeable }.subscribeOn(schedulers.io()))
+            .flatMap { rechargeable ->
+                getBuyVariants(rechargeable.map { it.sku })
+                    .subscribeOn(schedulers.io())
+            }
+            .subscribeOn(schedulers.io())
+            .observeOn(schedulers.ui())
+            .subscribe({ skus ->
+                println("---------- skus loaded: ${skus.size}")
+                inAppProducts.clear()
+                skus.forEach {
+                    if (it.isRewarded) {
+                        loadVideoProducts(it)
+                    } else {
+                        inAppProducts.add(it)
+                    }
+                }
+            }, {
+                Timber.w(it, "load failed")
+            })
+    }
+
+    private fun loadVideoProducts(pendingVideoSku: SkuDetails) {
+        val params = RewardLoadParams.Builder()
+            .setSkuDetails(pendingVideoSku)
+            .build()
+        billingClient?.loadRewardedSku(params) { billingResult ->
+            if (billingResult.responseCode == BillingClient.BillingResponseCode.OK) {
+                println("---------- pendingVideoSku added: ${pendingVideoSku.sku}")
+                inAppProducts.add(pendingVideoSku)
+            } else {
+                println("---------- failed to load: ${billingResult.debugMessage}")
+            }
+        }
+    }
+
+    private fun start(): Completable = Completable
         .unsafeCreate { emitter ->
             if (billingClient == null) {
                 billingClient = BillingClient
                     .newBuilder(context)
                     .setListener(this)
+                    .setChildDirected(BillingClient.ChildDirected.NOT_CHILD_DIRECTED)
+                    .setUnderAgeOfConsent(BillingClient.UnderAgeOfConsent.NOT_UNDER_AGE_OF_CONSENT)
                     .enablePendingPurchases()
                     .build()
             }
@@ -73,7 +101,7 @@ class BillingManagerImpl(
             })
         }
 
-    override fun getBuyVariants(skuList: List<String>): Single<List<SkuDetails>> = Single
+    private fun getBuyVariants(skuList: List<String>): Single<List<SkuDetails>> = Single
         .create { emitter ->
             val params = SkuDetailsParams
                 .newBuilder()
@@ -85,15 +113,14 @@ class BillingManagerImpl(
                 if (responseCode.responseCode == BillingClient.BillingResponseCode.OK) {
                     emitter.onSuccess(skuDetailsList)
                 } else {
-                    emitter.onError(BillingError(responseCode.responseCode))
-                    Timber.e("Can't querySkuDetailsAsync, responseCode: $responseCode")
+                    emitter.onError(Throwable("Can't querySkuDetailsAsync, responseCode: $responseCode"))
                 }
             }
         }
 
     override fun launchBuyWorkFlow(activity: Activity, product: TopUpProductModel): Completable =
         Completable.fromCallable {
-            pendingProduct = product
+            pendingVerificationProducts.add(product)
             val billingFlowParams = BillingFlowParams
                 .newBuilder()
                 .setSkuDetails(product.billingProduct)
@@ -182,11 +209,14 @@ class BillingManagerImpl(
     ) {
         resultTrigger.onNext(BillingManagerResult.Loading)
 
-        disposableBag += apiClient
+        val pendingProduct =
+            pendingVerificationProducts.first { it.billingProduct.sku == purchase.sku }
+
+        disposeBag += apiClient
             .registerPurchase(
                 orderId = purchase.orderId,
                 purchaseToken = purchase.purchaseToken,
-                balanceRecharge = pendingProduct?.id.orEmpty()
+                balanceRecharge = pendingProduct.id
             ).toFlowable()
             .flatMap { token ->
                 apiClient
@@ -197,26 +227,32 @@ class BillingManagerImpl(
             .subscribeOn(schedulers.io())
             .observeOn(schedulers.ui())
             .subscribe({
+                pendingVerificationProducts.remove(pendingProduct)
                 when (it.status) {
                     PurchaseStatus.INVALID -> {
-                        resultTrigger.onNext(BillingManagerResult.Retry("registerTokenOnServer failed: Invalid"))
-                        disposableBag.clear()
+                        resultTrigger.onNext(
+                            BillingManagerResult.Retry("registerTokenOnServer failed: Invalid")
+                        )
+                        disposeBag.clear()
                     }
                     PurchaseStatus.CANCELLED -> {
-                        resultTrigger.onNext(BillingManagerResult.Retry("registerTokenOnServer failed: Canceled"))
-                        disposableBag.clear()
+                        resultTrigger.onNext(
+                            BillingManagerResult.Retry("registerTokenOnServer failed: Canceled")
+                        )
+                        disposeBag.clear()
                     }
                     PurchaseStatus.PURCHASED -> {
                         resultTrigger.onNext(BillingManagerResult.Success)
-                        disposableBag.clear()
+                        disposeBag.clear()
                     }
                     PurchaseStatus.UNKNOWN -> {
                         //Nothing, wait until status will changed
                     }
                 }
             }, {
+                pendingVerificationProducts.remove(pendingProduct)
                 resultTrigger.onNext(BillingManagerResult.Retry("registerTokenOnServer failed, try again"))
-                disposableBag.clear()
+                disposeBag.clear()
             })
     }
 }

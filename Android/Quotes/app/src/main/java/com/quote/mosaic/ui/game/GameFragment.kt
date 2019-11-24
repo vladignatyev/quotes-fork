@@ -20,6 +20,7 @@ import androidx.transition.TransitionManager
 import com.google.android.material.snackbar.Snackbar
 import com.quote.mosaic.R
 import com.quote.mosaic.core.AppFragment
+import com.quote.mosaic.core.billing.BillingManager
 import com.quote.mosaic.core.common.args
 import com.quote.mosaic.core.ui.data.ExampleDataProvider
 import com.quote.mosaic.databinding.GameFragmentBinding
@@ -32,8 +33,12 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import nl.dionsegijn.konfetti.models.Shape
 import nl.dionsegijn.konfetti.models.Size
 import java.util.concurrent.TimeUnit
+import javax.inject.Inject
 
 class GameFragment : AppFragment() {
+
+    @Inject
+    lateinit var billingManager: BillingManager
 
     private val vm: GameViewModel by activityViewModels()
 
@@ -83,6 +88,11 @@ class GameFragment : AppFragment() {
         vm.state.skipLevelTriggered.subscribe {
             Toast.makeText(requireContext(), "Skipped", Toast.LENGTH_SHORT).show()
         }.untilStopped()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        billingManager.warmUp()
     }
 
     override fun onPause() {

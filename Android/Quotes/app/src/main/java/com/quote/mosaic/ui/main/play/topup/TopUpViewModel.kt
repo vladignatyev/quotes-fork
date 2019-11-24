@@ -5,15 +5,13 @@ import androidx.databinding.ObservableBoolean
 import androidx.databinding.ObservableField
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.android.billingclient.api.SkuDetails
 import com.quote.mosaic.core.AppViewModel
 import com.quote.mosaic.core.Schedulers
-import com.quote.mosaic.core.manager.billing.BillingManager
-import com.quote.mosaic.core.manager.billing.BillingManagerResult
+import com.quote.mosaic.core.billing.BillingManager
+import com.quote.mosaic.core.billing.BillingManagerResult
 import com.quote.mosaic.core.rx.ClearableBehaviorProcessor
 import com.quote.mosaic.data.api.ApiClient
 import com.quote.mosaic.data.manager.UserManager
-import com.quote.mosaic.data.model.purchase.AvailableProductsDO
 import com.quote.mosaic.data.model.user.UserDO
 import io.reactivex.Flowable
 import io.reactivex.processors.BehaviorProcessor
@@ -45,18 +43,8 @@ class TopUpViewModel(
     override fun initialise() {
         state.loading.set(true)
 
-        billingManager.start()
-            .andThen(
-                apiClient.getSkuList()
-                    .subscribeOn(schedulers.io())
-                    .flatMap { products ->
-                        billingManager.getBuyVariants(products.rechargeable.map { remote -> remote.sku })
-                            .map { Pair(products, it) }
-                            .subscribeOn(schedulers.io())
-                    })
-            .map { (remoteProducts: AvailableProductsDO, billingProducts: List<SkuDetails>) ->
-                productsMapper.toLocaleModel(remoteProducts, billingProducts)
-            }
+        apiClient.getSkuList()
+            .map { productsMapper.toLocaleModel(it, billingManager.availableSkus()) }
             .subscribeOn(schedulers.io())
             .observeOn(schedulers.ui())
             .subscribe({
@@ -64,7 +52,7 @@ class TopUpViewModel(
                 products.onNext(it)
             }, {
                 state.loading.set(false)
-                Timber.e("Billing initialization failed", it)
+                Timber.e(it, "Billing initialization failed")
             })
             .untilCleared()
 
@@ -95,13 +83,13 @@ class TopUpViewModel(
                         userManager.setUser(user)
                         state.balance.set(user.balance.toString())
                         Timber.e(
-                            "Billing Failed for user: ${userManager.getSession()}", result.cause
+                            result.cause, "Billing Failed for user: ${userManager.getSession()}"
                         )
                         failureTrigger.onNext(Unit)
                     }
                 }
             }, {
-                Timber.e("billingResultTrigger failed", it)
+                Timber.e(it, "billingResultTrigger failed")
             }).untilCleared()
     }
 
