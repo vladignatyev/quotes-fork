@@ -68,6 +68,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="@string/onboarding_label_name_hint"
+                android:maxLength="20"
                 android:singleLine="true"
                 android:text="@={viewModel.state.nameText}"
                 android:textColor="@color/white"
