@@ -1,27 +1,35 @@
 package com.quote.mosaic.ui.game
 
+import android.app.Activity
+import androidx.databinding.ObservableBoolean
 import androidx.databinding.ObservableField
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.quote.mosaic.core.AppViewModel
 import com.quote.mosaic.core.Schedulers
+import com.quote.mosaic.core.billing.BillingManager
+import com.quote.mosaic.core.billing.BillingManagerResult
+import com.quote.mosaic.core.billing.BillingProduct
 import com.quote.mosaic.core.rx.ClearableBehaviorProcessor
 import com.quote.mosaic.core.rx.NonNullObservableField
 import com.quote.mosaic.data.api.ApiClient
 import com.quote.mosaic.data.manager.UserManager
 import com.quote.mosaic.data.model.overview.QuoteDO
+import com.quote.mosaic.data.model.user.UserDO
 import com.quote.mosaic.ui.game.hint.HintModel
 import com.quote.mosaic.ui.game.hint.HintType
+import com.quote.mosaic.ui.main.play.topup.TopUpProductModel
 import io.reactivex.Flowable
 import io.reactivex.processors.BehaviorProcessor
 import io.reactivex.processors.PublishProcessor
 import timber.log.Timber
-import java.util.*
+import kotlin.random.Random
 
 class GameViewModel(
     private val schedulers: Schedulers,
     private val apiClient: ApiClient,
-    private val userManager: UserManager
+    private val userManager: UserManager,
+    private val billingManager: BillingManager
 ) : AppViewModel() {
 
     private val onNextLevelReceived = BehaviorProcessor.create<List<String>>()
@@ -58,6 +66,41 @@ class GameViewModel(
             }, {
                 Timber.w(it, "User loading failed")
             }).untilCleared()
+
+    }
+
+    //============ Game =============//
+    fun loadLevel() {
+        val selectedCategoryId = state.selectedCategory.get() ?: 0
+
+        apiClient.profile()
+            .flatMap { user ->
+                apiClient.quotesList(selectedCategoryId)
+                    .subscribeOn(schedulers.io())
+                    .map { Pair(it, user) }
+            }
+            .subscribeOn(schedulers.io())
+            .observeOn(schedulers.ui())
+            .subscribe({ (quotes: List<QuoteDO>, user: UserDO) ->
+                state.allQuotes.set(quotes)
+                state.totalLevel.set(quotes.count().toString())
+                state.currentLevel.set(quotes.filter { it.complete }.count().plus(1).toString())
+
+                val currentQuote = quotes.first { !it.complete }
+                state.currentQuote.set(currentQuote)
+                onNextLevelReceived.onNext(currentQuote.splitted.shuffled(Random(currentQuote.id)))
+
+                userManager.setUser(user)
+                state.userName.set(user.nickname)
+                state.balance.set(user.balance.toString())
+            }, {
+                Timber.e(it, "GameViewModel init failed")
+            }).untilCleared()
+    }
+
+    fun setCurrentVariant(currentQuote: List<String>) {
+        state.userVariantQuote.set(currentQuote)
+        onNextLevelReceived.onNext(currentQuote)
     }
 
     fun markLevelAsCompleted() {
@@ -69,13 +112,16 @@ class GameViewModel(
             .andThen(apiClient.quotesList(selectedCategoryId))
             .subscribeOn(schedulers.io())
             .observeOn(schedulers.ui())
-            .subscribe({
+            .subscribe({ quotes ->
+                state.isLastQuote.set(quotes.none { !it.complete })
+                prepareSuccessDialog()
                 levelCompletedTrigger.onNext(Unit)
             }, {
                 Timber.e(it, "completeLevel failed")
             }).untilCleared()
     }
 
+    //============ Hint Dialog =============//
     fun loadHints() {
         //TODO: change
         val hints = mutableListOf<HintModel>().apply {
@@ -90,26 +136,6 @@ class GameViewModel(
             add(HintModel.Close)
         }
         onHintsReceived.onNext(hints)
-    }
-
-    fun loadLevel() {
-        val selectedCategoryId = state.selectedCategory.get() ?: 0
-
-        apiClient
-            .quotesList(selectedCategoryId)
-            .subscribeOn(schedulers.io())
-            .observeOn(schedulers.ui())
-            .subscribe({ quotes ->
-                state.allQuotes.set(quotes)
-                state.totalLevel.set(quotes.count().toString())
-                state.currentLevel.set(quotes.filter { it.complete }.count().plus(1).toString())
-
-                val currentQuote = quotes.first { !it.complete }
-                state.currentQuote.set(currentQuote)
-                onNextLevelReceived.onNext(mixedQuote(currentQuote.splitted))
-            }, {
-                Timber.e(it, "GameViewModel init failed")
-            }).untilCleared()
     }
 
     fun findNextWord() {
@@ -143,44 +169,116 @@ class GameViewModel(
         showBalanceTrigger.onNext(Unit)
     }
 
-    fun setCurrentVariant(currentQuote: List<String>) {
-        state.userVariantQuote.set(currentQuote)
-        onNextLevelReceived.onNext(currentQuote)
+    //============ Success Dialog =============//
+    private fun prepareSuccessDialog() {
+        val currentQuote = state.currentQuote.get()!!
+
+        state.successQuote.set(currentQuote.beautiful)
+        state.successAuthor.set(currentQuote.author.orEmpty())
+        state.successWinningCoins.set(currentQuote.reward.toString())
+        state.successWinningDoubledCoins.set((currentQuote.reward * 2).toString())
+
+//        TODO: find a way
+//        state.successWinningCategoryCoins.set("30")
+//        state.successWinningAchievement.set("Знаток всего подряд")
     }
 
-    private fun mixedQuote(quote: List<String>): List<String> =
-        quote.shuffled(Random(quote.size.toLong()))
+    fun showDoubleUpVideo(activity: Activity) {
+        val billingProduct: BillingProduct.TestSku = billingManager
+            .availableSkus()
+            .filterIsInstance<BillingProduct.TestSku>()
+            .first()
+
+        val product = TopUpProductModel.Free(
+            id = billingProduct.remoteBro.id,
+            title = billingProduct.remoteBro.title,
+            iconUrl = billingProduct.remoteBro.imageUrl,
+            billingProduct = billingProduct.skuDetails
+        )
+
+        billingManager.launchBuyWorkFlow(activity, product)
+            .onErrorComplete()
+            .subscribeOn(schedulers.io())
+            .observeOn(schedulers.ui())
+            .subscribe()
+            .untilCleared()
+
+        billingManager
+            .billingResultTrigger()
+            .flatMap { result ->
+                apiClient
+                    .profile()
+                    .map { Pair(result, it) }
+                    .subscribeOn(schedulers.io())
+                    .toFlowable()
+            }
+            .subscribeOn(schedulers.io())
+            .observeOn(schedulers.ui())
+            .subscribe({ (result: BillingManagerResult, user: UserDO) ->
+                when (result) {
+                    is BillingManagerResult.Success -> {
+                        userManager.setUser(user)
+                        state.balance.set(user.balance.toString())
+                        billingManager.warmUp()
+                    }
+                }
+            }, {
+                Timber.e(it, "billingResultTrigger failed")
+            }).untilCleared()
+    }
+
+    fun doubleUpPossible(): Boolean =
+        billingManager.availableSkus()
+            .filterIsInstance<BillingProduct.TestSku>()
+            .isNotEmpty()
+
+    fun reset() {
+        levelCompletedTrigger.clear()
+    }
 
     data class State(
+        //============ Main/UI ==============//
         val selectedCategory: ObservableField<Int> = ObservableField(),
-
         val currentLevel: NonNullObservableField<String> = NonNullObservableField(""),
         val totalLevel: NonNullObservableField<String> = NonNullObservableField(""),
         val balance: NonNullObservableField<String> = NonNullObservableField(""),
         val userName: NonNullObservableField<String> = NonNullObservableField(""),
 
+        //============ Game ===============//
         val allQuotes: ObservableField<List<QuoteDO>> = ObservableField(),
+
+        val isLastQuote: ObservableBoolean = ObservableBoolean(),
         val currentQuote: ObservableField<QuoteDO> = ObservableField(),
         val userVariantQuote: ObservableField<List<String>> = ObservableField(),
 
         val onNextLevelReceived: Flowable<List<String>>,
-        val onHintsReceived: Flowable<List<HintModel>>,
-
         val levelCompletedTrigger: Flowable<Unit>,
+
+        //============ Hint Dialog ===============//
+        val onHintsReceived: Flowable<List<HintModel>>,
         val showBalanceTrigger: Flowable<Unit>,
         val showHintTriggered: Flowable<String>,
-        val skipLevelTriggered: Flowable<Unit>
+        val skipLevelTriggered: Flowable<Unit>,
+
+        //============ Success Dialog =============//
+        val successQuote: NonNullObservableField<String> = NonNullObservableField(""),
+        val successAuthor: NonNullObservableField<String> = NonNullObservableField(""),
+        val successWinningCoins: NonNullObservableField<String> = NonNullObservableField(""),
+        val successWinningDoubledCoins: NonNullObservableField<String> = NonNullObservableField(""),
+        val successWinningCategoryCoins: NonNullObservableField<String> = NonNullObservableField(""),
+        val successWinningAchievement: NonNullObservableField<String> = NonNullObservableField("")
     )
 
     class Factory(
         private val schedulers: Schedulers,
         private val apiClient: ApiClient,
-        private val userManager: UserManager
+        private val userManager: UserManager,
+        private val billingManager: BillingManager
     ) : ViewModelProvider.Factory {
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
             if (modelClass.isAssignableFrom(GameViewModel::class.java)) {
                 @Suppress("UNCHECKED_CAST")
-                return GameViewModel(schedulers, apiClient, userManager) as T
+                return GameViewModel(schedulers, apiClient, userManager, billingManager) as T
             }
             throw IllegalArgumentException("Unknown ViewModel class")
         }

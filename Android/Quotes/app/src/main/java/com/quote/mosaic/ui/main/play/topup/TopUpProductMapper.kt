@@ -1,14 +1,11 @@
 package com.quote.mosaic.ui.main.play.topup
 
 import com.android.billingclient.api.SkuDetails
-import com.quote.mosaic.data.model.purchase.AvailableProductsDO
-import com.quote.mosaic.data.model.purchase.isVideo
+import com.quote.mosaic.core.billing.BillingProduct
 
 interface TopUpProductMapper {
 
-    fun toLocaleModel(
-        remoteProducts: AvailableProductsDO, billingProducts: List<SkuDetails>
-    ): List<TopUpProductModel>
+    fun toLocaleModel(bilingProducts: List<BillingProduct>): List<TopUpProductModel>
 
     fun toLoadingState(): List<TopUpProductModel>
 }
@@ -16,34 +13,49 @@ interface TopUpProductMapper {
 class TopUpProductMapperImpl : TopUpProductMapper {
 
     override fun toLocaleModel(
-        remoteProducts: AvailableProductsDO,
-        billingProducts: List<SkuDetails>
-    ): List<TopUpProductModel> = billingProducts.map { billingProduct ->
-        val remoteProduct = remoteProducts.rechargeable.first { it.sku == billingProduct.sku }
-        when {
-            remoteProduct.isVideo() -> TopUpProductModel.Free(
-                id = remoteProduct.id,
-                title = remoteProduct.title,
-                iconUrl = remoteProduct.imageUrl,
-                price = billingProduct.price,
-                billingProduct = billingProduct
-            )
+        bilingProducts: List<BillingProduct>
+    ): List<TopUpProductModel> = bilingProducts.mapNotNull { bilingProduct ->
+        when (bilingProduct) {
 
-            remoteProduct.isFeatured -> TopUpProductModel.Featured(
-                id = remoteProduct.id,
-                title = remoteProduct.title,
-                iconUrl = remoteProduct.imageUrl,
-                price = billingProduct.price,
-                billingProduct = billingProduct
-            )
+            is BillingProduct.InApp -> {
+                val remoteBro = bilingProduct.remoteBro
+                if (remoteBro.isFeatured) {
+                    TopUpProductModel.Featured(
+                        id = remoteBro.id,
+                        title = remoteBro.title,
+                        iconUrl = remoteBro.imageUrl,
+                        price = bilingProduct.skuDetails.price,
+                        billingProduct = bilingProduct.skuDetails
+                    )
+                } else {
+                    TopUpProductModel.Item(
+                        id = remoteBro.id,
+                        title = remoteBro.title,
+                        iconUrl = remoteBro.imageUrl,
+                        price = bilingProduct.skuDetails.price,
+                        billingProduct = bilingProduct.skuDetails
+                    )
+                }
+            }
 
-            else -> TopUpProductModel.Item(
-                id = remoteProduct.id,
-                title = remoteProduct.title,
-                iconUrl = remoteProduct.imageUrl,
-                price = billingProduct.price,
-                billingProduct = billingProduct
-            )
+            is BillingProduct.FreeCoins -> {
+                TopUpProductModel.Free(
+                    id = bilingProduct.remoteBro.id,
+                    title = bilingProduct.remoteBro.title,
+                    iconUrl = bilingProduct.remoteBro.imageUrl,
+                    billingProduct = bilingProduct.skuDetails
+                )
+            }
+
+            is BillingProduct.TestSku -> {
+                TopUpProductModel.Free(
+                    id = bilingProduct.remoteBro.id,
+                    title = bilingProduct.remoteBro.title,
+                    iconUrl = bilingProduct.remoteBro.imageUrl,
+                    billingProduct = bilingProduct.skuDetails
+                )
+            }
+            else -> null
         }
     }
 

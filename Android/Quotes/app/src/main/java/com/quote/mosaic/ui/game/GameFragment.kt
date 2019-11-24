@@ -7,7 +7,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
-import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.activityViewModels
@@ -27,6 +26,7 @@ import com.quote.mosaic.databinding.GameFragmentBinding
 import com.quote.mosaic.game.animator.DraggableItemAnimator
 import com.quote.mosaic.game.draggable.RecyclerViewDragDropManager
 import com.quote.mosaic.game.utils.WrapperAdapterUtils
+import com.quote.mosaic.ui.common.dialog.DialogBuilder
 import com.quote.mosaic.ui.onboarding.game.OnboardingGameAdapter
 import io.reactivex.Completable
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -78,7 +78,7 @@ class GameFragment : AppFragment() {
         }.untilStopped()
 
         vm.state.levelCompletedTrigger.subscribe {
-            findNavController().navigate(R.id.action_gameFragment_to_gameSuccessFragment)
+            showSuccessDialog()
         }.untilStopped()
 
         vm.state.showHintTriggered.subscribe {
@@ -86,8 +86,31 @@ class GameFragment : AppFragment() {
         }.untilStopped()
 
         vm.state.skipLevelTriggered.subscribe {
-            Toast.makeText(requireContext(), "Skipped", Toast.LENGTH_SHORT).show()
+            onLevelCompleted()
         }.untilStopped()
+    }
+
+    private fun showSuccessDialog() {
+        DialogBuilder.showGameSuccessDialog(requireContext(), vm) { successDialog ->
+            successDialog.dismiss()
+            vm.reset()
+
+            if (vm.state.isLastQuote.get()) {
+                requireActivity().onBackPressed()
+            } else {
+                vm.loadLevel()
+
+                if (vm.doubleUpPossible()) {
+                    Completable.timer(500, TimeUnit.MILLISECONDS, AndroidSchedulers.mainThread())
+                        .subscribe {
+                            DialogBuilder.showDoubleUpDialog(requireContext(), vm) {
+                                vm.showDoubleUpVideo(requireActivity())
+                                it.dismiss()
+                            }
+                        }
+                }
+            }
+        }
     }
 
     override fun onResume() {

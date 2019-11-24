@@ -72,7 +72,7 @@ class OnboardingActivity : AppActivity(),
             startActivity(MainActivity.newIntent(this))
         }
 
-        AlertDialog.Builder(this)
+        AlertDialog.Builder(this, R.style.DialogStyle)
             .setCancelable(false)
             .setView(binding.root)
             .show()

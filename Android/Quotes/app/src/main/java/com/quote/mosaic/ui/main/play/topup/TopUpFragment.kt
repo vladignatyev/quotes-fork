@@ -81,7 +81,7 @@ class TopUpFragment : AppFragment() {
                 LayoutInflater.from(requireContext()), R.layout.topup_failed_popup, null, true
             )
 
-        val alert = AlertDialog.Builder(requireContext())
+        val alert = AlertDialog.Builder(requireContext(), R.style.DialogStyle)
             .setCancelable(false)
             .setView(binding.root)
             .show()

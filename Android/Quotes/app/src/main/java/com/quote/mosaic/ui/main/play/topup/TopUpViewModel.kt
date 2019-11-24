@@ -41,20 +41,8 @@ class TopUpViewModel(
     }
 
     override fun initialise() {
-        state.loading.set(true)
 
-        apiClient.getSkuList()
-            .map { productsMapper.toLocaleModel(it, billingManager.availableSkus()) }
-            .subscribeOn(schedulers.io())
-            .observeOn(schedulers.ui())
-            .subscribe({
-                state.loading.set(false)
-                products.onNext(it)
-            }, {
-                state.loading.set(false)
-                Timber.e(it, "Billing initialization failed")
-            })
-            .untilCleared()
+        products.onNext(productsMapper.toLocaleModel(billingManager.availableSkus()))
 
         billingManager
             .billingResultTrigger()
@@ -76,6 +64,7 @@ class TopUpViewModel(
                         state.loading.set(false)
                         userManager.setUser(user)
                         state.balance.set(user.balance.toString())
+                        billingManager.warmUp()
                         successTrigger.onNext(Unit)
                     }
                     is BillingManagerResult.Retry -> {

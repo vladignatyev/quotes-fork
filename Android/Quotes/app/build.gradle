@@ -129,6 +129,7 @@ dependencies {
     implementation "io.supercharge:shimmerlayout:$versions.shimmer"
     implementation "com.github.bumptech.glide:glide:$versions.glide"
     annotationProcessor "com.github.bumptech.glide:compiler:$versions.glide"
+    implementation "com.github.ChiliLabs:FireLike:$versions.fireLikes"
 
     //Billing
     implementation "com.android.billingclient:billing:$versions.billing"

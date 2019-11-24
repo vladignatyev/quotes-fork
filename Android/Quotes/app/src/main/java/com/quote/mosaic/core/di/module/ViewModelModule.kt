@@ -6,7 +6,6 @@ import com.quote.mosaic.core.manager.UserPreferences
 import com.quote.mosaic.data.api.ApiClient
 import com.quote.mosaic.data.manager.UserManager
 import com.quote.mosaic.ui.game.GameViewModel
-import com.quote.mosaic.ui.game.success.GameSuccessViewModel
 import com.quote.mosaic.ui.main.MainViewModel
 import com.quote.mosaic.ui.main.play.OverviewViewModel
 import com.quote.mosaic.ui.main.play.topic.TopicMapper
@@ -50,11 +49,13 @@ class ViewModelModule {
     fun gameViewModelFactory(
         schedulers: Schedulers,
         apiClient: ApiClient,
-        userManager: UserManager
+        userManager: UserManager,
+        billingManager: BillingManager
     ) = GameViewModel.Factory(
         schedulers,
         apiClient,
-        userManager
+        userManager,
+        billingManager
     )
 
     @Provides
@@ -123,16 +124,6 @@ class ViewModelModule {
         apiClient,
         userManager,
         userPreferences
-    )
-
-    @Provides
-    @Singleton
-    fun successViewModelFactory(
-        schedulers: Schedulers,
-        apiClient: ApiClient
-    ) = GameSuccessViewModel.Factory(
-        schedulers,
-        apiClient
     )
 
 }

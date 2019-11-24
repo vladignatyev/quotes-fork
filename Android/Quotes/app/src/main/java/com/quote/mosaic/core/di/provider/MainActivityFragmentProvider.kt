@@ -1,7 +1,6 @@
 package com.quote.mosaic.core.di.provider
 
 import com.quote.mosaic.ui.main.play.OverviewFragment
-import com.quote.mosaic.ui.game.success.GameSuccessFragment
 import com.quote.mosaic.ui.main.play.topic.TopicFragment
 import com.quote.mosaic.ui.main.play.topup.TopUpFragment
 import com.quote.mosaic.ui.main.profile.ProfileFragment
@@ -20,9 +19,6 @@ abstract class MainActivityFragmentProvider {
 
     @ContributesAndroidInjector
     abstract fun bindsOverviewFragment(): OverviewFragment
-
-    @ContributesAndroidInjector
-    abstract fun bindsGameSuccessFragment(): GameSuccessFragment
 
     @ContributesAndroidInjector
     abstract fun bindsTopFragment(): TopFragment

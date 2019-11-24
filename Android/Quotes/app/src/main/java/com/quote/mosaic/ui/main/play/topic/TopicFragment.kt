@@ -54,7 +54,6 @@ class TopicFragment : AppFragment(), CategoryClickListener {
             binding().items.run {
                 setHasFixedSize(true)
                 isNestedScrollingEnabled = true
-                smoothScrollToPosition(0)
             }
         }.untilStopped()
     }

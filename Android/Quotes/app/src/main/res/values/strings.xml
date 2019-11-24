@@ -40,6 +40,19 @@
 
     <!-- GAME -->
     <string name="game_label_title">Уровень %s из %s</string>
+    <string name="game_label_success_title">Молодец!</string>
+    <string name="game_label_success_you_win">Вы получаете: </string>
+    <string name="game_button_success_collect_coins">Забрать приз!</string>
+    <string name="game_label_success_quote">«%s»</string>
+    <string name="game_label_success_author">© %s</string>
+    <string name="game_label_success_coins_reward">- %s монет за угаданную цитату</string>
+    <string name="game_label_success_category_reward">- %s монет за пройденную категорию</string>
+    <string name="game_label_success_category_achievement">- Достижение «%s»</string>
+    <string name="game_label_double_up_title">Но это еще не все подарки!</string>
+    <string name="game_label_double_up_subtitle">Всего ты заработал: %s</string>
+    <string name="game_label_double_watch_video_title">Посмотри короткий рекламный видеоролик и получи в два раза больше монет!</string>
+    <string name="game_button_double_watch_approve">Получить %s монет!👍</string>
+    <string name="game_button_double_watch_decline">Упустить возможность💩</string>
 
     <!-- PROFILE -->
     <string name="profile_name_hint">Ваше имя</string>

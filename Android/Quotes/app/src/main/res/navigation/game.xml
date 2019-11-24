@@ -13,9 +13,6 @@
         <action
             android:id="@+id/action_gameFragment_to_hintFragment"
             app:destination="@id/hintFragment" />
-        <action
-            android:id="@+id/action_gameFragment_to_gameSuccessFragment"
-            app:destination="@id/gameSuccessFragment" />
     </fragment>
     <dialog
         android:id="@+id/hintFragment"
@@ -30,11 +27,7 @@
             app:popEnterAnim="@anim/enter_from_left"
             app:popExitAnim="@anim/exit_to_right" />
     </dialog>
-    <dialog
-        android:id="@+id/gameSuccessFragment"
-        android:name="com.quote.mosaic.ui.game.success.GameSuccessFragment"
-        android:label="GameSuccessFragment"
-        tools:layout="@layout/game_success_fragment" />
+
     <fragment
         android:id="@+id/topUpFragment"
         android:name="com.quote.mosaic.ui.main.play.topup.TopUpFragment"

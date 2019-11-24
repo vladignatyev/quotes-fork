@@ -59,7 +59,6 @@ class HintFragment : AppDialogFragment() {
 
     override fun onStart() {
         super.onStart()
-
         vm.state.onHintsReceived.subscribe {
             adapter.submitList(it)
         }.untilStopped()

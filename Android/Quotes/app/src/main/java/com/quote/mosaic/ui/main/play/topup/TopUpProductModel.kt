@@ -27,8 +27,7 @@ sealed class TopUpProductModel(
         override val id: String,
         override val billingProduct: SkuDetails,
         val title: String,
-        val iconUrl: String,
-        val price: String
+        val iconUrl: String
     ) : TopUpProductModel(id, billingProduct)
 
     data class Loading(

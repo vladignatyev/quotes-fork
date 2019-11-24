@@ -5,7 +5,7 @@ import android.content.Context
 import com.android.billingclient.api.*
 import com.quote.mosaic.core.Schedulers
 import com.quote.mosaic.data.api.ApiClient
-import com.quote.mosaic.data.model.purchase.PurchaseStatus
+import com.quote.mosaic.data.model.purchase.*
 import com.quote.mosaic.ui.main.play.topup.TopUpProductModel
 import io.reactivex.Completable
 import io.reactivex.Flowable
@@ -29,7 +29,7 @@ class InAppBillingManager(
     private val resultTrigger = PublishProcessor.create<BillingManagerResult>()
 
     private val pendingVerificationProducts = mutableListOf<TopUpProductModel>()
-    private val inAppProducts = mutableListOf<SkuDetails>()
+    private val inAppProducts = mutableListOf<BillingProduct>()
 
     override fun availableSkus() = inAppProducts
     override fun billingResultTrigger(): Flowable<BillingManagerResult> = resultTrigger
@@ -40,19 +40,21 @@ class InAppBillingManager(
         startBag += start()
             .andThen(apiClient.getSkuList().map { it.rechargeable }.subscribeOn(schedulers.io()))
             .flatMap { rechargeable ->
-                getBuyVariants(rechargeable.map { it.sku })
-                    .subscribeOn(schedulers.io())
+                getBuyVariants(rechargeable.map { it.sku }).subscribeOn(schedulers.io())
+                    .map { Pair(it, rechargeable) }
             }
             .subscribeOn(schedulers.io())
             .observeOn(schedulers.ui())
-            .subscribe({ skus ->
-                println("---------- skus loaded: ${skus.size}")
+            .subscribe({ (billingProducts: List<SkuDetails>, remoteProducts: List<RechargeableSkuDO>) ->
                 inAppProducts.clear()
-                skus.forEach {
-                    if (it.isRewarded) {
-                        loadVideoProducts(it)
+
+                billingProducts.forEach { billingProduct ->
+                    val remoteProduct = remoteProducts.first { billingProduct.sku == it.sku }
+
+                    if (billingProduct.isRewarded) {
+                        loadVideoProducts(billingProduct, remoteProduct)
                     } else {
-                        inAppProducts.add(it)
+                        inAppProducts.add(BillingProduct.InApp(billingProduct, remoteProduct))
                     }
                 }
             }, {
@@ -60,16 +62,27 @@ class InAppBillingManager(
             })
     }
 
-    private fun loadVideoProducts(pendingVideoSku: SkuDetails) {
-        val params = RewardLoadParams.Builder()
-            .setSkuDetails(pendingVideoSku)
-            .build()
+    private fun loadVideoProducts(
+        pendingVideoSku: SkuDetails, remoteProduct: RechargeableSkuDO
+    ) {
+        val params = RewardLoadParams.Builder().setSkuDetails(pendingVideoSku).build()
+
         billingClient?.loadRewardedSku(params) { billingResult ->
             if (billingResult.responseCode == BillingClient.BillingResponseCode.OK) {
-                println("---------- pendingVideoSku added: ${pendingVideoSku.sku}")
-                inAppProducts.add(pendingVideoSku)
-            } else {
-                println("---------- failed to load: ${billingResult.debugMessage}")
+                when {
+                    remoteProduct.isTestingVideo() -> {
+                        inAppProducts.add(BillingProduct.TestSku(pendingVideoSku, remoteProduct))
+                    }
+                    remoteProduct.doubleUpVideo() -> {
+                        inAppProducts.add(BillingProduct.DoubleUp(pendingVideoSku, remoteProduct))
+                    }
+                    remoteProduct.freeCoinsVideo() -> {
+                        inAppProducts.add(BillingProduct.FreeCoins(pendingVideoSku, remoteProduct))
+                    }
+                    remoteProduct.nextHintWordVideo() -> {
+                        inAppProducts.add(BillingProduct.NextWord(pendingVideoSku, remoteProduct))
+                    }
+                }
             }
         }
     }
@@ -210,13 +223,13 @@ class InAppBillingManager(
         resultTrigger.onNext(BillingManagerResult.Loading)
 
         val pendingProduct =
-            pendingVerificationProducts.first { it.billingProduct.sku == purchase.sku }
+            pendingVerificationProducts.firstOrNull { it.billingProduct.sku == purchase.sku }
 
         disposeBag += apiClient
             .registerPurchase(
                 orderId = purchase.orderId,
                 purchaseToken = purchase.purchaseToken,
-                balanceRecharge = pendingProduct.id
+                balanceRecharge = pendingProduct?.id.orEmpty()
             ).toFlowable()
             .flatMap { token ->
                 apiClient
