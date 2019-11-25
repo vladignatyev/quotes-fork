@@ -26,7 +26,14 @@ class GooglePlayIAPSubscriptionAdmin(admin.ModelAdmin):
     pass
 
 
+@admin.register(GooglePlayIAPPurchase)
 class GooglePlayIAPPurchaseAdmin(admin.ModelAdmin):
+    date_hierarchy = 'date_created'
+    fields = ['type', 'status', 'previous_status', 'device_session', 'date_created','order_id', 'purchase_token', 'product']
+    autocomplete_fields = ['device_session', 'product',]
+    # exclude = []
+    readonly_fields = ('date_created',)
+    list_display = ['date_created', 'product', 'order_id']
     pass
 
 
@@ -45,7 +52,8 @@ class CredentialsAdmin(admin.ModelAdmin):
 
 class GooglePlayProductAdmin(admin.ModelAdmin):
     list_display = ('id', 'sku',)
-    pass
+    search_fields = ['sku']
+
 
 # class AppStoreProductAdmin(admin.ModelAdmin):
 #     pass
@@ -56,7 +64,7 @@ admin.site.register(PushSubscription, PushSubscriptionAdmin)
 
 admin.site.register(GooglePlayProduct, GooglePlayProductAdmin)
 # admin.site.register(GooglePlayIAPSubscription, GooglePlayIAPSubscriptionAdmin)
-admin.site.register(GooglePlayIAPPurchase, GooglePlayIAPPurchaseAdmin)
+# admin.site.register(GooglePlayIAPPurchase, GooglePlayIAPPurchaseAdmin)
 #
 # admin.site.register(AppStoreProduct, AppStoreProductAdmin)
 # admin.site.register(AppStoreIAPSubscription, AppStoreIAPSubscriptionAdmin)

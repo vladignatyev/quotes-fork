@@ -34,17 +34,18 @@ def recharge_profile_on_purchase(sender, instance, created, **kwargs):
     try:
         app_product = BalanceRechargeProduct.objects.get_by_store_product(purchase.product)
 
-        # todo: extract to Profile.recharge(...)
-        with transaction.atomic():
-            profile = Profile.objects.get_by_session(purchase.device_session)
-            if instance.status == PurchaseStatus.PURCHASED:
-                profile.balance = profile.balance + app_product.balance_recharge
-            elif instance.status == PurchaseStatus.CANCELLED:
-                new_balance = profile.balance - app_product.balance_recharge
-                if new_balance < 0:
-                    profile.is_banned = True
-                profile.balance = new_balance
 
+        # with transaction.atomic(): # already in transaction
+        profile = Profile.objects.select_for_update().get(device_sessions__pk__contains=purchase.device_session.pk)
+
+        if instance.status == PurchaseStatus.PURCHASED:
+            profile.balance = profile.balance + app_product.balance_recharge
+            profile.save()
+        elif instance.status == PurchaseStatus.CANCELLED and instance.previous_status == PurchaseStatus.PURCHASED:
+            new_balance = profile.balance - app_product.balance_recharge
+            if new_balance < 0:
+                profile.is_banned = True
+            profile.balance = new_balance
             profile.save()
 
         logger.debug('Profile recharged: %s', profile)
@@ -67,7 +68,7 @@ def unlock_category_on_purchase(sender, instance, created, **kwargs):
         unlock = CategoryUnlockPurchase.objects.get(google_play_purchase=purchase)
         if instance.status == PurchaseStatus.PURCHASED:
             unlock.do_unlock()
-        elif instance.status == PurchaseStatus.CANCELLED:
+        elif instance.status == PurchaseStatus.CANCELLED and instance.previous_status == PurchaseStatus.PURCHASED:
             unlock.undo_unlock()
     except CategoryUnlockPurchase.DoesNotExist:
         logger.debug('CategoryUnlockPurchase.DoesNotExist: Google Play Purchase %s', purchase.pk)

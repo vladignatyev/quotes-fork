@@ -97,8 +97,13 @@ class PurchaseStatus:
 class Purchase(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     type = models.CharField('Type: reward video or purchase', choices=PurchaseTypes.choices, default=PurchaseTypes.DEFAULT, max_length=16)
+    previous_status = models.CharField('Validation status before validation occured', choices=PurchaseStatus.choices, default=PurchaseStatus.DEFAULT, max_length=16)
     status = models.CharField('Validation status', choices=PurchaseStatus.choices, default=PurchaseStatus.DEFAULT, max_length=16)
-    device_session = models.ForeignKey(DeviceSession, on_delete=models.CASCADE, null=True)
+    device_session = models.ForeignKey(DeviceSession,
+        on_delete=models.CASCADE, null=True,
+        related_name="%(app_label)s_%(class)s_related",
+        related_query_name="%(app_label)s_%(class)ss",
+    )
 
     class Meta:
         abstract = True
@@ -108,6 +113,7 @@ class GooglePlayProduct(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     # according to: https://developer.android.com/google/play/billing/billing_library_overview
     sku = models.CharField('IAP SKU (Product ID)', max_length=256, blank=True)
+    is_rewarded_product = models.BooleanField(default=False, blank=True)
 
     def __str__(self):
         return f'{self.sku}'
@@ -126,8 +132,9 @@ class GooglePlayIAPPurchase(Purchase):
     # should be unique, see https://developer.android.com/google/play/billing/billing_best_practices#validating-purchase-server
     order_id = models.CharField(max_length=256, blank=True, unique=True)
 
-    date_created = models.DateTimeField(auto_now_add=True)
+    date_created = models.DateTimeField(auto_now_add=True, blank=True)
     date_updated = models.DateTimeField(auto_now=True)
+
 
 class AppStoreIAPPurchase(Purchase):
     product = models.ForeignKey(AppStoreProduct, on_delete=models.SET_NULL, null=True, blank=True)

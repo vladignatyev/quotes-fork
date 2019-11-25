@@ -12,7 +12,8 @@ if __name__ == '__main__':
 # request = create_request(credentials, 'com.quote.mosaic', 'get_1000_coins', 'ppbcgdoncgefhpfjcbajfbma.AO-J1OxdctdC5Aq-DMLR0KWpPP9Q8DbwXJ8rJt7lCUoYQU-r0GmtD0qC3g9F-2YY2U-mkjxPzMmyP0lSztaQAjon-vmVSD0CRDy5dBKK2FwxaIib3yEWyIw-P4YOphwsBTK11uT5h1h_')
 # for i in range(0,10):
 
-    request = create_request(credentials, 'com.quote.mosaic', 'get_1000_coins', 'adcgfmkmdgmigdjeehnjocen.AO-J1Oxh8U3FKP-DBVQulRen9eRaK0qurrCUREgNQdmvRi-NsPhwTrHOsSv4aZMQLpkqSCJWx6n-eRGX7UHx_4oXAepn0YOyWv_FHptqVBXMkUFs9gu5gBLHeEv2DElExKJZeMcwdhcK')
+    # request = create_request(credentials, 'com.quote.mosaic', 'get_1000_coins', 'adcgfmkmdgmigdjeehnjocen.AO-J1Oxh8U3FKP-DBVQulRen9eRaK0qurrCUREgNQdmvRi-NsPhwTrHOsSv4aZMQLpkqSCJWx6n-eRGX7UHx_4oXAepn0YOyWv_FHptqVBXMkUFs9gu5gBLHeEv2DElExKJZeMcwdhcK')
+    request = create_request(credentials, 'com.quote.mosaic', 'android.test.reward', 'inapp:com.quote.mosaic:android.test.reward')
 
     try:
         status = process_response(request)

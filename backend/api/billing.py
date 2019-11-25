@@ -47,6 +47,8 @@ class GoogleIAPValidator(BaseIAPValidator):
         if not status.is_ready():
             return
         if status.is_purchased():
+            purchase.previous_status = purchase.status
             purchase.status = PurchaseStatus.PURCHASED
         elif status.is_cancelled():
+            purchase.previous_status = purchase.status
             purchase.status = PurchaseStatus.CANCELLED
