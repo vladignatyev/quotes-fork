@@ -220,6 +220,7 @@ class PurchaseCoinsView(FormBasedView):
                                                device_session=request.device_session,
                                                order_id=cleaned_data['order_id'],
                                                purchase_token=cleaned_data['purchase_token'])
+            purchase.save()
             res_dict = {
                 "objects":[{
                     "purchase_id": purchase.id
