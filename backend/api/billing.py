@@ -38,6 +38,7 @@ class GoogleIAPValidator(BaseIAPValidator):
         try:
             status = google.process_response(request)
 
+            # return status
             return self._apply_status_to_purchase_state(status, purchase)
         except google.PurchaseValidationError as e:
             purchase.status = PurchaseStatus.INVALID

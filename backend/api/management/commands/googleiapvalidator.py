@@ -58,22 +58,22 @@ class Worker:
                         Q(date_created__gt=self.get_refund_period(), status=PurchaseStatus.PURCHASED) | Q(status=PurchaseStatus.UNKNOWN))
 
     def process_rewarded_purchases(self):
-        with transaction.atomic():
-            purchases = self.get_rewarded_purchases()
-            at_least_one = False
-            for purchase in purchases:
-                at_least_one = True
-                self.process_purchase(purchase)
-            return at_least_one
+        # with transaction.atomic():
+        purchases = self.get_rewarded_purchases()
+        at_least_one = False
+        for purchase in purchases:
+            at_least_one = True
+            self.process_purchase(purchase)
+        return at_least_one
 
     def process_normal_purchases(self):
-        with transaction.atomic():
-            purchases = self.get_normal_purchases()
-            at_least_one = False
-            for purchase in purchases:
-                at_least_one = True
-                self.process_purchase(purchase)
-            return at_least_one
+        # with transaction.atomic():
+        purchases = self.get_normal_purchases()
+        at_least_one = False
+        for purchase in purchases:
+            at_least_one = True
+            self.process_purchase(purchase)
+        return at_least_one
 
     def process_purchase(self, purchase):
         # if not purchase:

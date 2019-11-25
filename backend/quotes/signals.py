@@ -20,8 +20,8 @@ def create_profile_on_new_device_session(sender, instance, created, **kwargs):
     logger.debug('Profile: %s', profile)
 
 
-def recharge_profile_on_purchase(sender, instance, created, **kwargs):
-    if created:
+def recharge_profile_on_purchase(sender, instance, created, raw, **kwargs):
+    if created or raw:
         return
     if instance.status == instance.previous_status:
         return
@@ -56,8 +56,8 @@ def recharge_profile_on_purchase(sender, instance, created, **kwargs):
         logger.debug('Balance recharge doesnot exist by store product: %s', purchase.product)
 
 
-def unlock_category_on_purchase(sender, instance, created, **kwargs):
-    if created:
+def unlock_category_on_purchase(sender, instance, created, raw, **kwargs):
+    if created or raw:
         return
     if instance.status not in (PurchaseStatus.PURCHASED, PurchaseStatus.CANCELLED):
         return
