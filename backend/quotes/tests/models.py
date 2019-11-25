@@ -342,6 +342,10 @@ class QuoteSplit(TestCase):
                           'drink', 'something', 'or', 'other', 'but', 'the',
                           'great', 'question', 'is', 'what'], quote_split('I suppose I ought to eat or drink something or other; but the great question is ‘What?’'))
 
+    def test_split_shouldnt_eat_defise(self):
+        self.assertEqual(['кто-то', 'плачет','от', 'счастья', 'кто-то', 'смеётся', 'упав'],
+                          quote_split('Кто-то плачет от счастья, кто-то смеётся, упав.'))
+
     def test_split_special(self):
         self.assertEqual(['and what is the use of', 'a book without', 'pictures or conversations'],
                           quote_split('And what is the use of ^a book without ^pictures or conversations^?'))

@@ -231,11 +231,12 @@ def quote_split(quote_item_text,
     else:
         case = normal_case_re
         merge_spaces = re.sub(r' +', ' ', quote_item_text)
-        special_after_space = re.sub(r'\s+([?!])', '\g<1>', merge_spaces)
+        special_after_space = re.sub(r'\s+([\?\!])', '\g<1>', merge_spaces)
 
         prepared = special_after_space
 
-    splitted_and_without_punctuation = [re.sub(r'[^\w\s]+', '', str) for str in re.split(case, prepared)]
+    splitted = re.split(case, prepared)
+    splitted_and_without_punctuation = [re.sub(r'[“‘”’;,\.\?]+', '', str) for str in splitted]
     without_empty = filter(None, splitted_and_without_punctuation)
     lowercased = [str.lower() for str in without_empty]
     return lowercased
