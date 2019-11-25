@@ -31,7 +31,7 @@ class Worker:
                        handle_normal_purchases=True,
                        workers_count=1,
                        worker_num=0,
-                       time_delay=3,
+                       time_delay=1,
                        refund_period_days=3):
         self.time_delay = time_delay
         self.handle_normal_purchases = handle_normal_purchases
@@ -99,11 +99,9 @@ class Worker:
         return now - dt
 
     def do(self):
-        nothing = self.process_rewarded_purchases()
-        nothing = nothing or self.process_normal_purchases()
-        if nothing:
-            logger.debug('Nothing to do.')
-            time.sleep(self.time_delay)
+        self.process_rewarded_purchases()
+        self.process_normal_purchases()
+        time.sleep(self.time_delay)
 
 
 class Command(BaseCommand):

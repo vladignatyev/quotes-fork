@@ -20,8 +20,6 @@ def create_profile_on_new_device_session(sender, instance, created, **kwargs):
     logger.debug('Profile: %s', profile)
 
 
-# TODO: - extract core logic: find responsible for processing purchase and then call him to process a purchase
-# TODO: - guarantee that every purchase has been processed
 def recharge_profile_on_purchase(sender, instance, created, **kwargs):
     if created:
         return
@@ -33,7 +31,6 @@ def recharge_profile_on_purchase(sender, instance, created, **kwargs):
 
     try:
         app_product = BalanceRechargeProduct.objects.get_by_store_product(purchase.product)
-
 
         # with transaction.atomic(): # already in transaction
         profile = Profile.objects.select_for_update().get(device_sessions__pk__contains=purchase.device_session.pk)
@@ -49,9 +46,12 @@ def recharge_profile_on_purchase(sender, instance, created, **kwargs):
             profile.save()
 
         logger.debug('Profile recharged: %s', profile)
+
+    except Profile.DoesNotExist:
+        logger.error('Profile matching purchase doesnt exist: %s', purchase)
     except BalanceRechargeProduct.DoesNotExist:
+        # purchase related to another Product/Purchase model, so skipping
         logger.debug('Balance recharge doesnot exist by store product: %s', purchase.product)
-        pass  # purchase related to another Product/Purchase model, so skipping
 
 
 def unlock_category_on_purchase(sender, instance, created, **kwargs):
