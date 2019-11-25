@@ -38,7 +38,7 @@ def recharge_profile_on_purchase(sender, instance, created, **kwargs):
         # with transaction.atomic(): # already in transaction
         profile = Profile.objects.select_for_update().get(device_sessions__pk__contains=purchase.device_session.pk)
 
-        if instance.status == PurchaseStatus.PURCHASED:
+        if instance.status == PurchaseStatus.PURCHASED and instance.previous_status != PurchaseStatus.PURCHASED:
             profile.balance = profile.balance + app_product.balance_recharge
             profile.save()
         elif instance.status == PurchaseStatus.CANCELLED and instance.previous_status == PurchaseStatus.PURCHASED:
@@ -66,7 +66,7 @@ def unlock_category_on_purchase(sender, instance, created, **kwargs):
 
     try:
         unlock = CategoryUnlockPurchase.objects.get(google_play_purchase=purchase)
-        if instance.status == PurchaseStatus.PURCHASED:
+        if instance.status == PurchaseStatus.PURCHASED and instance.previous_status != PurchaseStatus.PURCHASED:
             unlock.do_unlock()
         elif instance.status == PurchaseStatus.CANCELLED and instance.previous_status == PurchaseStatus.PURCHASED:
             unlock.undo_unlock()
