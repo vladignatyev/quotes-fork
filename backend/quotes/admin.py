@@ -146,6 +146,7 @@ class SectionAdmin(admin.ModelAdmin):
 class ProfileAdmin(admin.ModelAdmin):
     list_display = ('nickname', 'balance', 'is_banned')
     date_hierarchy = 'last_active'
+    search_fields = ['device_sessions__token']
     # exclude = ('device_sessions',)
 
 

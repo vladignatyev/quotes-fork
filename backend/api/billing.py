@@ -39,10 +39,10 @@ class GoogleIAPValidator(BaseIAPValidator):
             status = google.process_response(request)
 
             # return status
-            return self._apply_status_to_purchase_state(status, purchase)
+            self._apply_status_to_purchase_state(status, purchase)
         except google.PurchaseValidationError as e:
             purchase.status = PurchaseStatus.INVALID
-            # raise PurchaseValidationError(e)
+            raise PurchaseValidationError(e)
 
     def _apply_status_to_purchase_state(self, status, purchase):
         if not status.is_ready():

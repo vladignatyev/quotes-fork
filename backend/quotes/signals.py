@@ -21,31 +21,32 @@ def create_profile_on_new_device_session(sender, instance, created, **kwargs):
 
 
 def recharge_profile_on_purchase(sender, instance, created, raw, **kwargs):
+    print('Пришел сигнал')
+    print(f'{instance} - {instance.status} - {instance.previous_status}')
     if created or raw:
-        return
-    if instance.status == instance.previous_status:
         return
     if instance.status not in (PurchaseStatus.PURCHASED, PurchaseStatus.CANCELLED):
         return
-    purchase = instance
+    if instance.status == instance.previous_status:
+        return
 
-    logger.debug('New valid purchase: %s', purchase)
+    purchase = instance
 
     try:
         app_product = BalanceRechargeProduct.objects.get_by_store_product(purchase.product)
 
-        # with transaction.atomic(): # already in transaction
-        profile = Profile.objects.select_for_update().get(device_sessions__pk__contains=purchase.device_session.pk)
+        with transaction.atomic(): # already in transaction
+            profile = Profile.objects.select_for_update().get(device_sessions__pk__contains=purchase.device_session.pk)
 
-        if instance.status == PurchaseStatus.PURCHASED:
-            profile.balance = profile.balance + app_product.balance_recharge
-            profile.save()
-        elif instance.status == PurchaseStatus.CANCELLED:
-            new_balance = profile.balance - app_product.balance_recharge
-            if new_balance < 0:
-                profile.is_banned = True
-            profile.balance = new_balance
-            profile.save()
+            if instance.status == PurchaseStatus.PURCHASED:
+                profile.balance = profile.balance + app_product.balance_recharge
+                profile.save()
+            elif instance.status == PurchaseStatus.CANCELLED:
+                new_balance = profile.balance - app_product.balance_recharge
+                if new_balance < 0:
+                    profile.is_banned = True
+                profile.balance = new_balance
+                profile.save()
 
         logger.debug('Profile recharged: %s', profile)
 
