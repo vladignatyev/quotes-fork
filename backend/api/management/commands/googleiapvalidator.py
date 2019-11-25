@@ -24,7 +24,7 @@ from django.utils import timezone
 
 
 class Worker:
-    queryset = lambda _: GooglePlayIAPPurchase.objects.select_related('product').select_for_update()
+    queryset = lambda _: GooglePlayIAPPurchase.objects.select_related('product')#.select_for_update()
 
 
     def __init__(self, handle_rewarded_purchases=True,
