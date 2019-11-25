@@ -317,18 +317,18 @@ class PurchaseStatusView(BaseView):
 
 class PurchaseableProductsListView(BaseView):
     def get(self, request, *args, **kwargs):
-        balance_recharges = BalanceRechargeProduct.objects.all()
+        balance_recharges = BalanceRechargeProduct.objects.select_related('google_play_product').all()
         balance_recharge_flat_list = [o.get_flat() for o in balance_recharges]
 
-        balance_recharge_play_products_skus = [o['sku'] for o in balance_recharge_flat_list]
+        # balance_recharge_play_products_skus = [o['sku'] for o in balance_recharge_flat_list]
 
-        all_play_products = apps.get_model('api.GooglePlayProduct').objects.all()
-        google_play_products_flat_list = [{'id': o.id, 'sku': o.sku} for o in all_play_products]
-        google_play_products_flat_list_filtered = list(filter(lambda o: o['sku'] not in balance_recharge_play_products_skus, google_play_products_flat_list))
+        # all_play_products = apps.get_model('api.GooglePlayProduct').objects.all()
+        # google_play_products_flat_list = [{'id': o.id, 'sku': o.sku} for o in all_play_products]
+        # google_play_products_flat_list_filtered = list(filter(lambda o: o['sku'] not in balance_recharge_play_products_skus, google_play_products_flat_list))
 
 
         products = {
-            'other_products': google_play_products_flat_list_filtered,
+            'other_products': [],
             'recharge_products': balance_recharge_flat_list
         }
         res_dict = {
