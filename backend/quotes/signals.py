@@ -23,6 +23,8 @@ def create_profile_on_new_device_session(sender, instance, created, **kwargs):
 def recharge_profile_on_purchase(sender, instance, created, **kwargs):
     if created:
         return
+    if instance.status == instance.previous_status:
+        return
     if instance.status not in (PurchaseStatus.PURCHASED, PurchaseStatus.CANCELLED):
         return
     purchase = instance
@@ -35,10 +37,10 @@ def recharge_profile_on_purchase(sender, instance, created, **kwargs):
         # with transaction.atomic(): # already in transaction
         profile = Profile.objects.select_for_update().get(device_sessions__pk__contains=purchase.device_session.pk)
 
-        if instance.status == PurchaseStatus.PURCHASED and instance.previous_status != PurchaseStatus.PURCHASED:
+        if instance.status == PurchaseStatus.PURCHASED:
             profile.balance = profile.balance + app_product.balance_recharge
             profile.save()
-        elif instance.status == PurchaseStatus.CANCELLED and instance.previous_status == PurchaseStatus.PURCHASED:
+        elif instance.status == PurchaseStatus.CANCELLED:
             new_balance = profile.balance - app_product.balance_recharge
             if new_balance < 0:
                 profile.is_banned = True
