@@ -146,7 +146,7 @@ class SectionAdmin(admin.ModelAdmin):
 class ProfileAdmin(admin.ModelAdmin):
     list_display = ('nickname', 'balance', 'is_banned')
     date_hierarchy = 'last_active'
-    exclude = ('device_sessions',)
+    # exclude = ('device_sessions',)
 
 
 @admin.register(Achievement)
