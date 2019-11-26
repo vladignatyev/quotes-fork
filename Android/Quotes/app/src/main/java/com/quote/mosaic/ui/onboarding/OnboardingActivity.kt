@@ -4,7 +4,6 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
-import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.fragment.NavHostFragment
 import com.quote.mosaic.R
@@ -12,6 +11,7 @@ import com.quote.mosaic.core.AppActivity
 import com.quote.mosaic.core.common.utils.TimedActionConfirmHelper
 import com.quote.mosaic.core.manager.UserPreferences
 import com.quote.mosaic.data.manager.UserManager
+import com.quote.mosaic.core.common.utils.findColor
 import dagger.android.AndroidInjector
 import dagger.android.DispatchingAndroidInjector
 import dagger.android.HasAndroidInjector
@@ -40,7 +40,7 @@ class OnboardingActivity : AppActivity(), HasAndroidInjector {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.onboarding_activity)
-        window.statusBarColor = ContextCompat.getColor(this, R.color.darkBlue)
+        window.statusBarColor = findColor(R.color.darkBlue)
         userPreferences.setBackgroundColor(R.color.bar_background_blue)
         vm = ViewModelProviders
             .of(this, vmFactory)

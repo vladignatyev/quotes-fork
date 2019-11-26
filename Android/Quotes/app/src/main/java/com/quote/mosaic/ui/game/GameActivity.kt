@@ -3,12 +3,12 @@ package com.quote.mosaic.ui.game
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.fragment.NavHostFragment
 import com.quote.mosaic.R
 import com.quote.mosaic.core.AppActivity
 import com.quote.mosaic.core.manager.UserPreferences
+import com.quote.mosaic.core.common.utils.findColor
 import dagger.android.AndroidInjector
 import dagger.android.DispatchingAndroidInjector
 import dagger.android.HasAndroidInjector
@@ -36,7 +36,7 @@ class GameActivity : AppActivity(), HasAndroidInjector {
 
         setContentView(R.layout.game_activity)
         window.statusBarColor =
-            ContextCompat.getColor(this, userPreferences.getBackgroundBarColor())
+            findColor(userPreferences.getBackgroundBarColor())
 
         val hostFragment = gameContainer as NavHostFragment
         hostFragment.navController.setGraph(R.navigation.game, intent.extras)

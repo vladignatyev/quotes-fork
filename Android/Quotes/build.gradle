@@ -78,6 +78,7 @@ ext {
             colorPicker         : "2.2.2",
             glide               : "4.10.0",
             fragmentKtx         : "1.1.0",
+            flexbox             : "2.0.0",
             fireLikes           : "0.0.2"
 
     ]

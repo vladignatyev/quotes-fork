@@ -11,8 +11,8 @@ import com.quote.mosaic.databinding.TopupProductFeaturedBinding
 import com.quote.mosaic.databinding.TopupProductFreeBinding
 import com.quote.mosaic.databinding.TopupProductItemBinding
 import com.quote.mosaic.databinding.TopupProductLoadingBinding
-import com.quote.mosaic.ui.common.dialog.PaddingDividerDecoration
-import com.quote.mosaic.ui.common.dialog.PaddingDividerDecoration.Companion.ORIENTATION_HORIZONTAL
+import com.quote.mosaic.core.common.utils.PaddingDividerDecoration
+import com.quote.mosaic.core.common.utils.PaddingDividerDecoration.Companion.ORIENTATION_HORIZONTAL
 
 class TopUpProductsAdapter(
     val onProductClicked: (TopUpProductModel) -> Unit
@@ -110,7 +110,9 @@ class TopUpProductsAdapter(
         }
 
         fun decoration(padding: Int): RecyclerView.ItemDecoration =
-            PaddingDividerDecoration(ORIENTATION_HORIZONTAL) { _, _ ->
+            PaddingDividerDecoration(
+                ORIENTATION_HORIZONTAL
+            ) { _, _ ->
                 padding
             }
     }
