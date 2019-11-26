@@ -1,27 +1,19 @@
 package com.quote.mosaic.ui.onboarding.game
 
 import android.graphics.Color
-import android.graphics.Rect
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.activityViewModels
-import androidx.recyclerview.widget.RecyclerView
-import androidx.recyclerview.widget.StaggeredGridLayoutManager
-import androidx.transition.Explode
-import androidx.transition.Transition
-import androidx.transition.TransitionManager
 import com.quote.mosaic.R
 import com.quote.mosaic.core.AppFragment
-import com.quote.mosaic.core.ui.data.ExampleDataProvider
+import com.quote.mosaic.core.common.utils.DialogBuilder
+import com.quote.mosaic.core.common.utils.manageViewGroupTapable
 import com.quote.mosaic.data.manager.UserManager
 import com.quote.mosaic.databinding.OnboardingGameFragmentBinding
-import com.quote.mosaic.game.animator.DraggableItemAnimator
-import com.quote.mosaic.game.draggable.RecyclerViewDragDropManager
-import com.quote.mosaic.game.utils.WrapperAdapterUtils
-import com.quote.mosaic.ui.common.dialog.DialogBuilder
+import com.quote.mosaic.game.GameListener
 import com.quote.mosaic.ui.main.MainActivity
 import com.quote.mosaic.ui.onboarding.OnboardingViewModel
 import io.reactivex.Completable
@@ -31,18 +23,12 @@ import nl.dionsegijn.konfetti.models.Size
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
-class OnboardingGameFragment : AppFragment() {
+class OnboardingGameFragment : AppFragment(), GameListener {
 
     @Inject
     lateinit var userManager: UserManager
 
     private val vm: OnboardingViewModel by activityViewModels()
-
-    private var gameWrapperAdapter: RecyclerView.Adapter<*>? = null
-    private var gameManager: RecyclerViewDragDropManager? = null
-
-    private lateinit var dataProvider: ExampleDataProvider
-    private lateinit var gameAdapter: OnboardingGameAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -57,12 +43,10 @@ class OnboardingGameFragment : AppFragment() {
         inflater, R.layout.onboarding_game_fragment, container, false
     ).apply {
         viewModel = vm
+        gameView.setData(getString(R.string.onboarding_label_default_quote_mixed).split(" "))
+        gameView.setListener(this@OnboardingGameFragment)
+        gameView.setTextColor(R.color.game_background_blue)
     }.root
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        initGame()
-    }
 
     override fun onResume() {
         super.onResume()
@@ -70,59 +54,24 @@ class OnboardingGameFragment : AppFragment() {
             getString(R.string.onboarding_label_welcome_aboard, userManager.getUserName())
     }
 
-    override fun onPause() {
-        gameManager?.cancelDrag()
-        super.onPause()
-    }
+    private var completed = false
 
-    override fun onDestroyView() {
-        gameManager?.release()
-        WrapperAdapterUtils.releaseAll(gameWrapperAdapter)
-        super.onDestroyView()
-    }
-
-    private fun initGame() {
-        if (gameWrapperAdapter != null) return
-
-        dataProvider = ExampleDataProvider()
-        val correctQuote = getString(R.string.onboarding_label_default_quote).split(" ")
-        val mixedQuote = getString(R.string.onboarding_label_default_quote_mixed).split(" ")
-        dataProvider.addQuote(correctQuote, mixedQuote)
-        gameAdapter = OnboardingGameAdapter(R.color.game_background_blue) { onSuccess() }
-        gameAdapter.setDataProvider(dataProvider)
-
-        initGameManager()
-
-        binding().gameRv.run {
-            layoutManager = StaggeredGridLayoutManager(3, StaggeredGridLayoutManager.VERTICAL)
-            gameWrapperAdapter = gameManager?.createWrappedAdapter(gameAdapter)
-            adapter = gameWrapperAdapter
-            itemAnimator = DraggableItemAnimator()
-            setHasFixedSize(false)
+    override fun onQuoteOrderChanged(userVariant: ArrayList<String>) {
+        val badChar = "\u200E"
+        val correctQuote = getString(R.string.onboarding_label_default_quote)
+        if (!completed && userVariant.joinToString(" ").replace(badChar, "") == correctQuote) {
+            completed = true
+            levelCompleted()
         }
     }
 
-    private fun initGameManager() {
-        gameManager = RecyclerViewDragDropManager().apply {
-            setInitiateOnLongPress(true)
-            setInitiateOnMove(true)
-            setLongPressTimeout(100)
-            draggingItemAlpha = 0.8f
-            draggingItemScale = 1.3f
-            draggingItemRotation = 15.0f
-            attachRecyclerView(binding().gameRv)
-        }
-    }
-
-    private fun onSuccess() {
+    private fun levelCompleted() {
+        binding().container.manageViewGroupTapable(binding().container, false)
         showKonfetti()
-        enableDisableViewGroup(binding().container, false)
-        gameManager?.release()
         Completable
-            .timer(1700, TimeUnit.MILLISECONDS, AndroidSchedulers.mainThread())
+            .timer(1200, TimeUnit.MILLISECONDS, AndroidSchedulers.mainThread())
             .subscribe {
-                removeAll()
-                WrapperAdapterUtils.releaseAll(gameWrapperAdapter)
+                binding().gameView.removeItems()
                 showSuccessDialog()
             }
             .untilStopped()
@@ -139,36 +88,6 @@ class OnboardingGameFragment : AppFragment() {
             .addSizes(Size(12))
             .setPosition(-50f, binding().viewKonfetti.width + 500f, -50f, -50f)
             .streamFor(300, 5000L)
-    }
-
-    private fun enableDisableViewGroup(viewGroup: ViewGroup, enabled: Boolean) {
-        val childCount = viewGroup.childCount
-        for (i in 0 until childCount) {
-            val view = viewGroup.getChildAt(i)
-            view.isEnabled = enabled
-            if (view is ViewGroup) {
-                enableDisableViewGroup(view, enabled)
-            }
-        }
-    }
-
-    private fun removeAll() {
-        // save rect of view in screen coordinates
-        val viewRect = Rect()
-        binding().gameRv.getGlobalVisibleRect(viewRect)
-
-        // create Explode transition with epicenter
-        val explode: Transition = Explode()
-        explode.epicenterCallback = object : Transition.EpicenterCallback() {
-            override fun onGetEpicenter(transition: Transition): Rect {
-                return viewRect
-            }
-        }
-        explode.duration = 1000
-        TransitionManager.beginDelayedTransition(binding().gameRv, explode)
-
-        // remove all views from Recycler View
-        binding().gameRv.adapter = null
     }
 
     private fun showSuccessDialog() {

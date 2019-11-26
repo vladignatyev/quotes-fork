@@ -32,12 +32,12 @@ class GameViewModel(
     private val billingManager: BillingManager
 ) : AppViewModel() {
 
-    private val onNextLevelReceived = BehaviorProcessor.create<List<String>>()
+    private val onNextLevelReceived = PublishProcessor.create<List<String>>()
     private val onHintsReceived = BehaviorProcessor.create<List<HintModel>>()
     private val levelCompletedTrigger = ClearableBehaviorProcessor.create<Unit>()
 
     private val showBalanceTrigger = PublishProcessor.create<Unit>()
-    private val showHintTriggered = PublishProcessor.create<String>()
+    private val hintReceivedTrigger = PublishProcessor.create<String>()
     private val skipLevelTriggered = PublishProcessor.create<Unit>()
 
     val state = State(
@@ -46,7 +46,7 @@ class GameViewModel(
 
         levelCompletedTrigger = levelCompletedTrigger.clearable(),
         showBalanceTrigger = showBalanceTrigger,
-        showHintTriggered = showHintTriggered,
+        hintReceivedTrigger = hintReceivedTrigger,
         skipLevelTriggered = skipLevelTriggered
     )
 
@@ -98,12 +98,14 @@ class GameViewModel(
             }).untilCleared()
     }
 
-    fun setCurrentVariant(currentQuote: List<String>) {
-        state.userVariantQuote.set(currentQuote)
-        onNextLevelReceived.onNext(currentQuote)
+    fun setCurrentVariant(userVariant: List<String>) {
+        state.userVariantQuote.set(userVariant)
     }
 
     fun markLevelAsCompleted() {
+        if (state.isLoading.get()) return
+
+        state.isLoading.set(true)
         val currentQuote = state.allQuotes.get().orEmpty().first { !it.complete }
         val selectedCategoryId = state.selectedCategory.get() ?: 0
 
@@ -113,10 +115,12 @@ class GameViewModel(
             .subscribeOn(schedulers.io())
             .observeOn(schedulers.ui())
             .subscribe({ quotes ->
+                state.isLoading.set(false)
                 state.isLastQuote.set(quotes.none { !it.complete })
                 prepareSuccessDialog()
                 levelCompletedTrigger.onNext(Unit)
             }, {
+                state.isLoading.set(false)
                 Timber.e(it, "completeLevel failed")
             }).untilCleared()
     }
@@ -146,7 +150,7 @@ class GameViewModel(
             var hint = ""
             correctQuote.forEachIndexed { index, word ->
                 if (word != userVariantQuote[index]) {
-                    showHintTriggered.onNext("$hint$word")
+                    hintReceivedTrigger.onNext("$hint$word")
                     return
                 } else {
                     hint += "$word "
@@ -157,12 +161,13 @@ class GameViewModel(
 
     fun findAuthor() {
         state.currentQuote.get()?.author?.let {
-            showHintTriggered.onNext(it)
+            hintReceivedTrigger.onNext(it)
         }
     }
 
     fun skipLevel() {
         skipLevelTriggered.onNext(Unit)
+        markLevelAsCompleted()
     }
 
     fun showBalance() {
@@ -243,6 +248,7 @@ class GameViewModel(
         val totalLevel: NonNullObservableField<String> = NonNullObservableField(""),
         val balance: NonNullObservableField<String> = NonNullObservableField(""),
         val userName: NonNullObservableField<String> = NonNullObservableField(""),
+        val isLoading: ObservableBoolean = ObservableBoolean(),
 
         //============ Game ===============//
         val allQuotes: ObservableField<List<QuoteDO>> = ObservableField(),
@@ -257,7 +263,7 @@ class GameViewModel(
         //============ Hint Dialog ===============//
         val onHintsReceived: Flowable<List<HintModel>>,
         val showBalanceTrigger: Flowable<Unit>,
-        val showHintTriggered: Flowable<String>,
+        val hintReceivedTrigger: Flowable<String>,
         val skipLevelTriggered: Flowable<Unit>,
 
         //============ Success Dialog =============//

@@ -6,12 +6,12 @@ import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.CallSuper
-import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import androidx.databinding.ViewDataBinding
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.quote.mosaic.core.manager.UserPreferences
+import com.quote.mosaic.core.common.utils.findColor
 import com.quote.mosaic.ui.main.MainActivity
 import dagger.android.support.AndroidSupportInjection
 import io.reactivex.disposables.CompositeDisposable
@@ -88,7 +88,7 @@ abstract class AppFragment : Fragment() {
         (requireActivity() as? MainActivity)?.let {
             it.binding.bottomBar.setBackgroundResource(userPreferences.getBackgroundBarColor())
             it.window.statusBarColor =
-                ContextCompat.getColor(requireContext(), userPreferences.getBackgroundBarColor())
+                requireContext().findColor(userPreferences.getBackgroundBarColor())
         }
         container.setBackgroundResource(userPreferences.getBackgroundColor())
 

@@ -63,7 +63,7 @@ class HintFragment : AppDialogFragment() {
             adapter.submitList(it)
         }.untilStopped()
 
-        vm.state.showHintTriggered.subscribe {
+        vm.state.onHintsReceived.subscribe {
             dismiss()
         }.untilStopped()
 
