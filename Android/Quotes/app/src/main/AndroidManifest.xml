@@ -25,11 +25,6 @@
             android:theme="@style/NoActionBar" />
 
         <activity
-            android:name="com.quote.mosaic.ui.main.play.game.GameActivity"
-            android:screenOrientation="portrait"
-            android:theme="@style/NoActionBar" />
-
-        <activity
             android:name=".ui.SplashActivity"
             android:screenOrientation="portrait"
             android:theme="@style/SplashActivity">
