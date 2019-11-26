@@ -172,8 +172,9 @@ class CategoryUnlockPurchaseAdmin(admin.ModelAdmin):
 
 
 @admin.register(BalanceRechargeProduct)
+@admin.register(DoubleUpProduct)
 class BalanceRechargeProductAdmin(admin.ModelAdmin):
-    list_display = ('item_preview_image_view', 'admin_title', 'google_play_product', ) # 'app_store_product')
+    list_display = ('item_preview_image_view', 'admin_title', 'google_play_product', 'is_featured') # 'app_store_product')
     readonly_fields = ('item_image_view',)
     exclude = ('item_preview_image_view',)
 
