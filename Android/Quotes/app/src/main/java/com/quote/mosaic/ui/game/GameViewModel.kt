@@ -16,11 +16,8 @@ import com.quote.mosaic.data.api.ApiClient
 import com.quote.mosaic.data.manager.UserManager
 import com.quote.mosaic.data.model.overview.QuoteDO
 import com.quote.mosaic.data.model.user.UserDO
-import com.quote.mosaic.ui.game.hint.HintModel
-import com.quote.mosaic.ui.game.hint.HintType
 import com.quote.mosaic.ui.main.play.topup.TopUpProductModel
 import io.reactivex.Flowable
-import io.reactivex.processors.BehaviorProcessor
 import io.reactivex.processors.PublishProcessor
 import timber.log.Timber
 import kotlin.random.Random
@@ -33,19 +30,15 @@ class GameViewModel(
 ) : AppViewModel() {
 
     private val onNextLevelReceived = PublishProcessor.create<List<String>>()
-    private val onHintsReceived = BehaviorProcessor.create<List<HintModel>>()
     private val levelCompletedTrigger = ClearableBehaviorProcessor.create<Unit>()
 
-    private val showBalanceTrigger = PublishProcessor.create<Unit>()
     private val hintReceivedTrigger = PublishProcessor.create<String>()
     private val skipLevelTriggered = PublishProcessor.create<Unit>()
 
     val state = State(
         onNextLevelReceived = onNextLevelReceived,
-        onHintsReceived = onHintsReceived,
 
         levelCompletedTrigger = levelCompletedTrigger.clearable(),
-        showBalanceTrigger = showBalanceTrigger,
         hintReceivedTrigger = hintReceivedTrigger,
         skipLevelTriggered = skipLevelTriggered
     )
@@ -56,6 +49,7 @@ class GameViewModel(
 
     override fun initialise() {
         loadLevel()
+        loadHints()
 
         apiClient.profile()
             .subscribeOn(schedulers.io())
@@ -88,7 +82,9 @@ class GameViewModel(
 
                 val currentQuote = quotes.first { !it.complete }
                 state.currentQuote.set(currentQuote)
-                onNextLevelReceived.onNext(currentQuote.splitted.shuffled(Random(currentQuote.id)))
+                val shuffled = currentQuote.splitted.shuffled(Random(currentQuote.id))
+                state.userVariantQuote.set(shuffled)
+                onNextLevelReceived.onNext(shuffled)
 
                 userManager.setUser(user)
                 state.userName.set(user.nickname)
@@ -125,36 +121,22 @@ class GameViewModel(
             }).untilCleared()
     }
 
-    //============ Hint Dialog =============//
-    fun loadHints() {
+    //============ Hints =============//
+    private fun loadHints() {
         //TODO: change
-        val hints = mutableListOf<HintModel>().apply {
-            add(HintModel.Balance(state.balance.get() ?: "0"))
-            add(HintModel.CoinHint(HintType.NEXT_WORD, "Узнать следующее слово", "5"))
-            add(HintModel.SkipHint("Пропустить Уровень", "30"))
-
-            state.currentQuote.get()?.author?.let {
-                add(HintModel.CoinHint(HintType.AUTHOR, "Узнать автора цитаты", "1"))
-            }
-
-            add(HintModel.Close)
-        }
-        onHintsReceived.onNext(hints)
     }
 
     fun findNextWord() {
         val correctQuote = state.currentQuote.get()?.splitted!!
         val userVariantQuote = state.userVariantQuote.get().orEmpty()
 
-        if (correctQuote.size == userVariantQuote.size) {
-            var hint = ""
-            correctQuote.forEachIndexed { index, word ->
-                if (word != userVariantQuote[index]) {
-                    hintReceivedTrigger.onNext("$hint$word")
-                    return
-                } else {
-                    hint += "$word "
-                }
+        var hint = ""
+        correctQuote.forEachIndexed { index, word ->
+            if (word != userVariantQuote[index]) {
+                hintReceivedTrigger.onNext("$hint$word")
+                return
+            } else {
+                hint += "$word "
             }
         }
     }
@@ -168,10 +150,6 @@ class GameViewModel(
     fun skipLevel() {
         skipLevelTriggered.onNext(Unit)
         markLevelAsCompleted()
-    }
-
-    fun showBalance() {
-        showBalanceTrigger.onNext(Unit)
     }
 
     //============ Success Dialog =============//
@@ -261,8 +239,7 @@ class GameViewModel(
         val levelCompletedTrigger: Flowable<Unit>,
 
         //============ Hint Dialog ===============//
-        val onHintsReceived: Flowable<List<HintModel>>,
-        val showBalanceTrigger: Flowable<Unit>,
+        val author: ObservableField<String> = ObservableField(),
         val hintReceivedTrigger: Flowable<String>,
         val skipLevelTriggered: Flowable<Unit>,
 

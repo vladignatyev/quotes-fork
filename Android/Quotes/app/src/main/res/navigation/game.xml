@@ -11,22 +11,9 @@
         android:label="GameFragment"
         tools:layout="@layout/game_fragment">
         <action
-            android:id="@+id/action_gameFragment_to_hintFragment"
-            app:destination="@id/hintFragment" />
+            android:id="@+id/action_gameFragment_to_topUpFragment"
+            app:destination="@id/topUpFragment" />
     </fragment>
-    <dialog
-        android:id="@+id/hintFragment"
-        android:name="com.quote.mosaic.ui.game.hint.HintFragment"
-        android:label="HintFragment"
-        tools:layout="@layout/hint_fragment">
-        <action
-            android:id="@+id/action_hintFragment_to_topUpFragment"
-            app:destination="@id/topUpFragment"
-            app:enterAnim="@anim/enter_from_right"
-            app:exitAnim="@anim/exit_to_left"
-            app:popEnterAnim="@anim/enter_from_left"
-            app:popExitAnim="@anim/exit_to_right" />
-    </dialog>
 
     <fragment
         android:id="@+id/topUpFragment"

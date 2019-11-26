@@ -8,7 +8,6 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.activityViewModels
-import androidx.navigation.fragment.findNavController
 import com.google.android.material.snackbar.Snackbar
 import com.quote.mosaic.R
 import com.quote.mosaic.core.AppFragment
@@ -71,11 +70,16 @@ class GameFragment : AppFragment(), GameListener {
         vm.state.hintReceivedTrigger.subscribe {
             onHintReceived(it)
         }.untilStopped()
+
     }
 
     override fun onResume() {
         super.onResume()
         billingManager.warmUp()
+    }
+
+    fun topupClicked() {
+
     }
 
     override fun onQuoteOrderChanged(userVariant: ArrayList<String>) {
@@ -87,10 +91,6 @@ class GameFragment : AppFragment(), GameListener {
         } else {
             vm.setCurrentVariant(userVariant)
         }
-    }
-
-    fun showHints() {
-        findNavController().navigate(R.id.action_gameFragment_to_hintFragment)
     }
 
     private fun onHintReceived(hint: String) {
