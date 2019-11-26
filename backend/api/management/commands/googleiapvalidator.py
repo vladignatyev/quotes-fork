@@ -55,7 +55,8 @@ class Worker:
         # q = self.parallelized_queryset() if self.workers_count > 1 else self.queryset()
         q = self.queryset()
         return q.filter(Q(product__is_rewarded_product=False),
-                        Q(date_created__gt=self.get_refund_period(), status=PurchaseStatus.PURCHASED) | Q(status=PurchaseStatus.UNKNOWN))
+                        Q(date_created__gt=self.get_refund_period(), date_updated__lt=self.get_purchased_last_update_interval(),
+                          status=PurchaseStatus.PURCHASED, ) | Q(status=PurchaseStatus.UNKNOWN))
 
     def process_rewarded_purchases(self):
         # with transaction.atomic():
@@ -96,6 +97,11 @@ class Worker:
     def get_refund_period(self):
         now = timezone.now()
         dt = timedelta(days=self.refund_period_days)
+        return now - dt
+
+    def get_purchased_last_update_interval(self):
+        now = timezone.now()
+        dt = timedelta(hours=4)
         return now - dt
 
     def do(self):
