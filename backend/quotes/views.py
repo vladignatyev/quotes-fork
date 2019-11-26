@@ -387,6 +387,7 @@ class PurchaseableProductsListView(BaseView):
 
         d = PurchaseProductDiscovery()
         products = d.get_all_products()
+        products['test_sku'] = apps.get_model('api.GooglePlayProduct').objects.get_test_product_sku()
 
         res_dict = {
             "objects": [products],

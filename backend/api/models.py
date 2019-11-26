@@ -111,17 +111,27 @@ class Purchase(models.Model):
         abstract = True
 
 
+from django.core.exceptions import ObjectDoesNotExist
+class GooglePlayProductManager(models.Manager):
+    def get_test_product_sku(self):
+        # try:
+        o = list(self.filter(is_test=True))
+        return o.sku if len(o) > 0 else 0
+        # except ObjectDoesNotExist:
+        #     return None
+
+
 class GooglePlayProduct(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     # according to: https://developer.android.com/google/play/billing/billing_library_overview
     sku = models.CharField('IAP SKU (Product ID)', max_length=256, blank=True)
     is_rewarded_product = models.BooleanField(default=False, blank=True)
-
-    # todo: use this SKU as test?
     is_test = models.BooleanField(default=False, blank=True)
 
     def __str__(self):
         return f'{self.sku}'
+
+    objects = GooglePlayProductManager()
 
 
 class AppStoreProduct(models.Model):

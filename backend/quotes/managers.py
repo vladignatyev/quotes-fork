@@ -18,14 +18,7 @@ class TopicManager(models.Manager):
 
 class BaseProductManager(models.Manager):
      def get_queryset(self):
-        return super().get_queryset().select_related('google_play_product') #filter(author='Roald Dahl')
-    # def get_by_store_product(self, store_product):
-    #     if type(store_product) is GooglePlayProduct:
-    #         return apps.get_model('quotes.BalanceRechargeProduct').objects.get(google_play_product=store_product)
-    #     elif type(store_product) is AppStoreProduct:
-    #         return apps.get_model('quotes.BalanceRechargeProduct').objects.get(app_store_product=store_product)
-    #     else:
-    #         raise Error('Unknown product type.')
+        return super().get_queryset().select_related('google_play_product').filter(google_play_product__is_test=False)
 
 
 class GameBalanceManager(models.Manager):

@@ -691,8 +691,6 @@ class PurchaseProductDiscovery:
         raise ValueError('Unknown product.')
 
 
-
-
 class GameBalance(models.Model):
     initial_profile_balance = models.BigIntegerField("Начальный баланс монет у юзера", default=0)
     reward_per_level_completion = models.BigIntegerField("Вознаграждение за решение цитаты", default=5)
