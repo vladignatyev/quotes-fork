@@ -542,28 +542,66 @@ def beautiful_text(text):
 
 
 class ProductFlow:
-    # todo: refactor all meta stuff from product models here
-    # todo: make it model
-    # todo: add scope tags
-    # todo: add image fields here
-    # todo: add is_featured here
     def consume_by_profile(self, profile, purchase=None):
         pass
     def unconsume_by_profile(self, profile, purchase=None):
         pass
 
 
-class DoubleUpProduct(models.Model, ProductFlow):
+class BaseProduct(models.Model, ProductFlow, ItemWithImageMixin):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    admin_title = models.CharField("Название продукта для юзера", max_length=256)
     google_play_product = models.ForeignKey('api.GooglePlayProduct',
                                             verbose_name="Соответствующий продукт в Google Play",
                                             on_delete=models.SET_NULL, null=True, blank=True)
+    is_featured = models.BooleanField("Показывать как самый выгодный?", default=False, blank=True)
+
+    item_image = models.FileField('Картинка 512х512', upload_to='rechargeproducts', null=True, blank=True)
+    item_image_preview = models.FileField('Превью картинки 256х256', upload_to='rechargeproducts-preview', null=True, blank=True)
+
+    scope_tags = models.ManyToManyField('quotes.Tag', blank=True)
+
+    objects = BaseProductManager()
+
+    @mark_safe
+    def item_image_view(self):
+        return u'<img src="%s" />' % escape(self.get_image_url())
+    item_image_view.short_description = 'Картинка'
+    item_image_view.allow_tags = True
+
+    @mark_safe
+    def item_preview_image_view(self):
+        return u'<img width="128" src="%s" />' % escape(self.get_image_url())
+    item_preview_image_view.short_description = 'Картинка'
+    item_preview_image_view.allow_tags = True
+
+    def get_flat(self):
+        # flat = model_to_dict(self, fields=('id', 'admin_title', 'is_featured'))
+        flat = {}
+        flat['admin_title'] = self.admin_title
+        flat['is_featured'] = self.is_featured
+        flat['sku'] = self.google_play_product.sku if self.google_play_product else ''
+        flat['is_rewarded'] = self.google_play_product.is_rewarded_product if self.google_play_product else False
+        flat['image_url'] = self.get_image_url()
+        flat['tags'] = [str(t) for t in self.scope_tags.all()]
+        flat['id'] = self.id
+        return flat
+
+    def save(self, *args, **kwargs):
+        super(BaseProduct, self).save(*args, **kwargs)
+        self.save_images()
+
+    class Meta:
+        abstract = True
+
+
+class DoubleUpProduct(BaseProduct):
     class Meta:
         verbose_name = 'Продукт «дабл-ап»'
         verbose_name_plural = 'Продукты типа «дабл-ап»'
 
     def _get_quote_from_purchase(self, purchase):
-        quote_id = purchase.payload
+        quote_id = int(purchase.payload)
         quote = Quote.objects.get(pk=quote_id)
         return quote
 
@@ -580,56 +618,13 @@ class DoubleUpProduct(models.Model, ProductFlow):
         profile.balance = new_balance
         profile.save()
 
-    def get_flat(self):
-        # todo: extract into base
-        flat = model_to_dict(self, fields=('id',))
-        flat['sku'] = self.google_play_product.sku if self.google_play_product else ''
-        return flat
 
-
-class BalanceRechargeProduct(models.Model, ProductFlow, ItemWithImageMixin):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    admin_title = models.CharField("Название продукта для юзера", max_length=256)
+class BalanceRechargeProduct(BaseProduct):
     balance_recharge = models.IntegerField("Сумма пополнения баланса", default=1)
-
-    google_play_product = models.ForeignKey('api.GooglePlayProduct',
-                                            verbose_name="Соответствующий продукт в Google Play",
-                                            on_delete=models.SET_NULL, null=True, blank=True)
-    # app_store_product = models.ForeignKey('api.AppStoreProduct', on_delete=models.SET_NULL, null=True, blank=True)
-
-    is_featured = models.BooleanField("Показывать как самый выгодный?", default=False, blank=True)
-
-    objects = ProductManager()
 
     class Meta:
         verbose_name = 'Продукт «Монеты»'
         verbose_name_plural = 'продукты «монеты»'
-
-    def get_flat(self):
-        flat = model_to_dict(self, fields=('id', 'admin_title', 'balance_recharge', 'is_featured'))
-        if self.google_play_product is not None:
-            flat['sku'] = self.google_play_product.sku
-        else:
-            flat['sku'] = ''
-        flat['image_url'] = self.get_image_url()
-        flat['id'] = self.id
-        return flat
-
-
-    item_image = models.FileField('Картинка 512х512', upload_to='rechargeproducts', null=True, blank=True)
-    item_image_preview = models.FileField('Превью картинки 256х256', upload_to='rechargeproducts-preview', null=True, blank=True)
-
-    @mark_safe
-    def item_image_view(self):
-        return u'<img src="%s" />' % escape(self.get_image_url())
-    item_image_view.short_description = 'Картинка'
-    item_image_view.allow_tags = True
-
-    @mark_safe
-    def item_preview_image_view(self):
-        return u'<img width="128" src="%s" />' % escape(self.get_image_url())
-    item_preview_image_view.short_description = 'Картинка'
-    item_preview_image_view.allow_tags = True
 
     def consume_by_profile(self, profile, purchase=None):
         profile.balance = profile.balance + self.balance_recharge
@@ -642,12 +637,14 @@ class BalanceRechargeProduct(models.Model, ProductFlow, ItemWithImageMixin):
         profile.balance = new_balance
         profile.save()
 
+    def get_flat(self):
+        flat = super(BalanceRechargeProduct, self).get_flat()
+        flat['balance_recharge'] = self.balance_recharge
+        return flat
 
-# class ProductFlowTypes:
-#     DOUBLEUP = 'doubleup'
-#
+
+
 class PurchaseProductDiscovery:
-    # class DoesNotExist(Exception): pass
     class DiscoveryError(Exception): pass
 
     product_types = {

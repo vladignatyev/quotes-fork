@@ -26,7 +26,7 @@ class ItemWithImageMixin:
 
 
     def save_images(self, *args, **kwargs):
-        if not self.preview_file:
+        if not self.item_image_preview and self.item_image:
             # generate and save preview
             image = Image.open(self.item_image.file)
             w = image.width
