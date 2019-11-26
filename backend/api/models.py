@@ -116,7 +116,7 @@ class GooglePlayProductManager(models.Manager):
     def get_test_product_sku(self):
         # try:
         o = list(self.filter(is_test=True))
-        return o.sku if len(o) > 0 else 0
+        return o.sku if len(o) > 0 else False
         # except ObjectDoesNotExist:
         #     return None
 

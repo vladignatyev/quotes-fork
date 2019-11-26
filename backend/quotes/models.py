@@ -577,14 +577,20 @@ class BaseProduct(models.Model, ProductFlow, ItemWithImageMixin):
 
     def get_flat(self):
         # flat = model_to_dict(self, fields=('id', 'admin_title', 'is_featured'))
+        discovery = PurchaseProductDiscovery()
+
         flat = {}
+        flat['id'] = discovery.get_product_id_by_product(self)
         flat['admin_title'] = self.admin_title
         flat['is_featured'] = self.is_featured
         flat['sku'] = self.google_play_product.sku if self.google_play_product else ''
         flat['is_rewarded'] = self.google_play_product.is_rewarded_product if self.google_play_product else False
         flat['image_url'] = self.get_image_url()
         flat['tags'] = [str(t) for t in self.scope_tags.all()]
-        flat['id'] = self.id
+
+        # discovery_type =
+        # flat['id'] = f'{discovery_type}:{self.id}'
+
         return flat
 
     def save(self, *args, **kwargs):
