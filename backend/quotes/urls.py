@@ -50,7 +50,8 @@ urlpatterns = [
     path('achievements/all/', AllAchievementListView.as_view(), name='achievements-list-all'),
 
     # Google Play purchases
-    path('purchase/play/coins/', PurchaseCoinsView.as_view(), name='purchase-coins-view'),
+    # path('purchase/play/coins/', PurchaseCoinsView.as_view(), name='purchase-coins-view'),
+    path('purchase/play/', GenericPurchaseView.as_view(), name='purchase-play-view'),
     # path('purchase/rewarded/coins/', PurchaseCoinsRewardedView.as_view(), name='purchase-coins-rewarded-view'),
     # path('purchase/play/unlock/', PurchaseUnlockView.as_view(), name='purchase-unlock-view'),
 

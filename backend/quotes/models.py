@@ -2,6 +2,7 @@ import uuid
 
 import re
 import os
+import json
 import logging
 logger = logging.getLogger(__name__)
 
@@ -540,7 +541,53 @@ def beautiful_text(text):
     return beautified
 
 
-class BalanceRechargeProduct(models.Model, ItemWithImageMixin):
+class ProductFlow:
+    # todo: refactor all meta stuff from product models here
+    # todo: make it model
+    # todo: add scope tags
+    # todo: add image fields here
+    # todo: add is_featured here
+    def consume_by_profile(self, profile, purchase=None):
+        pass
+    def unconsume_by_profile(self, profile, purchase=None):
+        pass
+
+
+class DoubleUpProduct(models.Model, ProductFlow):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    google_play_product = models.ForeignKey('api.GooglePlayProduct',
+                                            verbose_name="Соответствующий продукт в Google Play",
+                                            on_delete=models.SET_NULL, null=True, blank=True)
+    class Meta:
+        verbose_name = 'Продукт «дабл-ап»'
+        verbose_name_plural = 'Продукты типа «дабл-ап»'
+
+    def _get_quote_from_purchase(self, purchase):
+        quote_id = purchase.payload
+        quote = Quote.objects.get(pk=quote_id)
+        return quote
+
+    def consume_by_profile(self, profile, purchase=None):
+        quote = self._get_quote_from_purchase(purchase)
+        profile.balance = profile.balance + quote.get_reward(profile)
+        profile.save()
+
+    def unconsume_by_profile(self, profile, purchase=None):
+        quote = self._get_quote_from_purchase(purchase)
+        new_balance = profile.balance - quote.get_reward(profile)
+        if new_balance < 0:
+            profile.is_banned = True
+        profile.balance = new_balance
+        profile.save()
+
+    def get_flat(self):
+        # todo: extract into base
+        flat = model_to_dict(self, fields=('id',))
+        flat['sku'] = self.google_play_product.sku if self.google_play_product else ''
+        return flat
+
+
+class BalanceRechargeProduct(models.Model, ProductFlow, ItemWithImageMixin):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     admin_title = models.CharField("Название продукта для юзера", max_length=256)
     balance_recharge = models.IntegerField("Сумма пополнения баланса", default=1)
@@ -583,6 +630,69 @@ class BalanceRechargeProduct(models.Model, ItemWithImageMixin):
         return u'<img width="128" src="%s" />' % escape(self.get_image_url())
     item_preview_image_view.short_description = 'Картинка'
     item_preview_image_view.allow_tags = True
+
+    def consume_by_profile(self, profile, purchase=None):
+        profile.balance = profile.balance + self.balance_recharge
+        profile.save()
+
+    def unconsume_by_profile(self, profile, purchase=None):
+        new_balance = profile.balance - self.balance_recharge
+        if new_balance < 0:
+            profile.is_banned = True
+        profile.balance = new_balance
+        profile.save()
+
+
+# class ProductFlowTypes:
+#     DOUBLEUP = 'doubleup'
+#
+class PurchaseProductDiscovery:
+    # class DoesNotExist(Exception): pass
+    class DiscoveryError(Exception): pass
+
+    product_types = {
+        'balance_recharge': BalanceRechargeProduct,
+        'doubleup': DoubleUpProduct
+    }
+
+    # todo: extract CategoryUnlockProduct, generalize this method
+    def find_product_by_purchase(self, purchase):
+        try:
+            return CategoryUnlockPurchase.objects.get(google_play_purchase=purchase)
+        except CategoryUnlockPurchase.DoesNotExist:
+            pass
+        try:
+            return BalanceRechargeProduct.objects.get(google_play_product=purchase.product)
+        except BalanceRechargeProduct.DoesNotExist:
+            pass
+        try:
+            return DoubleUpProduct.objects.get(google_play_product=purchase.product)
+        except BalanceRechargeProduct.DoesNotExist:
+            pass
+
+        raise self.DiscoveryError(f'Wrong product type in purchase: {purchase.id}')
+
+    def unwrap_product_id(self, product_id):
+        product_type, product_pk = product_id.split(':')
+        return product_type, product_pk
+
+    def get_product_by_product_id(self, product_id):
+        product_type, product_id = self.unwrap_product_id(product_id)
+        model_cls = self.product_types[product_type]
+        return model_cls.objects.get(id=product_id)
+
+    def get_all_products(self):
+        products = {}
+        for k, model_cls in self.product_types.items():
+            products[k] = [o.get_flat() for o in model_cls.objects.select_related('google_play_product').all()]
+        return products
+
+    def get_product_id_by_product(self, product):
+        for k, cls in self.product_types.items():
+            if type(product) == cls:
+                return f'{k}:{product.id}'
+        raise ValueError('Unknown product.')
+
 
 
 
@@ -676,7 +786,10 @@ class CategoryUnlockPurchaseStatus:
     )
 
 
-class CategoryUnlockPurchase(models.Model):
+class CategoryUnlockPurchase(models.Model, ProductFlow):
+    # todo: extract CategoryUnlockProduct and CategoryUnlock to not mix them both!
+    # CategoryUnlock should represent persistent state telling that the category has been unlocked.
+    # For our case it could be obtained one way only – by spending in-game coins.
     type = models.CharField("Тип анлока (за монеты или за покупку)", blank=False, max_length=32, choices=CategoryUnlockTypes.choices, default=CategoryUnlockTypes.NULL_UNLOCK)
     profile = models.ForeignKey(Profile, verbose_name="Юзер", on_delete=models.CASCADE)
     category_to_unlock = models.ForeignKey(QuoteCategory, verbose_name="Категория",  on_delete=models.CASCADE)
@@ -737,3 +850,9 @@ class CategoryUnlockPurchase(models.Model):
             self.delete()
         elif self.type == CategoryUnlockTypes.NULL_UNLOCK:
             raise ValueError('CategoryUnlockPurchase should be one of type specified in CategoryUnlockTypes, except NULL_UNLOCK')
+
+    def consume_by_profile(self, profile, purchase=None):
+        self.do_unlock()
+
+    def unconsume_by_profile(self, profile, purchase=None):
+        self.undo_unlock()

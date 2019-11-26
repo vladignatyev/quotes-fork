@@ -105,6 +105,8 @@ class Purchase(models.Model):
         related_query_name="%(app_label)s_%(class)ss",
     )
 
+    payload = models.TextField('Any additional metadata for Purchase', blank=True)
+
     class Meta:
         abstract = True
 
@@ -114,6 +116,9 @@ class GooglePlayProduct(models.Model):
     # according to: https://developer.android.com/google/play/billing/billing_library_overview
     sku = models.CharField('IAP SKU (Product ID)', max_length=256, blank=True)
     is_rewarded_product = models.BooleanField(default=False, blank=True)
+
+    # todo: use this SKU as test?
+    is_test = models.BooleanField(default=False, blank=True)
 
     def __str__(self):
         return f'{self.sku}'

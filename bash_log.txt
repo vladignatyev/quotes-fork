@@ -1,5 +1,5 @@
 adduser quotes
-# quotes / hyU8y9UdpUk82Bp4K7hQmenu
+# quotes / h&yU8y9UdpUk82Bp4K7hQmenu
 
 usermod -aG sudo quotes
 
@@ -15,7 +15,9 @@ chmod 644 /home/quotes/.ssh/authorized_keys
 
 ssh-keygen -a 1000 -b 4096 -C "" -E sha256 -o -t rsa
 
-apt install sudo libpq-dev postgresql postgresql-contrib nginx
+apt install sudo libpq-dev postgresql postgresql-contrib nginx gunicorn
+apt install postgresql-client-common
+apt install postgresql-client-11
 
 sudo -u postgres psql
 
@@ -47,7 +49,28 @@ User=quotes
 Group=www-data
 Environment=DJANGO_SETTINGS_MODULE=backend.devsettings
 WorkingDirectory=/home/quotes/quotes/backend
-ExecStart=/usr/local/bin/gunicorn --access-logfile - --workers 3 --bind unix:/home/quotes/quotes/backend/quotes.sock backend.wsgi:application
+ExecStart=/usr/local/bin/gunicorn --access-logfile - --workers 4 --bind unix:/home/quotes/quotes/backend/quotes.sock backend.wsgi:application
 
 [Install]
 WantedBy=multi-user.target
+
+
+
+
+
+
+
+server {
+    listen 80;
+    server_name ~. "";
+
+    location = /favicon.ico { access_log off; log_not_found off; }
+    location /static/ {
+        alias /home/quotes/static/;
+    }
+
+    location / {
+        include proxy_params;
+        proxy_pass http://unix:/home/quotes/quotes/backend/quotes.sock;
+    }
+}

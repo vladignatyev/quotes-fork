@@ -139,7 +139,9 @@ class FormBasedView(BaseView):
     form_cls = None
 
     def make_form_from_request(self, request):
-        data = request.body[:self.PAYLOAD_MAX_LENGTH]
+        # data = request.body[:self.PAYLOAD_MAX_LENGTH]
+        data = request.body
+
         try:
             deserialized = json.loads(data)
         except json.decoder.JSONDecodeError:
@@ -180,16 +182,68 @@ class GooglePlayIAPForm(forms.Form):
     order_id = forms.CharField(label='Google Play Billing Order ID', max_length=256)
     purchase_token = forms.CharField(label='Google Play Billing Purchase Token', max_length=256)
 
-class RechargeForm(GooglePlayIAPForm):
-    balance_recharge = forms.UUIDField(label='Related BalanceRechargeProduct ID')
+# class RechargeForm(GooglePlayIAPForm):
+#     balance_recharge = forms.UUIDField(label='Related BalanceRechargeProduct ID')
 
-class CategoryUnlockForm(GooglePlayIAPForm):
-    category_id = forms.IntegerField(label='ID of the category to unlock by purchase', min_value=0)
-    google_play_product_id = forms.UUIDField(label='Related Google Play Product ID')
+# class CategoryUnlockForm(GooglePlayIAPForm):
+#     category_id = forms.IntegerField(label='ID of the category to unlock by purchase', min_value=0)
+#     google_play_product_id = forms.UUIDField(label='Related Google Play Product ID')
+
+#
+# class PurchaseCoinsView(FormBasedView):
+#     form_cls = RechargeForm
+#
+#     def post(self, request, *args, **kwargs):
+#         form = self.make_form_from_request(request)
+#         if not form or not form.is_valid():
+#             return HttpResponse(status=400)
+#
+#         Purchase = apps.get_model('api.GooglePlayIAPPurchase')
+#
+#         cleaned_data = form.clean()
+#
+#         try:
+#             existing_purchase = Purchase.objects.get(order_id=cleaned_data['order_id'],
+#                                                   purchase_token=cleaned_data['purchase_token'])
+#             res_dict = {
+#                 "objects":[{
+#                     "purchase_id": existing_purchase.id
+#                 }],
+#                 "meta": {}
+#             }
+#             return json_response(res_dict)
+#         except Purchase.DoesNotExist:
+#             pass
+#
+#         try:
+#             recharge = BalanceRechargeProduct.objects.get(id=cleaned_data['balance_recharge'])
+#
+#             purchase = Purchase.objects.create(product=recharge.google_play_product,
+#                                                device_session=request.device_session,
+#                                                order_id=cleaned_data['order_id'],
+#                                                purchase_token=cleaned_data['purchase_token'])
+#             purchase.save()
+#             res_dict = {
+#                 "objects":[{
+#                     "purchase_id": purchase.id
+#                 }],
+#                 "meta": {}
+#             }
+#             return json_response(res_dict)
+#         except BalanceRechargeProduct.DoesNotExist:
+#             return HttpResponse(status=404)
+#
+#         return HttpResponse(status=501)
 
 
-class PurchaseCoinsView(FormBasedView):
-    form_cls = RechargeForm
+
+class GenericPurchaseForm(GooglePlayIAPForm):
+    app_product = forms.CharField(label='App product ID', max_length=256)
+    payload = forms.CharField(label='Payload', max_length=256, required=False)
+
+
+class GenericPurchaseView(FormBasedView):
+    form_cls = GenericPurchaseForm
 
     def post(self, request, *args, **kwargs):
         form = self.make_form_from_request(request)
@@ -214,12 +268,15 @@ class PurchaseCoinsView(FormBasedView):
             pass
 
         try:
-            recharge = BalanceRechargeProduct.objects.get(id=cleaned_data['balance_recharge'])
+            # recharge = BalanceRechargeProduct.objects.get(id=cleaned_data['balance_recharge'])
+            d = PurchaseProductDiscovery()
+            product = d.get_product_by_product_id(cleaned_data['app_product'])
 
-            purchase = Purchase.objects.create(product=recharge.google_play_product,
+            purchase = Purchase.objects.create(product=product.google_play_product,
                                                device_session=request.device_session,
                                                order_id=cleaned_data['order_id'],
-                                               purchase_token=cleaned_data['purchase_token'])
+                                               purchase_token=cleaned_data['purchase_token'],
+                                               payload=cleaned_data['payload'])
             purchase.save()
             res_dict = {
                 "objects":[{
@@ -228,71 +285,71 @@ class PurchaseCoinsView(FormBasedView):
                 "meta": {}
             }
             return json_response(res_dict)
-        except BalanceRechargeProduct.DoesNotExist:
+        except PurchaseProductDiscovery.DiscoveryError:
             return HttpResponse(status=404)
 
         return HttpResponse(status=501)
 
-
-class PurchaseUnlockView(FormBasedView):
-    form_cls = CategoryUnlockForm
-
-    def post(self, request, *args, **kwargs):
-        form = self.make_form_from_request(request)
-
-        if not form or not form.is_valid():
-            return HttpResponse(status=400)
-
-        Purchase = apps.get_model('api.GooglePlayIAPPurchase')
-        GooglePlayProduct = apps.get_model('api.GooglePlayProduct')
-
-        cleaned_data = form.clean()
-
-        try:
-            category_to_unlock = QuoteCategory.objects.get(pk=cleaned_data['category_id'])
-
-            if category_to_unlock.is_available_to_user(self.request.user_profile):
-                return HttpResponse(status=422)
-        except QuoteCategory.DoesNotExist:
-            return HttpResponse(status=404)
-
-        try:
-            existing_purchase = Purchase.objects.get(order_id=cleaned_data['order_id'],
-                                                     purchase_token=cleaned_data['purchase_token'])
-            res_dict = {
-                "objects":[{
-                    "purchase_id": existing_purchase.id
-                }],
-                "meta": {}
-            }
-            return json_response(res_dict)
-        except Purchase.DoesNotExist:
-            pass
-
-        try:
-            google_play_product = GooglePlayProduct.objects.get(pk=cleaned_data['google_play_product_id'])
-            purchase = Purchase.objects.create(product=google_play_product,
-                                               device_session=request.device_session,
-                                               order_id=cleaned_data['order_id'],
-                                               purchase_token=cleaned_data['purchase_token'])
-
-            # todo: redesign in conformance with #16.
-            unlock, created = CategoryUnlockPurchase.objects.get_or_create(type=CategoryUnlockTypes.UNLOCK_BY_PURCHASE,
-                                                           profile=self.request.user_profile,
-                                                           category_to_unlock=category_to_unlock,
-                                                           google_play_purchase=purchase)
-
-            res_dict = {
-                "objects":[{
-                    "purchase_id": purchase.id
-                }],
-                "meta": {}
-            }
-            return json_response(res_dict)
-        except GooglePlayProduct.DoesNotExist:
-            return HttpResponse(status=404)
-
-        return HttpResponse(status=501)
+#
+# class PurchaseUnlockView(FormBasedView):
+#     form_cls = CategoryUnlockForm
+#
+#     def post(self, request, *args, **kwargs):
+#         form = self.make_form_from_request(request)
+#
+#         if not form or not form.is_valid():
+#             return HttpResponse(status=400)
+#
+#         Purchase = apps.get_model('api.GooglePlayIAPPurchase')
+#         GooglePlayProduct = apps.get_model('api.GooglePlayProduct')
+#
+#         cleaned_data = form.clean()
+#
+#         try:
+#             category_to_unlock = QuoteCategory.objects.get(pk=cleaned_data['category_id'])
+#
+#             if category_to_unlock.is_available_to_user(self.request.user_profile):
+#                 return HttpResponse(status=422)
+#         except QuoteCategory.DoesNotExist:
+#             return HttpResponse(status=404)
+#
+#         try:
+#             existing_purchase = Purchase.objects.get(order_id=cleaned_data['order_id'],
+#                                                      purchase_token=cleaned_data['purchase_token'])
+#             res_dict = {
+#                 "objects":[{
+#                     "purchase_id": existing_purchase.id
+#                 }],
+#                 "meta": {}
+#             }
+#             return json_response(res_dict)
+#         except Purchase.DoesNotExist:
+#             pass
+#
+#         try:
+#             google_play_product = GooglePlayProduct.objects.get(pk=cleaned_data['google_play_product_id'])
+#             purchase = Purchase.objects.create(product=google_play_product,
+#                                                device_session=request.device_session,
+#                                                order_id=cleaned_data['order_id'],
+#                                                purchase_token=cleaned_data['purchase_token'])
+#
+#             # todo: redesign in conformance with #16.
+#             unlock, created = CategoryUnlockPurchase.objects.get_or_create(type=CategoryUnlockTypes.UNLOCK_BY_PURCHASE,
+#                                                            profile=self.request.user_profile,
+#                                                            category_to_unlock=category_to_unlock,
+#                                                            google_play_purchase=purchase)
+#
+#             res_dict = {
+#                 "objects":[{
+#                     "purchase_id": purchase.id
+#                 }],
+#                 "meta": {}
+#             }
+#             return json_response(res_dict)
+#         except GooglePlayProduct.DoesNotExist:
+#             return HttpResponse(status=404)
+#
+#         return HttpResponse(status=501)
 
 
 class PurchaseStatusView(BaseView):
@@ -318,8 +375,9 @@ class PurchaseStatusView(BaseView):
 
 class PurchaseableProductsListView(BaseView):
     def get(self, request, *args, **kwargs):
-        balance_recharges = BalanceRechargeProduct.objects.select_related('google_play_product').all()
-        balance_recharge_flat_list = [o.get_flat() for o in balance_recharges]
+        # balance_recharges = BalanceRechargeProduct.objects.select_related('google_play_product').all()
+        # balance_recharge_flat_list = [o.get_flat() for o in balance_recharges]
+
 
         # balance_recharge_play_products_skus = [o['sku'] for o in balance_recharge_flat_list]
 
@@ -327,11 +385,9 @@ class PurchaseableProductsListView(BaseView):
         # google_play_products_flat_list = [{'id': o.id, 'sku': o.sku} for o in all_play_products]
         # google_play_products_flat_list_filtered = list(filter(lambda o: o['sku'] not in balance_recharge_play_products_skus, google_play_products_flat_list))
 
+        d = PurchaseProductDiscovery()
+        products = d.get_all_products()
 
-        products = {
-            'other_products': [],
-            'recharge_products': balance_recharge_flat_list
-        }
         res_dict = {
             "objects": [products],
             "meta": {}
