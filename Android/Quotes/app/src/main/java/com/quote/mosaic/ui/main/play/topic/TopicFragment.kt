@@ -7,11 +7,12 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProviders
+import androidx.navigation.fragment.findNavController
 import com.quote.mosaic.R
 import com.quote.mosaic.core.AppFragment
 import com.quote.mosaic.core.common.args
 import com.quote.mosaic.databinding.OverviewTopicFragmentBinding
-import com.quote.mosaic.ui.game.GameActivity
+import com.quote.mosaic.ui.main.play.game.GameFragment
 import com.quote.mosaic.ui.main.play.CategoryClickListener
 import nl.dionsegijn.konfetti.models.Shape
 import nl.dionsegijn.konfetti.models.Size
@@ -51,10 +52,6 @@ class TopicFragment : AppFragment(), CategoryClickListener {
         super.onStart()
         vm.state.sections.subscribe {
             adapter.submitList(it)
-            binding().items.run {
-                setHasFixedSize(true)
-                isNestedScrollingEnabled = true
-            }
         }.untilStopped()
     }
 
@@ -76,7 +73,11 @@ class TopicFragment : AppFragment(), CategoryClickListener {
     }
 
     override fun onOpenedClicked(id: Int) {
-        startActivity(GameActivity.newIntent(requireContext(), id))
+        findNavController().navigate(
+            R.id.action_overviewFragment_to_gameFragment, Bundle().apply {
+                putInt(GameFragment.SELECTED_CATEGORY_ID, id)
+            }
+        )
     }
 
     override fun onRefreshClicked() {

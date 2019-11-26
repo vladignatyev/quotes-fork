@@ -1,4 +1,4 @@
-package com.quote.mosaic.ui.game
+package com.quote.mosaic.ui.main.play.game
 
 import android.app.Activity
 import androidx.databinding.ObservableBoolean

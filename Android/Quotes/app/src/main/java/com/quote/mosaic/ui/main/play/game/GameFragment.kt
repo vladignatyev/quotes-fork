@@ -1,4 +1,4 @@
-package com.quote.mosaic.ui.game
+package com.quote.mosaic.ui.main.play.game
 
 import android.graphics.Color
 import android.os.Bundle
@@ -7,7 +7,9 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.databinding.DataBindingUtil
-import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.FragmentNavigatorExtras
+import androidx.navigation.fragment.findNavController
 import com.google.android.material.snackbar.Snackbar
 import com.quote.mosaic.R
 import com.quote.mosaic.core.AppFragment
@@ -31,13 +33,16 @@ class GameFragment : AppFragment(), GameListener {
     @Inject
     lateinit var billingManager: BillingManager
 
-    private val vm: GameViewModel by activityViewModels()
+    @Inject
+    lateinit var vmFactory: GameViewModel.Factory
+
+    private val vm: GameViewModel by viewModels { vmFactory }
 
     private var levelCompleted = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        vm.setUp(args().getInt(GameActivity.SELECTED_CATEGORY_ID))
+        vm.setUp(args().getInt(SELECTED_CATEGORY_ID))
         vm.init()
     }
 
@@ -57,6 +62,7 @@ class GameFragment : AppFragment(), GameListener {
 
     override fun onStart() {
         super.onStart()
+
         vm.state.onNextLevelReceived.subscribe { mixedQuote ->
             levelCompleted = false
             binding().root.manageViewGroupTapable(binding().root, true)
@@ -79,7 +85,15 @@ class GameFragment : AppFragment(), GameListener {
     }
 
     fun topupClicked() {
+        val extras = FragmentNavigatorExtras(
+            binding().title to "title",
+            binding().balance to "balance",
+            binding().topup to "topup"
+        )
 
+        findNavController().navigate(
+            R.id.action_gameFragment_to_topUpFragment, null, null, extras
+        )
     }
 
     override fun onQuoteOrderChanged(userVariant: ArrayList<String>) {
@@ -149,5 +163,9 @@ class GameFragment : AppFragment(), GameListener {
     }
 
     private fun binding() = viewBinding<GameFragmentBinding>()
+
+    companion object {
+        const val SELECTED_CATEGORY_ID = "SELECTED_CATEGORY_ID"
+    }
 
 }

@@ -5,7 +5,7 @@ import com.quote.mosaic.core.billing.BillingManager
 import com.quote.mosaic.core.manager.UserPreferences
 import com.quote.mosaic.data.api.ApiClient
 import com.quote.mosaic.data.manager.UserManager
-import com.quote.mosaic.ui.game.GameViewModel
+import com.quote.mosaic.ui.main.play.game.GameViewModel
 import com.quote.mosaic.ui.main.MainViewModel
 import com.quote.mosaic.ui.main.play.OverviewViewModel
 import com.quote.mosaic.ui.main.play.topic.TopicMapper

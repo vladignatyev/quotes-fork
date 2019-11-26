@@ -75,7 +75,7 @@ class OverviewFragment : AppFragment() {
         )
 
         findNavController().navigate(
-            R.id.action_overviewFragment_to_topUpFragment2, null, null, extras
+            R.id.action_overviewFragment_to_topUpFragment, null, null, extras
         )
     }
 

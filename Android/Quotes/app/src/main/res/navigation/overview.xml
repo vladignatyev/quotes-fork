@@ -10,12 +10,28 @@
         android:label="OverviewFragment"
         tools:layout="@layout/overview_fragment">
         <action
-            android:id="@+id/action_overviewFragment_to_topUpFragment2"
-            app:destination="@id/topUpFragment2" />
+            android:id="@+id/action_overviewFragment_to_topUpFragment"
+            app:destination="@id/topUpFragment" />
+        <action
+            android:id="@+id/action_overviewFragment_to_gameFragment"
+            app:destination="@id/gameFragment"
+            app:enterAnim="@anim/enter_from_right"
+            app:exitAnim="@anim/exit_to_left"
+            app:popEnterAnim="@anim/enter_from_left"
+            app:popExitAnim="@anim/exit_to_right" />
     </fragment>
     <fragment
-        android:id="@+id/topUpFragment2"
+        android:id="@+id/topUpFragment"
         android:name="com.quote.mosaic.ui.main.play.topup.TopUpFragment"
         android:label="TopUpFragment"
         tools:layout="@layout/topup_fragment" />
+    <fragment
+        android:id="@+id/gameFragment"
+        android:name="com.quote.mosaic.ui.main.play.game.GameFragment"
+        android:label="GameFragment"
+        tools:layout="@layout/game_fragment">
+        <action
+            android:id="@+id/action_gameFragment_to_topUpFragment"
+            app:destination="@id/topUpFragment" />
+    </fragment>
 </navigation>

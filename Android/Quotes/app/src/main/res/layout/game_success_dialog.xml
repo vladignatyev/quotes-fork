@@ -9,7 +9,7 @@
 
         <variable
             name="viewModel"
-            type="com.quote.mosaic.ui.game.GameViewModel" />
+            type="com.quote.mosaic.ui.main.play.game.GameViewModel" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout

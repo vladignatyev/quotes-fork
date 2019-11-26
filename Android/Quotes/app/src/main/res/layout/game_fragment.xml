@@ -9,11 +9,11 @@
 
         <variable
             name="fragment"
-            type="com.quote.mosaic.ui.game.GameFragment" />
+            type="com.quote.mosaic.ui.main.play.game.GameFragment" />
 
         <variable
             name="viewModel"
-            type="com.quote.mosaic.ui.game.GameViewModel" />
+            type="com.quote.mosaic.ui.main.play.game.GameViewModel" />
 
     </data>
 
@@ -29,13 +29,13 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
             android:background="@drawable/ic_arrow_back"
-            android:onClick="@{() -> fragment.requireActivity().onBackPressed()}"
+            android:onClick="@{() -> fragment.goBack()}"
             app:layout_constraintBottom_toBottomOf="@+id/topup"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="@+id/topup" />
 
         <TextView
-            android:id="@+id/welcomeMsg"
+            android:id="@+id/title"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="4dp"
@@ -106,10 +106,10 @@
             android:paddingStart="16dp"
             android:paddingEnd="16dp"
             android:scrollbars="none"
-            app:layout_constraintBottom_toTopOf="@+id/hintsView"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/welcomeMsg" />
+            app:layout_constraintTop_toBottomOf="@+id/title" />
 
         <com.github.clans.fab.FloatingActionMenu
             android:id="@+id/menu"

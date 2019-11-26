@@ -9,7 +9,7 @@ import com.quote.mosaic.databinding.GameSuccessDialogBinding
 import com.quote.mosaic.databinding.GameSuccessDoubleUpBinding
 import com.quote.mosaic.databinding.OnboardingGameFinishDialogBinding
 import com.quote.mosaic.databinding.OnboardingGameSuccessDialogBinding
-import com.quote.mosaic.ui.game.GameViewModel
+import com.quote.mosaic.ui.main.play.game.GameViewModel
 import lv.chi.firelike.IconEmitterManager
 
 object DialogBuilder {
