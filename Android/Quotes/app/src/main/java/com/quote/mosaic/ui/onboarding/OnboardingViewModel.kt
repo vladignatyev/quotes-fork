@@ -1,30 +1,35 @@
-package com.quote.mosaic.ui.onboarding.login
+package com.quote.mosaic.ui.onboarding
 
 import androidx.databinding.ObservableBoolean
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.quote.mosaic.data.manager.UserManager
-import com.quote.mosaic.data.api.ApiClient
 import com.quote.mosaic.BuildConfig
+import com.quote.mosaic.R
 import com.quote.mosaic.core.AppViewModel
 import com.quote.mosaic.core.Schedulers
 import com.quote.mosaic.core.common.toFlowable
 import com.quote.mosaic.core.ext.Digest
 import com.quote.mosaic.core.rx.NonNullObservableField
+import com.quote.mosaic.data.api.ApiClient
+import com.quote.mosaic.data.manager.UserManager
+import com.quote.mosaic.ui.main.play.topic.TopicModel
+import com.quote.mosaic.ui.main.play.topic.category.CategoryModel
+import com.quote.mosaic.ui.main.play.topic.section.SectionModel
 import io.reactivex.Flowable
+import io.reactivex.Single
 import io.reactivex.processors.BehaviorProcessor
 import io.reactivex.processors.PublishProcessor
 import timber.log.Timber
 import java.text.SimpleDateFormat
 import java.util.*
 
-class LoginViewModel(
+class OnboardingViewModel(
     private val schedulers: Schedulers,
     private val apiClient: ApiClient,
     private val userManager: UserManager
 ) : AppViewModel() {
 
-    private val loginSuccess = BehaviorProcessor.create<Unit>()
+    private val loginSuccess = PublishProcessor.create<Unit>()
     private val loginFailure = PublishProcessor.create<String>()
 
     val state = State(
@@ -70,6 +75,18 @@ class LoginViewModel(
             }).untilCleared()
     }
 
+    fun loadUser() {
+        apiClient
+            .profile()
+            .subscribeOn(schedulers.io())
+            .observeOn(schedulers.ui())
+            .subscribe({
+                state.initialBalance.set(it.initialBalance.toString())
+            }, {
+                Timber.w(it, "loadUser failed")
+            }).untilCleared()
+    }
+
     data class State(
         val loading: ObservableBoolean = ObservableBoolean(),
         val loginEnabled: ObservableBoolean = ObservableBoolean(true),
@@ -77,6 +94,8 @@ class LoginViewModel(
         val deviceId: NonNullObservableField<String> = NonNullObservableField(""),
 
         val nameText: NonNullObservableField<String> = NonNullObservableField(""),
+        val balance: NonNullObservableField<String> = NonNullObservableField("50"),
+        val initialBalance: NonNullObservableField<String> = NonNullObservableField("100"),
 
         val loginSuccess: Flowable<Unit>,
         val loginFailure: Flowable<String>
@@ -88,9 +107,13 @@ class LoginViewModel(
         private val userManager: UserManager
     ) : ViewModelProvider.Factory {
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-            if (modelClass.isAssignableFrom(LoginViewModel::class.java)) {
+            if (modelClass.isAssignableFrom(OnboardingViewModel::class.java)) {
                 @Suppress("UNCHECKED_CAST")
-                return LoginViewModel(schedulers, apiClient, userManager) as T
+                return OnboardingViewModel(
+                    schedulers,
+                    apiClient,
+                    userManager
+                ) as T
             }
             throw IllegalArgumentException("Unknown ViewModel class")
         }

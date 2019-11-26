@@ -14,7 +14,7 @@ import com.quote.mosaic.ui.main.play.topup.TopUpProductMapper
 import com.quote.mosaic.ui.main.play.topup.TopUpViewModel
 import com.quote.mosaic.ui.main.profile.ProfileViewModel
 import com.quote.mosaic.ui.main.top.TopViewModel
-import com.quote.mosaic.ui.onboarding.login.LoginViewModel
+import com.quote.mosaic.ui.onboarding.OnboardingViewModel
 import dagger.Module
 import dagger.Provides
 import javax.inject.Singleton
@@ -24,11 +24,11 @@ class ViewModelModule {
 
     @Provides
     @Singleton
-    fun loginViewModelFactory(
+    fun onboardingViewModelFactory(
         schedulers: Schedulers,
         apiClient: ApiClient,
         userManager: UserManager
-    ) = LoginViewModel.Factory(
+    ) = OnboardingViewModel.Factory(
         schedulers,
         apiClient,
         userManager

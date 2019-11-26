@@ -1,6 +1,5 @@
 package com.quote.mosaic.ui.onboarding.game
 
-import android.content.Context
 import android.graphics.Color
 import android.graphics.Rect
 import android.os.Bundle
@@ -8,20 +7,23 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
+import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import androidx.transition.Explode
 import androidx.transition.Transition
 import androidx.transition.TransitionManager
+import com.quote.mosaic.R
+import com.quote.mosaic.core.AppFragment
+import com.quote.mosaic.core.ui.data.ExampleDataProvider
 import com.quote.mosaic.data.manager.UserManager
+import com.quote.mosaic.databinding.OnboardingGameFragmentBinding
 import com.quote.mosaic.game.animator.DraggableItemAnimator
 import com.quote.mosaic.game.draggable.RecyclerViewDragDropManager
 import com.quote.mosaic.game.utils.WrapperAdapterUtils
-import com.quote.mosaic.R
-import com.quote.mosaic.core.AppFragment
-import com.quote.mosaic.core.common.parentAs
-import com.quote.mosaic.core.ui.data.ExampleDataProvider
-import com.quote.mosaic.databinding.OnboardingGameFragmentBinding
+import com.quote.mosaic.ui.common.dialog.DialogBuilder
+import com.quote.mosaic.ui.main.MainActivity
+import com.quote.mosaic.ui.onboarding.OnboardingViewModel
 import io.reactivex.Completable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import nl.dionsegijn.konfetti.models.Shape
@@ -34,7 +36,7 @@ class OnboardingGameFragment : AppFragment() {
     @Inject
     lateinit var userManager: UserManager
 
-    private lateinit var listener: Listener
+    private val vm: OnboardingViewModel by activityViewModels()
 
     private var gameWrapperAdapter: RecyclerView.Adapter<*>? = null
     private var gameManager: RecyclerViewDragDropManager? = null
@@ -42,9 +44,9 @@ class OnboardingGameFragment : AppFragment() {
     private lateinit var dataProvider: ExampleDataProvider
     private lateinit var gameAdapter: OnboardingGameAdapter
 
-    override fun onAttach(context: Context) {
-        super.onAttach(context)
-        listener = parentAs()
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        vm.loadUser()
     }
 
     override fun onCreateView(
@@ -54,7 +56,7 @@ class OnboardingGameFragment : AppFragment() {
     ): View = DataBindingUtil.inflate<OnboardingGameFragmentBinding>(
         inflater, R.layout.onboarding_game_fragment, container, false
     ).apply {
-        listener = this@OnboardingGameFragment.listener
+        viewModel = vm
     }.root
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -83,10 +85,10 @@ class OnboardingGameFragment : AppFragment() {
         if (gameWrapperAdapter != null) return
 
         dataProvider = ExampleDataProvider()
-        val correctQuote = listOf("Через", "тернии", "к", "звездам")
-        val mixedQuote = listOf("Через", "звездам", "тернии", "к")
+        val correctQuote = getString(R.string.onboarding_label_default_quote).split(" ")
+        val mixedQuote = getString(R.string.onboarding_label_default_quote_mixed).split(" ")
         dataProvider.addQuote(correctQuote, mixedQuote)
-        gameAdapter = OnboardingGameAdapter(R.color.darkPurple) { onSuccess() }
+        gameAdapter = OnboardingGameAdapter(R.color.game_background_blue) { onSuccess() }
         gameAdapter.setDataProvider(dataProvider)
 
         initGameManager()
@@ -170,17 +172,21 @@ class OnboardingGameFragment : AppFragment() {
     }
 
     private fun showSuccessDialog() {
-        listener.onGameCompleted()
-    }
+        DialogBuilder.showOnboardingGameSuccessDialog(
+            requireContext(),
+            vm.state.initialBalance.get()
+        ) { parentDialog ->
+            parentDialog.dismiss()
 
-    interface Listener {
-
-        fun onGameCompleted()
+            Completable.timer(500, TimeUnit.MILLISECONDS, AndroidSchedulers.mainThread())
+                .subscribe {
+                    DialogBuilder.showOnboardingFinishDialog(requireContext()) {
+                        startActivity(MainActivity.newIntent(requireContext()))
+                        it.dismiss()
+                    }
+                }
+        }
     }
 
     private fun binding() = viewBinding<OnboardingGameFragmentBinding>()
-
-    companion object {
-        fun newInstance() = OnboardingGameFragment()
-    }
 }

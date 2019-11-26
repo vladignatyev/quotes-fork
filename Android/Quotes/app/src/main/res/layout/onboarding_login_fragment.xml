@@ -6,7 +6,7 @@
 
         <variable
             name="viewModel"
-            type="com.quote.mosaic.ui.onboarding.login.LoginViewModel" />
+            type="com.quote.mosaic.ui.onboarding.OnboardingViewModel" />
 
         <variable
             name="fragment"

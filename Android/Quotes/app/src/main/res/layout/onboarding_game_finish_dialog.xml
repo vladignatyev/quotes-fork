@@ -1,31 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <import type="android.text.TextUtils" />
+
+        <variable
+            name="viewModel"
+            type="com.quote.mosaic.ui.game.GameViewModel" />
+    </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_margin="8dp"
         android:background="@drawable/shape_solid_white_rounded_corners">
 
-        <com.airbnb.lottie.LottieAnimationView
+        <ImageView
             android:id="@+id/image"
             android:layout_width="wrap_content"
             android:layout_height="128dp"
-            android:layout_marginStart="32dp"
-            android:layout_marginTop="32dp"
-            android:layout_marginEnd="32dp"
+            android:src="@drawable/ic_winner"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:lottie_autoPlay="true"
-            app:lottie_loop="true"
-            app:lottie_rawRes="@raw/success_stars_animation" />
+            app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
-            android:id="@+id/hintTitle"
+            android:id="@+id/title"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="32dp"
+            android:layout_marginTop="16dp"
             android:layout_marginEnd="32dp"
             android:gravity="center"
             android:text="@string/onboarding_label_success_title"
@@ -36,34 +44,36 @@
             app:layout_constraintTop_toBottomOf="@+id/image" />
 
         <TextView
-            android:id="@+id/hintSubTitle"
+            android:id="@+id/subtitle"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="32dp"
+            android:layout_marginStart="16dp"
             android:layout_marginTop="8dp"
-            android:layout_marginEnd="32dp"
-            android:alpha="0.5"
+            android:layout_marginEnd="16dp"
+            android:alpha="0.3"
             android:gravity="center"
             android:text="@string/onboarding_label_success_subtitle"
             android:textColor="@color/black"
             android:textSize="16sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/hintTitle" />
+            app:layout_constraintTop_toBottomOf="@+id/title" />
 
         <TextView
-            android:id="@+id/grab"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:id="@+id/startPlay"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginBottom="32dp"
+            android:background="@drawable/shape_solid_green_rounded_corners"
             android:gravity="center"
-            android:padding="32dp"
-            android:text="@string/onboarding_button_grab"
-            android:textColor="@color/black"
+            android:text="@string/onboarding_button_start_play"
+            android:textColor="@color/white"
             android:textStyle="bold"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="@+id/hintSubTitle"
-            app:layout_constraintStart_toStartOf="@+id/hintSubTitle"
-            app:layout_constraintTop_toBottomOf="@+id/hintSubTitle" />
-
+            app:layout_constraintEnd_toEndOf="@+id/subtitle"
+            app:layout_constraintStart_toStartOf="@+id/subtitle"
+            app:layout_constraintTop_toBottomOf="@+id/subtitle" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

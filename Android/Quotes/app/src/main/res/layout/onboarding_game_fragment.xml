@@ -6,15 +6,15 @@
     <data>
 
         <variable
-            name="listener"
-            type="com.quote.mosaic.ui.onboarding.game.OnboardingGameFragment.Listener" />
+            name="viewModel"
+            type="com.quote.mosaic.ui.onboarding.OnboardingViewModel" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/purple">
+        android:background="@color/blue">
 
         <TextView
             android:id="@+id/welcomeMsg"

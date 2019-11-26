@@ -27,6 +27,7 @@ import com.quote.mosaic.game.animator.DraggableItemAnimator
 import com.quote.mosaic.game.draggable.RecyclerViewDragDropManager
 import com.quote.mosaic.game.utils.WrapperAdapterUtils
 import com.quote.mosaic.ui.common.dialog.DialogBuilder
+import com.quote.mosaic.ui.main.MainActivity
 import com.quote.mosaic.ui.onboarding.game.OnboardingGameAdapter
 import io.reactivex.Completable
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -96,7 +97,7 @@ class GameFragment : AppFragment() {
             vm.reset()
 
             if (vm.state.isLastQuote.get()) {
-                requireActivity().onBackPressed()
+                startActivity(MainActivity.newIntent(requireContext()))
             } else {
                 vm.loadLevel()
 

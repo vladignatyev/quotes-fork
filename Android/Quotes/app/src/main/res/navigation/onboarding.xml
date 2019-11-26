@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/onboarding"
+    app:startDestination="@id/loginFragment">
+
+    <fragment
+        android:id="@+id/loginFragment"
+        android:name="com.quote.mosaic.ui.onboarding.login.LoginFragment"
+        android:label="LoginFragment"
+        tools:layout="@layout/onboarding_login_fragment">
+        <action
+            android:id="@+id/action_loginFragment_to_onboardingCategoryFragment"
+            app:destination="@id/onboardingCategoryFragment"
+            app:enterAnim="@anim/enter_from_right"
+            app:exitAnim="@anim/exit_to_left"
+            app:popEnterAnim="@anim/enter_from_left"
+            app:popExitAnim="@anim/exit_to_right" />
+    </fragment>
+    <fragment
+        android:id="@+id/onboardingGameFragment"
+        android:name="com.quote.mosaic.ui.onboarding.game.OnboardingGameFragment"
+        android:label="OnboardingGameFragment"
+        tools:layout="@layout/onboarding_game_fragment" />
+    <fragment
+        android:id="@+id/onboardingCategoryFragment"
+        android:name="com.quote.mosaic.ui.onboarding.category.OnboardingOverviewFragment"
+        android:label="OnboardingCategoryFragment"
+        tools:layout="@layout/onboarding_topic_fragment">
+        <action
+            android:id="@+id/action_onboardingCategoryFragment_to_onboardingGameFragment"
+            app:destination="@id/onboardingGameFragment"
+            app:enterAnim="@anim/enter_from_right"
+            app:exitAnim="@anim/exit_to_left"
+            app:popEnterAnim="@anim/enter_from_left"
+            app:popExitAnim="@anim/exit_to_right" />
+    </fragment>
+</navigation>

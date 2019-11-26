@@ -85,7 +85,10 @@ class OnboardingGameAdapter(
 
     override fun onItemDragFinished(fromPosition: Int, toPosition: Int, result: Boolean) {
         notifyDataSetChanged()
-        if (dataProvider.getCurrentQuote() == dataProvider.getFullQuote()) {
+        val userQuote = dataProvider.getCurrentQuote().joinToString(" ").replace("\u200E","")
+        val correctQuote = dataProvider.getFullQuote().joinToString(" ").replace("\u200E","")
+
+        if (userQuote.equals(correctQuote)) {
             onSuccess()
         }
     }

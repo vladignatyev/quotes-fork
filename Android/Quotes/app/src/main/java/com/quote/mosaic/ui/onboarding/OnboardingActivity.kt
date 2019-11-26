@@ -1,32 +1,27 @@
 package com.quote.mosaic.ui.onboarding
 
-import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.view.LayoutInflater
 import android.widget.Toast
 import androidx.core.content.ContextCompat
-import androidx.databinding.DataBindingUtil
+import androidx.lifecycle.ViewModelProviders
+import androidx.navigation.fragment.NavHostFragment
 import com.quote.mosaic.R
 import com.quote.mosaic.core.AppActivity
-import com.quote.mosaic.core.common.utils.Ime
 import com.quote.mosaic.core.common.utils.TimedActionConfirmHelper
+import com.quote.mosaic.core.manager.UserPreferences
 import com.quote.mosaic.data.manager.UserManager
-import com.quote.mosaic.databinding.OnboardingActivityBinding
-import com.quote.mosaic.databinding.OnboardingCompletePopupBinding
-import com.quote.mosaic.ui.main.MainActivity
-import com.quote.mosaic.ui.onboarding.game.OnboardingGameFragment
-import com.quote.mosaic.ui.onboarding.login.LoginFragment
 import dagger.android.AndroidInjector
 import dagger.android.DispatchingAndroidInjector
 import dagger.android.HasAndroidInjector
+import kotlinx.android.synthetic.main.onboarding_activity.*
 import javax.inject.Inject
 
-class OnboardingActivity : AppActivity(),
-    HasAndroidInjector,
-    LoginFragment.Listener,
-    OnboardingGameFragment.Listener {
+class OnboardingActivity : AppActivity(), HasAndroidInjector {
+
+    @Inject
+    lateinit var vmFactory: OnboardingViewModel.Factory
 
     @Inject
     lateinit var appExitTimer: TimedActionConfirmHelper
@@ -35,47 +30,32 @@ class OnboardingActivity : AppActivity(),
     lateinit var userManager: UserManager
 
     @Inject
+    lateinit var userPreferences: UserPreferences
+
+    @Inject
     lateinit var fragmentDispatchingAndroidInjector: DispatchingAndroidInjector<Any>
 
-    private lateinit var binding: OnboardingActivityBinding
+    private lateinit var vm: OnboardingViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        setContentView(R.layout.onboarding_activity)
+        window.statusBarColor = ContextCompat.getColor(this, R.color.darkBlue)
+        userPreferences.setBackgroundColor(R.color.bar_background_blue)
+        vm = ViewModelProviders
+            .of(this, vmFactory)
+            .get(OnboardingViewModel::class.java)
+        vm.init()
 
-        setStatusBarColor(R.color.darkBlue)
-
-        binding = DataBindingUtil.setContentView<OnboardingActivityBinding>(
-            this, R.layout.onboarding_activity
-        ).apply {
-            activity = this@OnboardingActivity
-            pager.adapter = OnboardingPagerAdapter(supportFragmentManager)
-        }
-
-        appExitTimer.setListener {
-            finishAffinity()
-        }
+        appExitTimer.setListener { finishAffinity() }
     }
 
-    override fun firstStepCompleted() {
-        setStatusBarColor(R.color.darkPurple)
-        Ime.hide(binding.root)
-        binding.pager.currentItem = 1
-    }
-
-    override fun onGameCompleted() {
-        val binding: OnboardingCompletePopupBinding =
-            DataBindingUtil.inflate(
-                LayoutInflater.from(this), R.layout.onboarding_complete_popup, null, true
-            )
-
-        binding.grab.setOnClickListener {
-            startActivity(MainActivity.newIntent(this))
-        }
-
-        AlertDialog.Builder(this, R.style.DialogStyle)
-            .setCancelable(false)
-            .setView(binding.root)
-            .show()
+    override fun onStart() {
+        super.onStart()
+        vm.state.loginSuccess.subscribe {
+            val hostFragment = onboardingContainer as NavHostFragment
+            hostFragment.navController.navigate(R.id.action_loginFragment_to_onboardingCategoryFragment)
+        }.untilStopped()
     }
 
     override fun onBackPressed() {
@@ -91,19 +71,14 @@ class OnboardingActivity : AppActivity(),
     private fun promptToCloseApp() {
         val notify = appExitTimer.onAction()
         if (notify) {
-            Toast.makeText(this, R.string.shared_button_press_again_to_exit, Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, R.string.shared_button_press_again_to_exit, Toast.LENGTH_SHORT)
+                .show()
         }
-    }
-
-    private fun setStatusBarColor(colorRes: Int) {
-        window.statusBarColor = ContextCompat.getColor(this, colorRes)
     }
 
     override fun androidInjector(): AndroidInjector<Any> = fragmentDispatchingAndroidInjector
 
     companion object {
-
         fun newIntent(context: Context) = Intent(context, OnboardingActivity::class.java)
-
     }
 }

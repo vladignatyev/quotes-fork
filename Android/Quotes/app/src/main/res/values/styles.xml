@@ -14,11 +14,6 @@
         <item name="android:statusBarColor">@color/bar_background_blue</item>
     </style>
 
-    <style name="DialogAnimation">
-        <item name="android:windowEnterAnimation">@anim/enter_from_right</item>
-        <item name="android:windowExitAnimation">@anim/exit_to_right</item>
-    </style>
-
     <!-- ######### Button ######### -->
     <style name="Widget.App.Button" parent="@style/Widget.AppCompat.Button">
         <item name="android:gravity">center</item>
@@ -89,5 +84,10 @@
     <style name="DoubleUpDialogAnimation">
         <item name="android:windowEnterAnimation">@android:anim/fade_in</item>
         <item name="android:windowExitAnimation">@android:anim/fade_out</item>
+    </style>
+
+    <style name="DialogAnimation">
+        <item name="android:windowEnterAnimation">@anim/enter_from_right</item>
+        <item name="android:windowExitAnimation">@anim/exit_to_right</item>
     </style>
 </resources>

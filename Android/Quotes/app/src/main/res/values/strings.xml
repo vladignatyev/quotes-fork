@@ -27,12 +27,22 @@
 
     <!-- ONBOARDING -->
     <string name="onboarding_label_name_hint">Ваше имя</string>
+    <string name="onboarding_label_look_balance">%s, твой баланс:</string>
     <string name="onboarding_label_welcome">Привет!\nДавай знакомиться.</string>
     <string name="onboarding_label_welcome_aboard">Добро пожаловать на борт, %s!</string>
     <string name="onboarding_label_rules">Правила игры просты: меняй слова местами, чтобы собрать фразу!</string>
-    <string name="onboarding_label_success_title">Молодец, всё верно!</string>
-    <string name="onboarding_label_success_subtitle">За каждый пройденный уровень ты получаешь монеты.</string>
+    <string name="onboarding_label_success_title">Воу воу воу!</string>
+    <string name="onboarding_label_success_subtitle">Разминка закончилась, пора уже начать настоящую игру!</string>
     <string name="onboarding_button_grab">Продолжить!</string>
+    <string name="onboarding_label_author">© Луцию Аннею Сенеке</string>
+    <string name="onboarding_label_quote">«Через тернии к звёздам.»‎</string>
+    <string name="onboarding_label_default_quote">Через тернии к звёздам</string>
+    <string name="onboarding_label_default_quote_mixed">звёздам Через тернии к‎</string>
+    <string name="onboarding_label_reward"> - %s монет для старта</string>
+    <string name="onboarding_button_start_play">Поехали!</string>
+    <string name="onboarding_label_open_category">Открывай категорию:</string>
+    <string name="onboarding_label_warmup">Разминка</string>
+    <string name="onboarding_label_go_inside">Заходи в нее!</string>
 
     <!-- MAIN -->
     <string name="overview_label_title">Привет, %s!</string>

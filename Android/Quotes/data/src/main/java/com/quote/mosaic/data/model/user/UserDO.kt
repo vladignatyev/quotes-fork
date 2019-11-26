@@ -7,6 +7,8 @@ data class UserDO(
     val nickname: String,
     val balance: Int,
     @JsonProperty("reward_per_doubleup")
-    val rewardPerDoubleUp: Int
+    val rewardPerDoubleUp: Int,
+    @JsonProperty("initial_profile_balance")
+    val initialBalance: Int
 
 )

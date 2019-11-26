@@ -20,12 +20,6 @@ class UserPreferences(
         val colorChangedTrigger: Flowable<Unit>
     )
 
-    init {
-        if (getBackgroundColor() == -1) {
-            setBackgroundColor(R.color.bar_background_blue)
-        }
-    }
-
     fun setBackgroundColor(colorRes: Int) {
         val color = when (colorRes) {
             R.drawable.ic_circle_shape_blue -> R.color.game_background_blue
@@ -41,7 +35,8 @@ class UserPreferences(
         colorChangedTrigger.onNext(Unit)
     }
 
-    fun getBackgroundColor(): Int = sharedPreferences.getInt(KEY_BACKGROUND_COLOR_RES_ID, -1)
+    fun getBackgroundColor(): Int =
+        sharedPreferences.getInt(KEY_BACKGROUND_COLOR_RES_ID, R.color.bar_background_blue)
 
     fun getBackgroundBarColor(): Int = when (getBackgroundColor()) {
         R.color.game_background_blue -> R.color.bar_background_blue
