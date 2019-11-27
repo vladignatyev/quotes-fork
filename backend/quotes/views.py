@@ -256,8 +256,9 @@ class GenericPurchaseView(FormBasedView):
         cleaned_data = form.clean()
 
         try:
-            existing_purchase = Purchase.objects.get(order_id=cleaned_data['order_id'],
-                                                  purchase_token=cleaned_data['purchase_token'])
+            existing_purchase = Purchase.objects.select_related('product').get(order_id=cleaned_data['order_id'],
+                                                  purchase_token=cleaned_data['purchase_token'],
+                                                  product__is_rewarded_product=False)
             res_dict = {
                 "objects":[{
                     "purchase_id": existing_purchase.id
@@ -376,16 +377,6 @@ class PurchaseStatusView(BaseView):
 
 class PurchaseableProductsListView(BaseView):
     def get(self, request, *args, **kwargs):
-        # balance_recharges = BalanceRechargeProduct.objects.select_related('google_play_product').all()
-        # balance_recharge_flat_list = [o.get_flat() for o in balance_recharges]
-
-
-        # balance_recharge_play_products_skus = [o['sku'] for o in balance_recharge_flat_list]
-
-        # all_play_products = apps.get_model('api.GooglePlayProduct').objects.all()
-        # google_play_products_flat_list = [{'id': o.id, 'sku': o.sku} for o in all_play_products]
-        # google_play_products_flat_list_filtered = list(filter(lambda o: o['sku'] not in balance_recharge_play_products_skus, google_play_products_flat_list))
-
         d = PurchaseProductDiscovery()
         products = d.get_all_products()
         products['test_sku'] = apps.get_model('api.GooglePlayProduct').objects.get_test_product_sku()
@@ -517,3 +508,22 @@ class QuoteRankTop(BaseView):
         }
 
         return json_response(res_dict)
+
+
+class CoinProductsList(BaseView):
+    def get(self, request, *args, **kwargs):
+        products = CoinProduct.objects.all()
+        by_kind = {}
+        for product in products:
+            by_kind[product.kind] = by_kind.get(product.kind, [])
+            by_kind[product.kind].append(product.get_flat())
+
+        res_dict = {
+            "objects": [by_kind],
+            "meta": {}
+        }
+        return json_response(res_dict)
+
+class CoinProductConsume(BaseView):
+    def post(self, request, *args, **kwargs):
+        pass

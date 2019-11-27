@@ -665,12 +665,12 @@ class PurchaseProductDiscovery:
         except CategoryUnlockPurchase.DoesNotExist:
             pass
         try:
-            return BalanceRechargeProduct.objects.get(google_play_product=purchase.product)
+            return BalanceRechargeProduct.objects.get(google_play_product__id=purchase.product.id)
         except BalanceRechargeProduct.DoesNotExist:
             pass
         try:
-            return DoubleUpProduct.objects.get(google_play_product=purchase.product)
-        except BalanceRechargeProduct.DoesNotExist:
+            return DoubleUpProduct.objects.get(google_play_product__id=purchase.product.id)
+        except DoubleUpProduct.DoesNotExist:
             pass
 
         raise self.DiscoveryError(f'Wrong product type in purchase: {purchase.id}')
