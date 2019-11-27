@@ -31,6 +31,12 @@ class GoogleIAPValidator(BaseIAPValidator):
         assert self.package_name != ''
 
     def validate(self, purchase):
+        # Hook to avoid from requesting test purchases validation from Google
+        if purchase.product.is_test:
+            purchase.previous_status = PurchaseStatus.UNKNOWN
+            purchase.status = PurchaseStatus.PURCHASED
+            return
+
         request = google.create_request(self.credentials,
                                         self.package_name,
                                         purchase.product.sku,
