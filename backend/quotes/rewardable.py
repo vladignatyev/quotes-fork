@@ -21,11 +21,11 @@ class RewardableEntity(models.Model):
     def get_reward(self, profile):
         return self.bonus_reward
 
-    def add_completion(self, profile):
+    def add_completion(self, profile, *args, **kwargs):
         self.complete_by_users.add(profile)
 
-    def handle_complete(self, profile, save_profile=True):
-        self.add_completion(profile)
+    def handle_complete(self, profile, save_profile=True, *args, **kwargs):
+        self.add_completion(profile, *args, **kwargs)
 
         user_events = [UserEvents.new(self.complete_event_name, self.pk)]
 

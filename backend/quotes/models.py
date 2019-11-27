@@ -454,15 +454,28 @@ def clean_unlock_cache(*args, **kwargs):
     pass
 
 
+class QuoteCompletionKind:
+    DEFAULT = NORMAL = 'normal'
+    SKIPPED = 'skipped'
+
+    choices = (
+        ('normal', 'Normally completed level.'),
+        ('skipped', 'Skipped the level.'),
+    )
+
+
 class QuoteCompletion(models.Model):
     quote = models.ForeignKey('Quote', on_delete=models.CASCADE)
     profile = models.ForeignKey('Profile', on_delete=models.CASCADE)
+    kind = models.CharField(max_length=16, choices=QuoteCompletionKind.choices, default=QuoteCompletionKind.DEFAULT)
+
 
 class Quote(RewardableEntity):
-    complete_by_users = models.ManyToManyField('Profile', verbose_name='Юзеры которые прошли и должны получить вознаграждение', blank=True,
-                                                          related_name="%(app_label)s_%(class)s_complete_by_users",
+    complete_by_users2 = models.ManyToManyField('Profile', verbose_name='Юзеры которые прошли и должны получить вознаграждение', blank=True,
+                                                          related_name="%(app_label)s_%(class)s_completion_by_users",
                                                           related_query_name="%(app_label)s_%(class)s_complete_by_users_objs",
-                                                          through=)
+                                                          through='QuoteCompletion'
+                                                          )
 
     text = models.CharField("Текст цитаты", max_length=256)
     author = models.ForeignKey(QuoteAuthor, verbose_name="Автор", on_delete=models.SET_NULL, null=True, blank=True)
@@ -513,6 +526,10 @@ class Quote(RewardableEntity):
     bubbles.short_description = 'Предпросмотр'
     bubbles.allow_tags = True
 
+    def add_completion(self, profile, completion_kind=QuoteCompletionKind.DEFAULT, *args, **kwargs):
+        # self.complete_by_users.add(profile)
+        qc = QuoteCompletion.objects.create(quote=self, profile=profile, kind=completion_kind)
+        qc.save()
 
     def get_reward(self, profile):
         return profile.settings.reward_per_level_completion
@@ -520,13 +537,13 @@ class Quote(RewardableEntity):
     def is_completion_condition_met_by(self, profile):
         return True  # stub
 
-    def mark_complete(self, profile, solution=None):
+    def mark_complete(self, profile, solution=None, completion_kind=QuoteCompletionKind.DEFAULT):
         if not self.category.is_available_to_user(profile):
             raise self.NoAccess('The user have the category locked and he cannot complete this level.')
 
         logger.debug('Level id %s complete by profile %s', self.pk, profile.pk)
 
-        user_events = self.handle_complete(profile, save_profile=False)
+        user_events = self.handle_complete(profile, save_profile=False, completion_kind=completion_kind)
 
         if self.category.is_completion_condition_met_by(profile) == True:
             user_events += self.category.handle_complete(profile, save_profile=False)
@@ -622,22 +639,6 @@ class BaseStoreProduct(BaseProduct):
 
 
 
-class CoinProductSpecies:
-    AUTHOR_SUGGESTION = 'AUTHOR'
-    NEXT_WORD_SUGGESTION = 'NEXT_WORD'
-    SKIP_LEVEL_SUGGESTION = 'SKIP_LEVEL'
-
-    choices = (
-        (AUTHOR_SUGGESTION, 'Подсказка Автора'),
-        (NEXT_WORD_SUGGESTION, 'Подсказка Следующего слова'),
-        (SKIP_LEVEL_SUGGESTION, 'Пропуск уровня'),
-    )
-
-    registry = {
-        'AUTHOR': AuthorSuggestionCoinProductProcessor,
-        'NEXT_WORD': NextWordSuggestionCoinProductProcessor,
-        'SKIP_LEVEL': SkipLevelSuggestionCoinProductProcessor
-    }
 
 class BaseCoinProductProcessor:
     def __init__(self, coin_product, *args, **kwargs):
@@ -664,10 +665,28 @@ class SkipLevelSuggestionCoinProductProcessor(BaseCoinProductProcessor):
         return events
 
 
+class CoinProductSpecies:
+    AUTHOR_SUGGESTION = 'AUTHOR'
+    NEXT_WORD_SUGGESTION = 'NEXT_WORD'
+    SKIP_LEVEL_SUGGESTION = 'SKIP_LEVEL'
+
+    choices = (
+        (AUTHOR_SUGGESTION, 'Подсказка Автора'),
+        (NEXT_WORD_SUGGESTION, 'Подсказка Следующего слова'),
+        (SKIP_LEVEL_SUGGESTION, 'Пропуск уровня'),
+    )
+
+    registry = {
+        'AUTHOR': AuthorSuggestionCoinProductProcessor,
+        'NEXT_WORD': NextWordSuggestionCoinProductProcessor,
+        'SKIP_LEVEL': SkipLevelSuggestionCoinProductProcessor
+    }
+
+
 
 class CoinProduct(BaseProduct):
     coin_price = models.PositiveIntegerField("Стоимость в монетах для юзера", default=0)
-    kind = models.CharField("Тип продукта для моб. клиента", choices=CoinProductSpecies.choices)
+    kind = models.CharField("Тип продукта для моб. клиента", choices=CoinProductSpecies.choices, max_length=16)
 
     def get_processor(self, *args, **kwargs):
         cls = CoinProductSpecies.registry[str(self.kind)]
