@@ -18,6 +18,11 @@ class TopicManager(models.Manager):
 
 class BaseProductManager(models.Manager):
      def get_queryset(self):
+        return super().get_queryset()
+
+
+class BaseStoreProductManager(models.Manager):
+     def get_queryset(self):
         return super().get_queryset().select_related('google_play_product').filter(google_play_product__is_test=False)
 
 

@@ -590,13 +590,10 @@ class BaseProduct(models.Model, ProductFlow, ItemWithImageMixin):
         flat['id'] = discovery.get_product_id_by_product(self)
         flat['admin_title'] = self.admin_title
         flat['is_featured'] = self.is_featured
-        flat['sku'] = self.google_play_product.sku if self.google_play_product else ''
+
         flat['is_rewarded'] = self.google_play_product.is_rewarded_product if self.google_play_product else False
         flat['image_url'] = self.get_image_url()
         flat['tags'] = [str(t) for t in self.scope_tags.all()]
-
-        # discovery_type =
-        # flat['id'] = f'{discovery_type}:{self.id}'
 
         return flat
 
@@ -613,8 +610,15 @@ class BaseStoreProduct(BaseProduct):
                                             verbose_name="Соответствующий продукт в Google Play",
                                             on_delete=models.SET_NULL, null=True, blank=True)
 
+    objects = BaseStoreProductManager()
+
     class Meta:
         abstract = True
+
+    def get_flat(self):
+        flat = super(BaseStoreProduct, self).get_flat()
+        flat['sku'] = self.google_play_product.sku if self.google_play_product else ''
+        return flat
 
 
 
@@ -660,6 +664,7 @@ class SkipLevelSuggestionCoinProductProcessor(BaseCoinProductProcessor):
         return events
 
 
+
 class CoinProduct(BaseProduct):
     coin_price = models.PositiveIntegerField("Стоимость в монетах для юзера", default=0)
     kind = models.CharField("Тип продукта для моб. клиента", choices=CoinProductSpecies.choices)
@@ -674,6 +679,7 @@ class CoinProduct(BaseProduct):
 
     def unconsume_by_profile(self, profile, purchase=None):
         pass
+
 
 
 class DoubleUpProduct(BaseStoreProduct):
