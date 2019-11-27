@@ -12,6 +12,7 @@ import com.quote.mosaic.core.billing.BillingManagerResult
 import com.quote.mosaic.core.rx.ClearableBehaviorProcessor
 import com.quote.mosaic.data.api.ApiClient
 import com.quote.mosaic.data.manager.UserManager
+import com.quote.mosaic.data.model.purchase.RemoteProductTag
 import com.quote.mosaic.data.model.user.UserDO
 import io.reactivex.Flowable
 import io.reactivex.processors.BehaviorProcessor
@@ -41,8 +42,7 @@ class TopUpViewModel(
     }
 
     override fun initialise() {
-
-        products.onNext(productsMapper.toLocaleModel(billingManager.availableSkus()))
+        loadProducts()
 
         billingManager
             .billingResultTrigger()
@@ -80,6 +80,14 @@ class TopUpViewModel(
             }, {
                 Timber.e(it, "billingResultTrigger failed")
             }).untilCleared()
+    }
+
+    fun loadProducts() {
+        products.onNext(
+            productsMapper.toLocaleModel(billingManager.availableSkus().filter {
+                it.remoteProduct.tags.contains(RemoteProductTag.TOP_UP)
+            })
+        )
     }
 
     fun buyProduct(activity: Activity, model: TopUpProductModel) {

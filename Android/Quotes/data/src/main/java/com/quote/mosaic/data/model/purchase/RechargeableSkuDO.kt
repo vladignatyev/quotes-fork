@@ -6,17 +6,23 @@ data class RechargeableSkuDO(
     val id: String,
     @JsonProperty("admin_title")
     val title: String,
-    @JsonProperty("balance_recharge")
-    val balanceRecharge: Int,
     @JsonProperty("is_featured")
     val isFeatured: Boolean,
+    val sku: String,
+    @JsonProperty("balance_recharge")
+    val balanceRecharge: Int?,
+    @JsonProperty("is_rewarded")
+    val isRewarded: Boolean,
     @JsonProperty("image_url")
     val imageUrl: String,
-    val sku: String
+    val tags: List<RemoteProductTag>
 )
 
-fun RechargeableSkuDO.doubleUpVideo() = sku == "double_up"
-fun RechargeableSkuDO.freeCoinsVideo() = sku == "free_coins_for_video"
-fun RechargeableSkuDO.nextHintWordVideo() = sku == "hint_next_word"
-
-fun RechargeableSkuDO.isTestingVideo() = sku == "android.test.reward"
+enum class RemoteProductTag {
+    @JsonProperty("topup")
+    TOP_UP,
+    @JsonProperty("hint")
+    HINT,
+    @JsonProperty("doubleup")
+    DOUBLE_UP
+}

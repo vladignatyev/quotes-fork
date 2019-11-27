@@ -40,6 +40,6 @@ interface ApiClient {
 
     fun getPurchaseStatus(token: String): Single<PurchaseStatusDO>
 
-    fun registerPurchase(orderId: String, purchaseToken: String, balanceRecharge: String): Single<PurchaseIdDO>
+    fun registerPurchase(orderId: String, purchaseToken: String, appProduct: String, payload: String?): Single<PurchaseIdDO>
 
 }

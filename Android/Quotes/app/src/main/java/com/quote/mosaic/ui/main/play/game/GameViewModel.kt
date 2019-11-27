@@ -15,6 +15,7 @@ import com.quote.mosaic.core.rx.NonNullObservableField
 import com.quote.mosaic.data.api.ApiClient
 import com.quote.mosaic.data.manager.UserManager
 import com.quote.mosaic.data.model.overview.QuoteDO
+import com.quote.mosaic.data.model.purchase.RemoteProductTag
 import com.quote.mosaic.data.model.user.UserDO
 import com.quote.mosaic.ui.main.play.topup.TopUpProductModel
 import io.reactivex.Flowable
@@ -167,16 +168,15 @@ class GameViewModel(
     }
 
     fun showDoubleUpVideo(activity: Activity) {
-        val billingProduct: BillingProduct.TestSku = billingManager
-            .availableSkus()
-            .filterIsInstance<BillingProduct.TestSku>()
-            .first()
+        val billingProduct: BillingProduct = billingManager
+            .availableSkus().first { it.remoteProduct.tags.contains(RemoteProductTag.DOUBLE_UP) }
 
         val product = TopUpProductModel.Free(
-            id = billingProduct.remoteBro.id,
-            title = billingProduct.remoteBro.title,
-            iconUrl = billingProduct.remoteBro.imageUrl,
-            billingProduct = billingProduct.skuDetails
+            id = billingProduct.remoteProduct.id,
+            title = billingProduct.remoteProduct.title,
+            iconUrl = billingProduct.remoteProduct.imageUrl,
+            billingProduct = billingProduct.skuDetails,
+            payload = state.selectedCategory.get().toString()
         )
 
         billingManager.launchBuyWorkFlow(activity, product)
@@ -210,10 +210,8 @@ class GameViewModel(
             }).untilCleared()
     }
 
-    fun doubleUpPossible(): Boolean =
-        billingManager.availableSkus()
-            .filterIsInstance<BillingProduct.TestSku>()
-            .isNotEmpty()
+    fun doubleUpPossible(): Boolean = billingManager.availableSkus()
+        .any { it.remoteProduct.tags.contains(RemoteProductTag.DOUBLE_UP) }
 
     fun reset() {
         levelCompletedTrigger.clear()

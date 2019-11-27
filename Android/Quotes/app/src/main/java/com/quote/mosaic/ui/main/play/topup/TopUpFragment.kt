@@ -114,7 +114,7 @@ class TopUpFragment : AppFragment() {
 
         binding.grab.setOnClickListener {
             alert.dismiss()
-            goBack()
+            vm.loadProducts()
         }
     }
 

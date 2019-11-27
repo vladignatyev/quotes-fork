@@ -3,9 +3,11 @@ package com.quote.mosaic.core.billing
 import android.app.Activity
 import android.content.Context
 import com.android.billingclient.api.*
+import com.quote.mosaic.BuildConfig
 import com.quote.mosaic.core.Schedulers
 import com.quote.mosaic.data.api.ApiClient
-import com.quote.mosaic.data.model.purchase.*
+import com.quote.mosaic.data.model.purchase.AvailableProductsDO
+import com.quote.mosaic.data.model.purchase.PurchaseStatus
 import com.quote.mosaic.ui.main.play.topup.TopUpProductModel
 import io.reactivex.Completable
 import io.reactivex.Flowable
@@ -38,51 +40,88 @@ class InAppBillingManager(
         clearCachedHistory()
         startBag.clear()
         startBag += start()
-            .andThen(apiClient.getSkuList().map { it.rechargeable }.subscribeOn(schedulers.io()))
-            .flatMap { rechargeable ->
-                getBuyVariants(rechargeable.map { it.sku }).subscribeOn(schedulers.io())
-                    .map { Pair(it, rechargeable) }
+            .andThen(apiClient.getSkuList().map { toLocalProducts(it) }.subscribeOn(schedulers.io()))
+            .flatMap { remoteProducts ->
+                val skuList = remoteProducts.map { if (BuildConfig.DEBUG) it.testSku else it.sku }
+
+                getBuyVariants(skuList)
+                    .map { Pair(it, remoteProducts) }
+                    .subscribeOn(schedulers.io())
             }
             .subscribeOn(schedulers.io())
             .observeOn(schedulers.ui())
-            .subscribe({ (billingProducts: List<SkuDetails>, remoteProducts: List<RechargeableSkuDO>) ->
+            .subscribe({ (billingProducts: List<SkuDetails>, remoteProducts: List<RemoteProduct>) ->
                 inAppProducts.clear()
 
-                billingProducts.forEach { billingProduct ->
-                    val remoteProduct = remoteProducts.first { billingProduct.sku == it.sku }
+                remoteProducts.forEach { remoteProduct ->
+                    val correctRemoteSku =
+                        if (BuildConfig.DEBUG) remoteProduct.testSku else remoteProduct.sku
+                    val billingBro = billingProducts.firstOrNull { it.sku == correctRemoteSku }
 
-                    if (billingProduct.isRewarded) {
-                        loadVideoProducts(billingProduct, remoteProduct)
-                    } else {
-                        inAppProducts.add(BillingProduct.InApp(billingProduct, remoteProduct))
+                    billingBro?.let {
+                        if (it.isRewarded) {
+                            loadVideoProducts(it, remoteProduct)
+                        } else {
+                            inAppProducts.add(BillingProduct(it, remoteProduct))
+                        }
                     }
                 }
             }, {
-                Timber.w(it, "load failed")
+                Timber.e(it, "load failed")
             })
     }
 
+    private fun toLocalProducts(products: AvailableProductsDO): List<RemoteProduct> {
+        val remoteProducts = mutableListOf<RemoteProduct>()
+
+        products.rechargeable.forEach {
+            val realTestSku = if (it.isRewarded) products.testSku else it.sku
+
+            remoteProducts.add(
+                RemoteProduct(
+                    id = it.id,
+                    title = it.title,
+                    isFeatured = it.isFeatured,
+                    isRewarded = it.isRewarded,
+                    balanceRecharge = it.balanceRecharge ?: 0,
+                    sku = it.sku,
+                    testSku = realTestSku,
+                    imageUrl = it.imageUrl,
+                    tags = it.tags
+                )
+            )
+        }
+
+        products.doubleUp.forEach {
+            val realTestSku = if (it.isRewarded) products.testSku else it.sku
+
+            remoteProducts.add(
+                RemoteProduct(
+                    id = it.id,
+                    title = it.title,
+                    isFeatured = it.isFeatured,
+                    isRewarded = it.isRewarded,
+                    balanceRecharge = it.balanceRecharge ?: 0,
+                    sku = it.sku,
+                    testSku = realTestSku,
+                    imageUrl = it.imageUrl,
+                    tags = it.tags
+                )
+            )
+        }
+
+        return remoteProducts
+    }
+
+
     private fun loadVideoProducts(
-        pendingVideoSku: SkuDetails, remoteProduct: RechargeableSkuDO
+        pendingVideoSku: SkuDetails, remoteProduct: RemoteProduct
     ) {
         val params = RewardLoadParams.Builder().setSkuDetails(pendingVideoSku).build()
 
         billingClient?.loadRewardedSku(params) { billingResult ->
             if (billingResult.responseCode == BillingClient.BillingResponseCode.OK) {
-                when {
-                    remoteProduct.isTestingVideo() -> {
-                        inAppProducts.add(BillingProduct.TestSku(pendingVideoSku, remoteProduct))
-                    }
-                    remoteProduct.doubleUpVideo() -> {
-                        inAppProducts.add(BillingProduct.DoubleUp(pendingVideoSku, remoteProduct))
-                    }
-                    remoteProduct.freeCoinsVideo() -> {
-                        inAppProducts.add(BillingProduct.FreeCoins(pendingVideoSku, remoteProduct))
-                    }
-                    remoteProduct.nextHintWordVideo() -> {
-                        inAppProducts.add(BillingProduct.NextWord(pendingVideoSku, remoteProduct))
-                    }
-                }
+                inAppProducts.add(BillingProduct(pendingVideoSku, remoteProduct))
             }
         }
     }
@@ -229,7 +268,8 @@ class InAppBillingManager(
             .registerPurchase(
                 orderId = purchase.orderId,
                 purchaseToken = purchase.purchaseToken,
-                balanceRecharge = pendingProduct?.id.orEmpty()
+                appProduct = pendingProduct!!.id,
+                payload = pendingProduct.payload
             ).toFlowable()
             .flatMap { token ->
                 apiClient

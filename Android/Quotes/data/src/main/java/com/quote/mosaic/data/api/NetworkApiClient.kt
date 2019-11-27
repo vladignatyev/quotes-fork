@@ -88,14 +88,21 @@ class NetworkApiClient(
         ).transform().map { it.objects.first() }
 
     override fun registerPurchase(
-        orderId: String, purchaseToken: String, balanceRecharge: String
+        orderId: String,
+        purchaseToken: String,
+        appProduct: String,
+        payload: String?
     ): Single<PurchaseIdDO> {
         val body = HashMap<String, String>()
         body["order_id"] = orderId
         body["purchase_token"] = purchaseToken
-        body["balance_recharge"] = balanceRecharge
+        body["app_product"] = appProduct
+        payload?.let {
+            body["payload"] = it
+        }
 
-        return apiService.registerPurchase(userManager.getSession(), body).transform().map { it.objects.first() }
+        return apiService.registerPurchase(userManager.getSession(), body).transform()
+            .map { it.objects.first() }
     }
 
     // ---------------- COMMON ---------------- //

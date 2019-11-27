@@ -82,7 +82,7 @@ interface ApiService {
         @Path("purchaseToken") purchaseToken: String
     ): Single<Response<ResponseData<PurchaseStatusDO>>>
 
-    @POST("purchase/play/coins/")
+    @POST("purchase/play/")
     fun registerPurchase(
         @Header("X-Client-Auth") token: String,
         @Body body: HashMap<String, String>

@@ -4,7 +4,8 @@ import com.android.billingclient.api.SkuDetails
 
 sealed class TopUpProductModel(
     open val id: String,
-    open val billingProduct: SkuDetails
+    open val billingProduct: SkuDetails,
+    open val payload: String? = null
 ) {
 
     data class Item(
@@ -26,9 +27,10 @@ sealed class TopUpProductModel(
     data class Free(
         override val id: String,
         override val billingProduct: SkuDetails,
+        override val payload: String? = null,
         val title: String,
         val iconUrl: String
-    ) : TopUpProductModel(id, billingProduct)
+    ) : TopUpProductModel(id, billingProduct, payload)
 
     data class Loading(
         override val id: String,

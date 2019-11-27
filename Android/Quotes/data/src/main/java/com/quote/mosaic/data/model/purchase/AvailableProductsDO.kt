@@ -3,8 +3,10 @@ package com.quote.mosaic.data.model.purchase
 import com.fasterxml.jackson.annotation.JsonProperty
 
 data class AvailableProductsDO(
-    @JsonProperty("recharge_products")
+    @JsonProperty("balance_recharge")
     val rechargeable: List<RechargeableSkuDO>,
-    @JsonProperty("other_products")
-    val others: List<OthersSkuDO>
+    @JsonProperty("doubleup")
+    val doubleUp: List<RechargeableSkuDO>,
+    @JsonProperty("test_sku")
+    val testSku: String
 )
