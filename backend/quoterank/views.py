@@ -13,20 +13,23 @@ class QuoteRankPreview(View):
             raise Http404()
 
     def get(self, request, *args, **kwargs):
-        self.authenticate(request)
+        # self.authenticate(request)
 
-        global_top_10 = self.get_global_top(request)
-        user_top = self.get_user_top(request)
+        if getattr(request, 'user_profile', None):
+            profile = request.user_profile
+            user_top = self.get_user_top(profile)
+        else:
+            user_top = []
+
+        global_top_10 = self.get_global_top()
 
         return self.render_response(request, global_top_10, user_top)
 
-    def get_user_top(self, request):
-        if getattr(request, 'user_profile'):
-            return ProfileRank.objects.get_top_by_profile(request.user_profile)
-        return []
+    def get_user_top(self, profile):
+        return ProfileRank.objects.top_by_profile(profile)
 
-    def get_global_top(self, request):
-        return ProfileRank.objects.get_global_top(10)
+    def get_global_top(self):
+        return ProfileRank.objects.global_top(10)
 
     def render_response(self, request, global_top, user_top):
         return TemplateResponse(request, self.template, {

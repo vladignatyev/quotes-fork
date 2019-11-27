@@ -11,6 +11,7 @@ from django.urls import reverse
 from django import forms
 
 from .models import *
+from quoterank.models import *
 
 
 from api.views import AuthenticationForm, AuthenticateView, SafeView, PushSubscriptionView
@@ -498,3 +499,21 @@ class PushNotificationSubscriptionView(PushSubscriptionView):
 
 class QuoteRankHtmlPreview(QuoteRankPreview):
     pass
+
+
+class QuoteRankTop(BaseView):
+    def get(self, request, *args, **kwargs):
+        profile = self.request.user_profile
+        user_top = ProfileRank.objects.top_by_profile(profile)
+
+        global_top = ProfileRank.objects.global_top()
+
+        res_dict = {
+            "objects": {
+                "user": ProfileRank.objects.get_flat_enumerated(user_top),
+                "global": ProfileRank.objects.get_flat_enumerated(global_top)
+            },
+            "meta": {}
+        }
+
+        return json_response(res_dict)

@@ -1,0 +1,39 @@
+<h1>Global Top</h1>
+<table>
+  <thead>
+    <th># (change)</th>
+    <th>User ID</th>
+    <th>Nickname</th>
+    <th>Rank value (change)</th>
+  </thead>
+  <tbody>
+    {% for position, rank in quoterank_global %}
+    <tr>
+      <td>{{ position }} ({{ rank.position_change_since_last_update }})</td>
+      <td>{{ rank.profile.pk }}</td>
+      <td>{{ rank.profile.nickname }}</td>
+      <td>{{ rank.rank_cached }} ({{ rank.rank_change_since_last_update }})</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<h1>User-centered top</h1>
+<table>
+  <thead>
+    <th># (change)</th>
+    <th>User ID</th>
+    <th>Nickname</th>
+    <th>Rank value (change)</th>
+  </thead>
+  <tbody>
+    {% for position, rank in user_top %}
+    <tr>
+      <td>{{ position }} ({{ rank.position_change_since_last_update }})</td>
+      <td>{{ rank.profile.pk }}</td>
+      <td>{{ rank.profile.nickname }}</td>
+      <td>{{ rank.rank_cached }} ({{ rank.rank_change_since_last_update }})</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>

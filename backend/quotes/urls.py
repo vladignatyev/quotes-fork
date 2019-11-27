@@ -63,6 +63,8 @@ urlpatterns = [
 
     path('quoterank/globaltop/preview/', QuoteRankHtmlPreview.as_view(), name='quoterank-globaltop-preview'),
 
+    path('quoterank/', QuoteRankTop.as_view(), name='quoterank-top'),
+
     # Push notifications
     path('notifications/subscribe/', PushNotificationSubscriptionView.as_view(), name='notifications-subscribe')
 ]

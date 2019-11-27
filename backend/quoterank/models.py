@@ -7,14 +7,35 @@ from django.utils import timezone
 
 
 class ProfileRankManager(models.Manager):
-    def get_top_by_profile(self, profile_infocus, top_up=5, top_down=5):
+    def top_by_profile(self, profile_infocus, top_up=5, top_down=5):
         pr = ProfileRank.objects.select_related('profile').get(profile=profile_infocus)
-        return list(ProfileRank.objects.select_related('profile').filter(rank_cached__gt=pr.rank_cached).order_by('-rank_cached')[:top_up]) + \
-        [ pr ] + \
-        list(ProfileRank.objects.select_related('profile').filter(rank_cached__lt=pr.rank_cached).order_by('-rank_cached')[:top_down])
 
-    def get_global_top(self, limit=10):
-        return ProfileRank.objects.select_related('profile').order_by('-rank_cached')[:limit]
+        position = ProfileRank.objects.filter(rank_cached__gt=pr.rank_cached).count()
+
+        for profile_rank in ProfileRank.objects.select_related('profile').filter(rank_cached__gt=pr.rank_cached).order_by('-rank_cached')[:top_up]:
+            yield position, profile_rank
+            position += 1
+
+        yield position, pr
+        position += 1
+
+        for profile_rank in ProfileRank.objects.select_related('profile').filter(rank_cached__lt=pr.rank_cached).order_by('-rank_cached')[:top_down]:
+            yield position, profile_rank
+            position += 1
+
+
+    def global_top(self, limit=10):
+        position = 1
+        for profile_rank in ProfileRank.objects.select_related('profile').order_by('-rank_cached')[:limit]:
+            yield position, profile_rank
+            position += 1
+
+    def get_flat_enumerated(self, profile_ranks):
+        for position, profile_rank in profile_ranks:
+            flat = profile_rank.get_flat()
+            flat['position'] = position
+            yield flat
+
 
 
 def create_ranking_for_profile(sender, instance, created, **kwargs):
@@ -102,3 +123,13 @@ class ProfileRank(models.Model):
 
     def get_position_in_overall_top_by_rank(self, rank):
         return ProfileRank.objects.filter(rank_cached__gt=rank).count() + 1
+
+
+    def get_flat(self):
+        return {
+            'rank': self.rank_cached,
+            'user_id': self.profile.pk,
+            'nickname': self.profile.nickname,
+            'rank_change': self.rank_change_since_last_update,
+            'position_change': self.position_change_since_last_update
+        }
