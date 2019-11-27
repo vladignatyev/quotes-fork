@@ -453,7 +453,30 @@ def clean_unlock_cache(*args, **kwargs):
     # get_unlock_for_category_and_profile.cache_clear()
     pass
 
+
+class QuoteCompletionKind:
+    DEFAULT = NORMAL = 'normal'
+    SKIPPED = 'skipped'
+
+    choices = (
+        ('normal', 'Normally completed level.'),
+        ('skipped', 'Skipped the level.'),
+    )
+
+
+class QuoteCompletion(models.Model):
+    quote = models.ForeignKey('Quote', on_delete=models.CASCADE)
+    profile = models.ForeignKey('Profile', on_delete=models.CASCADE)
+    kind = models.CharField(max_length=16, choices=QuoteCompletionKind.choices, default=QuoteCompletionKind.DEFAULT)
+
+
 class Quote(RewardableEntity):
+    complete_by_users2 = models.ManyToManyField('Profile', verbose_name='Юзеры которые прошли и должны получить вознаграждение', blank=True,
+                                                          related_name="%(app_label)s_%(class)s_completion_by_users",
+                                                          related_query_name="%(app_label)s_%(class)s_complete_by_users_objs",
+                                                          through='QuoteCompletion'
+                                                          )
+
     text = models.CharField("Текст цитаты", max_length=256)
     author = models.ForeignKey(QuoteAuthor, verbose_name="Автор", on_delete=models.SET_NULL, null=True, blank=True)
     category = models.ForeignKey(QuoteCategory, verbose_name="Категория", on_delete=models.SET_NULL, null=True)
@@ -503,6 +526,10 @@ class Quote(RewardableEntity):
     bubbles.short_description = 'Предпросмотр'
     bubbles.allow_tags = True
 
+    def add_completion(self, profile, completion_kind=QuoteCompletionKind.DEFAULT, *args, **kwargs):
+        # self.complete_by_users.add(profile)
+        qc = QuoteCompletion.objects.create(quote=self, profile=profile, kind=completion_kind)
+        qc.save()
 
     def get_reward(self, profile):
         return profile.settings.reward_per_level_completion
@@ -510,13 +537,13 @@ class Quote(RewardableEntity):
     def is_completion_condition_met_by(self, profile):
         return True  # stub
 
-    def mark_complete(self, profile, solution=None):
+    def mark_complete(self, profile, solution=None, completion_kind=QuoteCompletionKind.DEFAULT):
         if not self.category.is_available_to_user(profile):
             raise self.NoAccess('The user have the category locked and he cannot complete this level.')
 
         logger.debug('Level id %s complete by profile %s', self.pk, profile.pk)
 
-        user_events = self.handle_complete(profile, save_profile=False)
+        user_events = self.handle_complete(profile, save_profile=False, completion_kind=completion_kind)
 
         if self.category.is_completion_condition_met_by(profile) == True:
             user_events += self.category.handle_complete(profile, save_profile=False)
@@ -551,9 +578,6 @@ class ProductFlow:
 class BaseProduct(models.Model, ProductFlow, ItemWithImageMixin):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     admin_title = models.CharField("Название продукта для юзера", max_length=256)
-    google_play_product = models.ForeignKey('api.GooglePlayProduct',
-                                            verbose_name="Соответствующий продукт в Google Play",
-                                            on_delete=models.SET_NULL, null=True, blank=True)
     is_featured = models.BooleanField("Показывать как самый выгодный?", default=False, blank=True)
 
     item_image = models.FileField('Картинка 512х512', upload_to='rechargeproducts', null=True, blank=True)
@@ -583,13 +607,10 @@ class BaseProduct(models.Model, ProductFlow, ItemWithImageMixin):
         flat['id'] = discovery.get_product_id_by_product(self)
         flat['admin_title'] = self.admin_title
         flat['is_featured'] = self.is_featured
-        flat['sku'] = self.google_play_product.sku if self.google_play_product else ''
+
         flat['is_rewarded'] = self.google_play_product.is_rewarded_product if self.google_play_product else False
         flat['image_url'] = self.get_image_url()
         flat['tags'] = [str(t) for t in self.scope_tags.all()]
-
-        # discovery_type =
-        # flat['id'] = f'{discovery_type}:{self.id}'
 
         return flat
 
@@ -601,7 +622,90 @@ class BaseProduct(models.Model, ProductFlow, ItemWithImageMixin):
         abstract = True
 
 
-class DoubleUpProduct(BaseProduct):
+class BaseStoreProduct(BaseProduct):
+    google_play_product = models.ForeignKey('api.GooglePlayProduct',
+                                            verbose_name="Соответствующий продукт в Google Play",
+                                            on_delete=models.SET_NULL, null=True, blank=True)
+
+    objects = BaseStoreProductManager()
+
+    class Meta:
+        abstract = True
+
+    def get_flat(self):
+        flat = super(BaseStoreProduct, self).get_flat()
+        flat['sku'] = self.google_play_product.sku if self.google_play_product else ''
+        return flat
+
+
+
+
+class BaseCoinProductProcessor:
+    def __init__(self, coin_product, *args, **kwargs):
+        self.coin_product = coin_product
+
+    def process(self, profile, *args, **kwargs):
+        pass
+
+
+class AuthorSuggestionCoinProductProcessor(BaseCoinProductProcessor):
+    def process(self, profile, quote, *args, **kwargs):
+        self.coin_product.consume_by_profile(profile)
+        return []
+
+class NextWordSuggestionCoinProductProcessor(BaseCoinProductProcessor):
+    def process(self, profile, quote, *args, **kwargs):
+        self.coin_product.consume_by_profile(profile)
+        return []
+
+class SkipLevelSuggestionCoinProductProcessor(BaseCoinProductProcessor):
+    def process(self, profile, quote, *args, **kwargs):
+        events = quote.mark_complete(profile, completion_kind=QuoteCompletionKind.SKIPPED)
+        self.coin_product.consume_by_profile(profile)
+        return events
+
+
+class CoinProductSpecies:
+    AUTHOR_SUGGESTION = 'AUTHOR'
+    NEXT_WORD_SUGGESTION = 'NEXT_WORD'
+    SKIP_LEVEL_SUGGESTION = 'SKIP_LEVEL'
+
+    choices = (
+        (AUTHOR_SUGGESTION, 'Подсказка Автора'),
+        (NEXT_WORD_SUGGESTION, 'Подсказка Следующего слова'),
+        (SKIP_LEVEL_SUGGESTION, 'Пропуск уровня'),
+    )
+
+    registry = {
+        'AUTHOR': AuthorSuggestionCoinProductProcessor,
+        'NEXT_WORD': NextWordSuggestionCoinProductProcessor,
+        'SKIP_LEVEL': SkipLevelSuggestionCoinProductProcessor
+    }
+
+
+
+class CoinProduct(BaseProduct):
+    coin_price = models.PositiveIntegerField("Стоимость в монетах для юзера", default=0)
+    kind = models.CharField("Тип продукта для моб. клиента", choices=CoinProductSpecies.choices, max_length=16)
+
+    def get_processor(self, *args, **kwargs):
+        cls = CoinProductSpecies.registry[str(self.kind)]
+        return cls(self, *args, **kwargs)
+
+    def consume_by_profile(self, profile, purchase=None):
+        profile.balance = profile.balance - self.coin_price
+        profile.save()
+
+    def unconsume_by_profile(self, profile, purchase=None):
+        pass
+
+    class Meta:
+        verbose_name = 'Продукт-бустер'
+        verbose_name_plural = 'Продукты-бустеры доступные за монеты'
+
+
+
+class DoubleUpProduct(BaseStoreProduct):
     class Meta:
         verbose_name = 'Продукт «дабл-ап»'
         verbose_name_plural = 'Продукты типа «дабл-ап»'
@@ -625,7 +729,8 @@ class DoubleUpProduct(BaseProduct):
         profile.save()
 
 
-class BalanceRechargeProduct(BaseProduct):
+
+class BalanceRechargeProduct(BaseStoreProduct):
     balance_recharge = models.IntegerField("Сумма пополнения баланса", default=1)
 
     class Meta:
@@ -714,7 +819,7 @@ class GameBalance(models.Model):
 
 class Profile(models.Model):
     device_sessions = models.ManyToManyField('api.DeviceSession', verbose_name="Сессии устройств")
-    balance = models.PositiveIntegerField("Баланс", default=0)
+    balance = models.IntegerField("Баланс", default=0)
     nickname = models.CharField("Никнейм", max_length=256, default='Пан Инкогнито')
 
     last_active = models.DateTimeField("Дата последней активности", auto_now=True)

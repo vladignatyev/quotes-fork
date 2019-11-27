@@ -21,9 +21,11 @@ class RewardableEntity(models.Model):
     def get_reward(self, profile):
         return self.bonus_reward
 
-    def handle_complete(self, profile, save_profile=True):
+    def add_completion(self, profile, *args, **kwargs):
         self.complete_by_users.add(profile)
-        # self.save()
+
+    def handle_complete(self, profile, save_profile=True, *args, **kwargs):
+        self.add_completion(profile, *args, **kwargs)
 
         user_events = [UserEvents.new(self.complete_event_name, self.pk)]
 
@@ -39,7 +41,7 @@ class RewardableEntity(models.Model):
         AchievementReceiving = apps.get_model('quotes.AchievementReceiving')
         ar = AchievementReceiving.objects.create(achievement=self.on_complete_achievement,
                                             profile=profile)
-        ar.save()                                    
+        ar.save()
         return [UserEvents.new(self.achievement_event_name,
                                self.on_complete_achievement.pk)]
 

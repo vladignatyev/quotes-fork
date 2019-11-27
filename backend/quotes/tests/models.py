@@ -428,14 +428,38 @@ class LevelProgressTestCase(TestCase, ContentMixin):
 
     def test_marking_user_complete_will_update_balance(self):
         # Given
-        self.assertEqual(0, len(list(Quote.objects.filter(complete_by_users=self.profile))))
+        QuoteCompletion = apps.get_model('quotes.QuoteCompletion')
+        quote_completions = QuoteCompletion.objects.filter(profile=self.profile).values_list('pk', flat=True)
+
+        self.assertEqual(0, len(quote_completions))
 
         # When
         self.quotes[0].mark_complete(self.profile)
         self.quotes[5].mark_complete(self.profile)
 
         # Then
-        complete = Quote.objects.filter(complete_by_users=self.profile)
+        quote_completions = QuoteCompletion.objects.filter(profile=self.profile).values_list('pk', flat=True)
+        complete = Quote.objects.filter(complete_by_users2__in=quote_completions)
+        self.assertIn(self.quotes[0], complete)
+        self.assertIn(self.quotes[5], complete)
+        self.assertNotIn(self.quotes[1], complete)
+        self.assertNotIn(self.quotes[2], complete)
+        self.assertNotIn(self.quotes[3], complete)
+
+    def test_marking_user_complete_with_skip_level_will_update_balance(self):
+        # Given
+        QuoteCompletion = apps.get_model('quotes.QuoteCompletion')
+        quote_completions = QuoteCompletion.objects.filter(profile=self.profile).values_list('pk', flat=True)
+
+        self.assertEqual(0, len(quote_completions))
+
+        # When
+        self.quotes[0].mark_complete(self.profile, completion_kind=QuoteCompletionKind.SKIPPED)
+        self.quotes[5].mark_complete(self.profile, completion_kind=QuoteCompletionKind.SKIPPED)
+
+        # Then
+        quote_completions = QuoteCompletion.objects.filter(profile=self.profile, kind=QuoteCompletionKind.SKIPPED).values_list('pk', flat=True)
+        complete = Quote.objects.filter(complete_by_users2__in=quote_completions)
         self.assertIn(self.quotes[0], complete)
         self.assertIn(self.quotes[5], complete)
         self.assertNotIn(self.quotes[1], complete)

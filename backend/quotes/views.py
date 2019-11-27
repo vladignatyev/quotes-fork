@@ -524,6 +524,38 @@ class CoinProductsList(BaseView):
         }
         return json_response(res_dict)
 
-class CoinProductConsume(BaseView):
+
+class CoinProductConsumeForm(forms.Form):
+    coin_product = forms.CharField(label='Coin product ID', max_length=256)
+    payload = forms.CharField(label='Payload', max_length=256, required=False)
+
+
+class CoinProductConsumeView(FormBasedView):
+    form_cls = CoinProductConsumeForm
+
     def post(self, request, *args, **kwargs):
-        pass
+        form = self.make_form_from_request(request)
+        if not form or not form.is_valid():
+            return HttpResponse(status=400)
+
+        cleaned_data = form.clean()
+
+        try:
+            coin_product = CoinProduct.objects.get(id=cleaned_data['coin_product'])
+            quote = Quote.objects.get(pk=cleaned_data['payload'])
+
+            processor = coin_product.get_processor()
+            events = processor.process(self.request.user_profile, quote)
+
+            res_dict = {
+                "objects":[events],
+                "meta": {}
+            }
+            return json_response(res_dict)
+
+        except CoinProduct.DoesNotExist:
+            return HttpResponse(status=404)
+        except Quote.DoesNotExist:
+            return HttpResponse(status=404)
+
+        return HttpResponse(status=501)

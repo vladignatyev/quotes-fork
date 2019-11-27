@@ -43,12 +43,14 @@ class ProfilesDataStorage(InMemoryCacheStorage):
         result = False
         if not result:
             Quote = apps.get_model('quotes.Quote')
+            QuoteCompletion = apps.get_model('quotes.QuoteCompletion')
 
             # complete_by_users_relation_values = Quote.complete_by_users.through.objects.filter(profile=profile_pk).all()
             # quotes_pks = [o.quote_id for o in complete_by_users_relation_values]
 
             # result = list(Quote.objects.filter(category=category_pk).filter(pk__in=quotes_pks).all())
-            result = list(Quote.objects.filter(category=category_pk).filter(complete_by_users=profile_pk).all())
+            quote_completions = QuoteCompletion.objects.filter(profile=profile_pk).values_list('pk', flat=True)
+            result = list(Quote.objects.filter(category=category_pk).filter(complete_by_users2__in=quote_completions).all())
             bucket[key] = result
 
         return result
@@ -61,7 +63,12 @@ class ProfilesDataStorage(InMemoryCacheStorage):
         # result = bucket.get(key, None)
         result = False
         if not result:
-            result = apps.get_model('quotes.Quote').objects.filter(complete_by_users=profile_pk).filter(category__section=section_pk).count()
+            Quote = apps.get_model('quotes.Quote')
+            QuoteCompletion = apps.get_model('quotes.QuoteCompletion')
+
+            quote_completions = QuoteCompletion.objects.filter(profile=profile_pk).values_list('pk', flat=True)
+
+            result = Quote.objects.filter(complete_by_users2__in=quote_completions).filter(category__section=section_pk).count()
             bucket[key] = result
 
         return result
@@ -74,7 +81,11 @@ class ProfilesDataStorage(InMemoryCacheStorage):
         # result = bucket.get(key, None)
         result = False
         if not result:
-            result = apps.get_model('quotes.Quote').objects.filter(complete_by_users=profile_pk).filter(category__section__topic=topic_pk).count()
+            Quote = apps.get_model('quotes.Quote')
+            QuoteCompletion = apps.get_model('quotes.QuoteCompletion')
+            
+            quote_completions = QuoteCompletion.objects.filter(profile=profile_pk).values_list('pk', flat=True)
+            result = Quote.objects.filter(complete_by_users2__in=quote_completions).filter(category__section__topic=topic_pk).count()
             bucket[key] = result
 
         return result
