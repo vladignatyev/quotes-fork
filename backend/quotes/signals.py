@@ -52,6 +52,9 @@ def consume_product_on_purchase(sender, instance, created, raw, **kwargs):
     except BalanceRechargeProduct.DoesNotExist:
         # purchase related to another Product/Purchase model, so skipping
         logger.debug('Balance recharge doesnot exist by store product: %s', purchase.product)
+    except DoubleUpProduct.DoesNotExist:
+        # purchase related to another Product/Purchase model, so skipping
+        logger.debug('DoubleUpProduct doesnot exist by store product: %s', purchase.product)
 #
 #
 # def unlock_category_on_purchase(sender, instance, created, raw, **kwargs):
