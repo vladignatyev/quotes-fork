@@ -453,7 +453,17 @@ def clean_unlock_cache(*args, **kwargs):
     # get_unlock_for_category_and_profile.cache_clear()
     pass
 
+
+class QuoteCompletion(models.Model):
+    quote = models.ForeignKey('Quote', on_delete=models.CASCADE)
+    profile = models.ForeignKey('Profile', on_delete=models.CASCADE)
+
 class Quote(RewardableEntity):
+    complete_by_users = models.ManyToManyField('Profile', verbose_name='Юзеры которые прошли и должны получить вознаграждение', blank=True,
+                                                          related_name="%(app_label)s_%(class)s_complete_by_users",
+                                                          related_query_name="%(app_label)s_%(class)s_complete_by_users_objs",
+                                                          through=)
+
     text = models.CharField("Текст цитаты", max_length=256)
     author = models.ForeignKey(QuoteAuthor, verbose_name="Автор", on_delete=models.SET_NULL, null=True, blank=True)
     category = models.ForeignKey(QuoteCategory, verbose_name="Категория", on_delete=models.SET_NULL, null=True)
@@ -551,9 +561,6 @@ class ProductFlow:
 class BaseProduct(models.Model, ProductFlow, ItemWithImageMixin):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     admin_title = models.CharField("Название продукта для юзера", max_length=256)
-    google_play_product = models.ForeignKey('api.GooglePlayProduct',
-                                            verbose_name="Соответствующий продукт в Google Play",
-                                            on_delete=models.SET_NULL, null=True, blank=True)
     is_featured = models.BooleanField("Показывать как самый выгодный?", default=False, blank=True)
 
     item_image = models.FileField('Картинка 512х512', upload_to='rechargeproducts', null=True, blank=True)
@@ -601,7 +608,75 @@ class BaseProduct(models.Model, ProductFlow, ItemWithImageMixin):
         abstract = True
 
 
-class DoubleUpProduct(BaseProduct):
+class BaseStoreProduct(BaseProduct):
+    google_play_product = models.ForeignKey('api.GooglePlayProduct',
+                                            verbose_name="Соответствующий продукт в Google Play",
+                                            on_delete=models.SET_NULL, null=True, blank=True)
+
+    class Meta:
+        abstract = True
+
+
+
+class CoinProductSpecies:
+    AUTHOR_SUGGESTION = 'AUTHOR'
+    NEXT_WORD_SUGGESTION = 'NEXT_WORD'
+    SKIP_LEVEL_SUGGESTION = 'SKIP_LEVEL'
+
+    choices = (
+        (AUTHOR_SUGGESTION, 'Подсказка Автора'),
+        (NEXT_WORD_SUGGESTION, 'Подсказка Следующего слова'),
+        (SKIP_LEVEL_SUGGESTION, 'Пропуск уровня'),
+    )
+
+    registry = {
+        'AUTHOR': AuthorSuggestionCoinProductProcessor,
+        'NEXT_WORD': NextWordSuggestionCoinProductProcessor,
+        'SKIP_LEVEL': SkipLevelSuggestionCoinProductProcessor
+    }
+
+class BaseCoinProductProcessor:
+    def __init__(self, coin_product, *args, **kwargs):
+        self.coin_product = coin_product
+
+    def process(self, profile, *args, **kwargs):
+        pass
+
+
+class AuthorSuggestionCoinProductProcessor(BaseCoinProductProcessor):
+    def process(self, profile, quote, *args, **kwargs):
+        self.coin_product.consume_by_profile(profile)
+        return []
+
+class NextWordSuggestionCoinProductProcessor(BaseCoinProductProcessor):
+    def process(self, profile, quote, *args, **kwargs):
+        self.coin_product.consume_by_profile(profile)
+        return []
+
+class SkipLevelSuggestionCoinProductProcessor(BaseCoinProductProcessor):
+    def process(self, profile, quote, *args, **kwargs):
+        events = quote.mark_complete(profile)
+        self.coin_product.consume_by_profile(profile)
+        return events
+
+
+class CoinProduct(BaseProduct):
+    coin_price = models.PositiveIntegerField("Стоимость в монетах для юзера", default=0)
+    kind = models.CharField("Тип продукта для моб. клиента", choices=CoinProductSpecies.choices)
+
+    def get_processor(self, *args, **kwargs):
+        cls = CoinProductSpecies.registry[str(self.kind)]
+        return cls(self, *args, **kwargs)
+
+    def consume_by_profile(self, profile, purchase=None):
+        profile.balance = profile.balance - self.coin_price
+        profile.save()
+
+    def unconsume_by_profile(self, profile, purchase=None):
+        pass
+
+
+class DoubleUpProduct(BaseStoreProduct):
     class Meta:
         verbose_name = 'Продукт «дабл-ап»'
         verbose_name_plural = 'Продукты типа «дабл-ап»'
@@ -625,7 +700,8 @@ class DoubleUpProduct(BaseProduct):
         profile.save()
 
 
-class BalanceRechargeProduct(BaseProduct):
+
+class BalanceRechargeProduct(BaseStoreProduct):
     balance_recharge = models.IntegerField("Сумма пополнения баланса", default=1)
 
     class Meta:
@@ -714,7 +790,7 @@ class GameBalance(models.Model):
 
 class Profile(models.Model):
     device_sessions = models.ManyToManyField('api.DeviceSession', verbose_name="Сессии устройств")
-    balance = models.PositiveIntegerField("Баланс", default=0)
+    balance = models.IntegerField("Баланс", default=0)
     nickname = models.CharField("Никнейм", max_length=256, default='Пан Инкогнито')
 
     last_active = models.DateTimeField("Дата последней активности", auto_now=True)
