@@ -145,7 +145,7 @@ class GooglePlayIAPPurchase(Purchase):
     purchase_token = models.CharField(max_length=256, blank=True)
 
     # should be unique, see https://developer.android.com/google/play/billing/billing_best_practices#validating-purchase-server
-    order_id = models.CharField(max_length=256, blank=True, unique=True)
+    order_id = models.CharField(max_length=256, blank=True)
 
     date_created = models.DateTimeField(auto_now_add=True, blank=True)
     date_updated = models.DateTimeField(auto_now=True)
