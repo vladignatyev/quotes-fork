@@ -660,7 +660,7 @@ class NextWordSuggestionCoinProductProcessor(BaseCoinProductProcessor):
 
 class SkipLevelSuggestionCoinProductProcessor(BaseCoinProductProcessor):
     def process(self, profile, quote, *args, **kwargs):
-        events = quote.mark_complete(profile)
+        events = quote.mark_complete(profile, completion_kind=QuoteCompletionKind.SKIPPED)
         self.coin_product.consume_by_profile(profile)
         return events
 
@@ -698,6 +698,10 @@ class CoinProduct(BaseProduct):
 
     def unconsume_by_profile(self, profile, purchase=None):
         pass
+
+    class Meta:
+        verbose_name = 'Продукт-бустер'
+        verbose_name_plural = 'Продукты-бустеры доступные за монеты'
 
 
 

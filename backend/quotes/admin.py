@@ -188,10 +188,22 @@ class CategoryUnlockPurchaseAdmin(admin.ModelAdmin):
 
 @admin.register(BalanceRechargeProduct)
 @admin.register(DoubleUpProduct)
-class BalanceRechargeProductAdmin(admin.ModelAdmin):
+class GenericProductAdmin(admin.ModelAdmin):
     list_display = ('item_preview_image_view', 'admin_title', 'google_play_product', 'is_featured') # 'app_store_product')
     readonly_fields = ('item_image_view',)
     exclude = ('item_preview_image_view',)
+    autocomplete_fields = ['scope_tags',]
+
+
+@admin.register(CoinProduct)
+class CoinProductAdmin(admin.ModelAdmin):
+    list_display = ('item_preview_image_view', 'admin_title', 'is_featured', 'kind', 'coin_price') # 'app_store_product')
+    readonly_fields = ('item_image_view',)
+    exclude = ('item_preview_image_view',)
+    autocomplete_fields = ['scope_tags',] 
+
+
+
 
 
 @admin.register(GameBalance)

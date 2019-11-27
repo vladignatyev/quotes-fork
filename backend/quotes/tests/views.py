@@ -893,7 +893,61 @@ class PushNotificationSubscriptionView(AuthenticatedTestCase, ContentMixin):
         self.assertEqual(pushsub.token, register_token)
 
 
-class ProfileRankSimpleTest(AuthenticatedTestCase, ContentMixin):
+# class ProfileRankSimpleTest(AuthenticatedTestCase, ContentMixin):
+#
+#     def test_should_present(self):
+#         self.profile.get_flat()
 
-    def test_should_present(self):
-        self.profile.get_flat()
+
+class CoinProductsListViewTest(AuthenticatedTestCase, ContentMixin):
+    def test_present(self):
+        # Given
+        url = reverse('coin-products-list')
+
+        # When
+        response = self.client.get(url, **self.auth())
+
+        # Then
+        self.assertEqual(200, response.status_code)
+
+class CoinProductConsumeViewTest(AuthenticatedTestCase, ContentMixin):
+    INITIAL_BALANCE = 1000
+    COIN_PRICE = 10
+
+    def test_present(self):
+        # Given
+        url = reverse('coin-product-consume')
+
+        # When
+        response = self.client.post(url, **self.auth())
+
+        # Then
+        self.assertEqual(400, response.status_code)
+
+    def test_should_create_required_objects(self):
+        # Given
+        url = reverse('coin-product-consume')
+
+        product = CoinProduct.objects.create(kind=CoinProductSpecies.AUTHOR_SUGGESTION,
+                                             coin_price=self.COIN_PRICE)
+
+        self.assertEqual(self.profile.balance, self.INITIAL_BALANCE)
+
+        self._create_content_hierarchy()
+        self._create_multiple_quotes(category=self.category, author=self.author)
+
+        quote_ut = self.quotes[1]
+
+        # When
+
+        params = {
+            'coin_product': product.id,
+            'payload': str(quote_ut.pk)
+        }
+
+        # When
+        response = self.client.post(url, params, content_type='application/json', **self.auth())
+
+        # Then
+        self.assertEqual(200, response.status_code)
+        self.assertEqual(Profile.objects.get(pk=self.profile.pk).balance, self.INITIAL_BALANCE - self.COIN_PRICE)
