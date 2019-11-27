@@ -13,22 +13,25 @@ class ProfileRankManager(models.Manager):
         position = ProfileRank.objects.filter(rank_cached__gt=pr.rank_cached).count()
 
         for profile_rank in ProfileRank.objects.select_related('profile').filter(rank_cached__gt=pr.rank_cached).order_by('-rank_cached')[:top_up]:
-            yield position, profile_rank
-            position += 1
+            if profile_rank.profile.show_in_rank():
+                yield position, profile_rank
+                position += 1
 
         yield position, pr
         position += 1
 
         for profile_rank in ProfileRank.objects.select_related('profile').filter(rank_cached__lt=pr.rank_cached).order_by('-rank_cached')[:top_down]:
-            yield position, profile_rank
-            position += 1
+            if profile_rank.profile.show_in_rank():
+                yield position, profile_rank
+                position += 1
 
 
     def global_top(self, limit=10):
         position = 1
         for profile_rank in ProfileRank.objects.select_related('profile').order_by('-rank_cached')[:limit]:
-            yield position, profile_rank
-            position += 1
+            if profile_rank.profile.show_in_rank():
+                yield position, profile_rank
+                position += 1
 
     def get_flat_enumerated(self, profile_ranks):
         for position, profile_rank in profile_ranks:

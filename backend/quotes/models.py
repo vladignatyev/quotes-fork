@@ -722,6 +722,7 @@ class Profile(models.Model):
     settings = models.ForeignKey('GameBalance', verbose_name="Соответствующий объект Игрового баланса", on_delete=models.CASCADE, null=True, default=None)
 
     is_banned = models.BooleanField("Забанен?", default=False, blank=True)
+    hide_from_rank = models.BooleanField("Скрыть из таблицы топа?", default=False, blank=True)
 
     objects = ProfileManager()
 
@@ -735,6 +736,9 @@ class Profile(models.Model):
     def get_profilerank(self):
         profile, created = ProfileRank.objects.get_or_create(profile=self)
         return profile
+
+    def show_in_rank(self):
+        return not self.hide_from_rank
 
     def get_flat(self):
         return {

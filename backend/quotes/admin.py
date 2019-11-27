@@ -23,6 +23,19 @@ def publish(modeladmin, request, queryset):
 publish.short_description = 'Publish selected items'
 
 
+def hide_from_rank(modeladmin, request, queryset):
+    for item in queryset:
+        item.hide_from_rank = True
+        item.save()
+hide_from_rank.short_description = 'Скрыть пользователей из топа'
+
+def show_in_rank(modeladmin, request, queryset):
+    for item in queryset:
+        item.hide_from_rank = False
+        item.save()
+show_in_rank.short_description = 'Показывать пользователя в топе'
+
+
 
 #
 # @admin.register(PushSubscription)
@@ -148,6 +161,8 @@ class ProfileAdmin(admin.ModelAdmin):
     date_hierarchy = 'last_active'
     search_fields = ['device_sessions__token']
     # exclude = ('device_sessions',)
+
+    actions = [hide_from_rank, show_in_rank]
 
 
 @admin.register(Achievement)
