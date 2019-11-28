@@ -600,11 +600,8 @@ class BaseProduct(models.Model, ProductFlow, ItemWithImageMixin):
     item_preview_image_view.allow_tags = True
 
     def get_flat(self):
-        # flat = model_to_dict(self, fields=('id', 'admin_title', 'is_featured'))
-        discovery = PurchaseProductDiscovery()
-
         flat = {}
-        flat['id'] = discovery.get_product_id_by_product(self)
+        flat['id'] = self.id
         flat['admin_title'] = self.admin_title
         flat['is_featured'] = self.is_featured
 
@@ -633,6 +630,10 @@ class BaseStoreProduct(BaseProduct):
 
     def get_flat(self):
         flat = super(BaseStoreProduct, self).get_flat()
+
+        discovery = PurchaseProductDiscovery()
+        flat['id'] = discovery.get_product_id_by_product(self)
+
         flat['is_rewarded'] = self.google_play_product.is_rewarded_product if self.google_play_product else False
         flat['sku'] = self.google_play_product.sku if self.google_play_product else ''
         return flat
@@ -689,6 +690,8 @@ class CoinProduct(BaseProduct):
 
     coin_price = models.PositiveIntegerField("Стоимость в монетах для юзера", default=0)
     kind = models.CharField("Тип продукта для моб. клиента", choices=CoinProductSpecies.choices, max_length=16)
+
+    objects = models.Manager()  # overriding BaseProductManager
 
     def get_processor(self, *args, **kwargs):
         cls = CoinProductSpecies.registry[str(self.kind)]
