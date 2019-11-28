@@ -11,7 +11,7 @@ from django.db import transaction
 from django.core.management.base import BaseCommand, CommandError
 
 from api.models import GooglePlayIAPPurchase, PurchaseStatus
-from api.billing import create_google_validator
+from api.billing import create_google_validator, PurchaseValidationError
 
 from django.db.models import Q
 from django.db.models.expressions import F
@@ -20,7 +20,6 @@ from django.db.models.expressions import F
 from datetime import timedelta
 from django.utils import timezone
 
-from api import google
 
 
 class Worker:
@@ -81,7 +80,7 @@ class Worker:
         try:
             self.validator.validate(purchase)
             logger.debug(f'Well done IAP # {purchase.pk}:{purchase.order_id}...')
-        except google.PurchaseValidationError as e1:
+        except PurchaseValidationError as e1:
             logger.error(f'Invalid purchase status received from Store API. {purchase.pk}. Error: {e1} ')
         except Exception as e:
             print(e)
