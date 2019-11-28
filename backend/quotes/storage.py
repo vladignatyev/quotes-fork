@@ -45,12 +45,12 @@ class ProfilesDataStorage(InMemoryCacheStorage):
             Quote = apps.get_model('quotes.Quote')
             QuoteCompletion = apps.get_model('quotes.QuoteCompletion')
 
-            # complete_by_users_relation_values = Quote.complete_by_users.through.objects.filter(profile=profile_pk).all()
-            # quotes_pks = [o.quote_id for o in complete_by_users_relation_values]
-
-            # result = list(Quote.objects.filter(category=category_pk).filter(pk__in=quotes_pks).all())
-            quote_completions = QuoteCompletion.objects.filter(profile=profile_pk).values_list('pk', flat=True)
-            result = list(Quote.objects.filter(category=category_pk).filter(complete_by_users2__in=quote_completions).all())
+            quote_completions = QuoteCompletion.objects.select_related('quote__category') \
+                                               .filter(profile=profile_pk, quote__category=category_pk) \
+                                               .values_list('profile', flat=True)
+            result = list(Quote.objects.select_related('category') \
+                                       .filter(complete_by_users2__in=quote_completions,
+                                               category=category_pk).all())
             bucket[key] = result
 
         return result
@@ -66,9 +66,13 @@ class ProfilesDataStorage(InMemoryCacheStorage):
             Quote = apps.get_model('quotes.Quote')
             QuoteCompletion = apps.get_model('quotes.QuoteCompletion')
 
-            quote_completions = QuoteCompletion.objects.filter(profile=profile_pk).values_list('pk', flat=True)
+            quote_completions = QuoteCompletion.objects \
+                                               .filter(profile=profile_pk) \
+                                               .values_list('profile', flat=True)
 
-            result = Quote.objects.filter(complete_by_users2__in=quote_completions).filter(category__section=section_pk).count()
+            result = Quote.objects.select_related('category', 'category__section') \
+                                  .filter(complete_by_users2__in=quote_completions,
+                                          category__section=section_pk).count()
             bucket[key] = result
 
         return result
@@ -83,9 +87,11 @@ class ProfilesDataStorage(InMemoryCacheStorage):
         if not result:
             Quote = apps.get_model('quotes.Quote')
             QuoteCompletion = apps.get_model('quotes.QuoteCompletion')
-            
-            quote_completions = QuoteCompletion.objects.filter(profile=profile_pk).values_list('pk', flat=True)
-            result = Quote.objects.filter(complete_by_users2__in=quote_completions).filter(category__section__topic=topic_pk).count()
+
+            quote_completions = QuoteCompletion.objects.filter(profile=profile_pk).values_list('profile', flat=True)
+            result = Quote.objects.select_related('category__section__topic') \
+                                  .filter(complete_by_users2__in=quote_completions,
+                                          category__section__topic=topic_pk).count()
             bucket[key] = result
 
         return result

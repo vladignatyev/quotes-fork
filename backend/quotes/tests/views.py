@@ -874,7 +874,56 @@ class LevelCompleteView(AuthenticatedTestCase, ContentMixin):
         response_objs = json.loads(response.content)['objects']
 
         complete_levels = get_levels_complete_by_profile_in_category(self.profile.pk, self.category.pk)
-        self.assertEqual(quote_ut.pk, complete_levels[0].pk)
+        self.assertIn(quote_ut, complete_levels)
+
+class LevelsListViewTest(AuthenticatedTestCase, ContentMixin):
+    def test_should_present(self):
+        self._create_content_hierarchy()
+        self._create_multiple_quotes(category=self.category, author=self.author)
+
+        quote = self.quotes[0]
+
+        url = reverse('levels-list', kwargs={'category_pk': quote.category.id})
+
+        response = self.client.get(url, **self.auth())
+        self.assertEqual(200, response.status_code)
+        response_objs = json.loads(response.content)['objects']
+
+    def test_should_show_marked_as_complete_quote_as_complete(self):
+        self._create_content_hierarchy()
+        self._create_multiple_quotes(category=self.category, author=self.author)
+
+        quote = self.quotes[3]
+        quote.mark_complete(self.profile)
+
+        url = reverse('levels-list', kwargs={'category_pk': quote.category.id})
+
+        response = self.client.get(url, **self.auth())
+        self.assertEqual(200, response.status_code)
+        response_objs = json.loads(response.content)['objects']
+        completed_quote_flat_obj = list(filter(lambda o: o['id'] == quote.pk, response_objs))[0]
+        print(completed_quote_flat_obj)
+        self.assertTrue(completed_quote_flat_obj['complete'])
+
+    def test_should_show_marked_as_complete_quote_as_complete_through_view(self):
+        self._create_content_hierarchy()
+        self._create_multiple_quotes(category=self.category, author=self.author)
+
+        quote = self.quotes[2]
+
+        url = reverse('level-complete', kwargs={'level_pk': quote.pk })
+        response = self.client.post(url, **self.auth())
+        self.assertEqual(200, response.status_code)
+
+
+        url = reverse('levels-list', kwargs={'category_pk': quote.category.id})
+
+        response = self.client.get(url, **self.auth())
+        self.assertEqual(200, response.status_code)
+        response_objs = json.loads(response.content)['objects']
+        completed_quote_flat_obj = list(filter(lambda o: o['id'] == quote.pk, response_objs))[0]
+        print(completed_quote_flat_obj)
+        self.assertTrue(completed_quote_flat_obj['complete'])
 
 
 class PushNotificationSubscriptionView(AuthenticatedTestCase, ContentMixin):
