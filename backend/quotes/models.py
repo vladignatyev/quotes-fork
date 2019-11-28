@@ -608,7 +608,6 @@ class BaseProduct(models.Model, ProductFlow, ItemWithImageMixin):
         flat['admin_title'] = self.admin_title
         flat['is_featured'] = self.is_featured
 
-        flat['is_rewarded'] = self.google_play_product.is_rewarded_product if self.google_play_product else False
         flat['image_url'] = self.get_image_url()
         flat['tags'] = [str(t) for t in self.scope_tags.all()]
 
@@ -634,6 +633,7 @@ class BaseStoreProduct(BaseProduct):
 
     def get_flat(self):
         flat = super(BaseStoreProduct, self).get_flat()
+        flat['is_rewarded'] = self.google_play_product.is_rewarded_product if self.google_play_product else False
         flat['sku'] = self.google_play_product.sku if self.google_play_product else ''
         return flat
 
@@ -702,6 +702,11 @@ class CoinProduct(BaseProduct):
     class Meta:
         verbose_name = 'Продукт-бустер'
         verbose_name_plural = 'Продукты-бустеры доступные за монеты'
+
+    def get_flat(self):
+        flat = super(CoinProduct, self).get_flat()
+        flat['coin_price'] = self.coin_price
+        return flat
 
 
 
