@@ -902,7 +902,7 @@ class LevelsListViewTest(AuthenticatedTestCase, ContentMixin):
         self.assertEqual(200, response.status_code)
         response_objs = json.loads(response.content)['objects']
         completed_quote_flat_obj = list(filter(lambda o: o['id'] == quote.pk, response_objs))[0]
-        print(completed_quote_flat_obj)
+
         self.assertTrue(completed_quote_flat_obj['complete'])
 
     def test_should_show_marked_as_complete_quote_as_complete_through_view(self):
@@ -922,7 +922,7 @@ class LevelsListViewTest(AuthenticatedTestCase, ContentMixin):
         self.assertEqual(200, response.status_code)
         response_objs = json.loads(response.content)['objects']
         completed_quote_flat_obj = list(filter(lambda o: o['id'] == quote.pk, response_objs))[0]
-        print(completed_quote_flat_obj)
+
         self.assertTrue(completed_quote_flat_obj['complete'])
 
 
@@ -942,12 +942,6 @@ class PushNotificationSubscriptionView(AuthenticatedTestCase, ContentMixin):
         self.assertEqual(pushsub.token, register_token)
 
 
-# class ProfileRankSimpleTest(AuthenticatedTestCase, ContentMixin):
-#
-#     def test_should_present(self):
-#         self.profile.get_flat()
-
-
 class CoinProductsListViewTest(AuthenticatedTestCase, ContentMixin):
     def test_present(self):
         # Given
@@ -958,6 +952,8 @@ class CoinProductsListViewTest(AuthenticatedTestCase, ContentMixin):
 
         # Then
         self.assertEqual(200, response.status_code)
+        response_content = json.loads(response.content)['objects']
+
 
 class CoinProductConsumeViewTest(AuthenticatedTestCase, ContentMixin):
     INITIAL_BALANCE = 1000
