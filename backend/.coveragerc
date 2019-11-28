@@ -12,6 +12,7 @@ omit =
     quotes/tests/*
     quotes/events.py
     api/tests.py
+    checkpurchase.py
 
 [report]
 skip_covered = True
