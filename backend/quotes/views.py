@@ -554,6 +554,8 @@ class CoinProductConsumeView(FormBasedView):
 
         except CoinProduct.DoesNotExist:
             return HttpResponse(status=404)
+        except CoinProduct.InsufficientFunds:
+            return HttpResponse(status=402)
         except Quote.DoesNotExist:
             return HttpResponse(status=404)
 

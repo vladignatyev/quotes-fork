@@ -685,6 +685,8 @@ class CoinProductSpecies:
 
 
 class CoinProduct(BaseProduct):
+    class InsufficientFunds(Exception): pass
+
     coin_price = models.PositiveIntegerField("Стоимость в монетах для юзера", default=0)
     kind = models.CharField("Тип продукта для моб. клиента", choices=CoinProductSpecies.choices, max_length=16)
 
@@ -693,7 +695,10 @@ class CoinProduct(BaseProduct):
         return cls(self, *args, **kwargs)
 
     def consume_by_profile(self, profile, purchase=None):
-        profile.balance = profile.balance - self.coin_price
+        new_balance = profile.balance - self.coin_price
+        if new_balance < 0:
+            raise self.InsufficientFunds()
+        profile.balance = new_balance
         profile.save()
 
     def unconsume_by_profile(self, profile, purchase=None):
