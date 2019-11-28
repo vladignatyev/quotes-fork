@@ -20,7 +20,7 @@ from django.db.models.expressions import F
 from datetime import timedelta
 from django.utils import timezone
 
-
+from api import google
 
 
 class Worker:
@@ -77,20 +77,19 @@ class Worker:
         return at_least_one
 
     def process_purchase(self, purchase):
-        # if not purchase:
-        #     print('here')
-        #     return True
         logger.debug(f'Processing IAP # {purchase.pk}:{purchase.order_id}...')
         try:
             self.validator.validate(purchase)
             logger.debug(f'Well done IAP # {purchase.pk}:{purchase.order_id}...')
+        except google.PurchaseValidationError as e1:
+            logger.error(f'Invalid purchase status received from Store API. {purchase.pk}. Error: {e1} ')
         except Exception as e:
             print(e)
             logger.debug(e)
             type_, value_, traceback_ = sys.exc_info()
             ex = '\n'.join(traceback.format_exception(type_, value_, traceback_))
             logger.error(f'{ex}')
-        else:
+        finally:
             purchase.save()
         return False
 
