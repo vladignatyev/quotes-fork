@@ -996,3 +996,33 @@ class CoinProductConsumeViewTest(AuthenticatedTestCase, ContentMixin):
         # Then
         self.assertEqual(200, response.status_code)
         self.assertEqual(Profile.objects.get(pk=self.profile.pk).balance, self.INITIAL_BALANCE - self.COIN_PRICE)
+
+    def test_should_properly_consume_skip_level(self):
+        # Given
+        url = reverse('coin-product-consume')
+
+        coin_price = 10
+        product = CoinProduct.objects.create(kind=CoinProductSpecies.SKIP_LEVEL_SUGGESTION,
+                                             coin_price=coin_price)
+
+        self.assertEqual(self.profile.balance, self.INITIAL_BALANCE)
+
+        self._create_content_hierarchy()
+        self._create_multiple_quotes(category=self.category, author=self.author)
+
+        quote_ut = self.quotes[1]
+
+        # When
+
+        params = {
+            'coin_product': product.id,
+            'payload': str(quote_ut.pk)
+        }
+
+        # When
+        response = self.client.post(url, params, content_type='application/json', **self.auth())
+
+        # Then
+        self.assertEqual(200, response.status_code)
+        self.assertEqual(Profile.objects.get(pk=self.profile.pk).balance, self.INITIAL_BALANCE - coin_price + GameBalance.objects.get_actual().reward_per_level_completion)
+        self.assertEqual(Quote.objects.get(pk=quote_ut.pk).get_completion_for_profile(self.profile).kind, QuoteCompletion.Kind.SKIPPED)
