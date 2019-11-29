@@ -26,7 +26,7 @@ class AisAdapter(
 
     fun setData(mixedQuote: List<String>) {
         val result = DiffUtil.calculateDiff(AisDiffUtill(data, mixedQuote))
-        data.clear()
+        data = emptyArrayList()
         data.addAll(mixedQuote)
         result.dispatchUpdatesTo(this)
         notifyDataSetChanged()
