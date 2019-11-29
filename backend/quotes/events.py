@@ -24,6 +24,11 @@ class UserEvents:
     QUOTERANK_POSITION_IN_TOP_CHANGED = 'quoterank_position_in_top_changed'
     QUOTERANK_RANK_CHANGED = 'quoterank_rank_changed'
 
+    HINT_USED_AUTHOR = 'hints_used_author'
+    HINT_USED_NEXT_WORD = 'hints_used_next_word'
+    HINT_USED_SKIPPED_LEVEL = 'hints_used_skipped_level'
+
+
     @classmethod
     def new(cls, name, param):
         return (name, param)

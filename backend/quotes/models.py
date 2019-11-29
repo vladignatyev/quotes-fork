@@ -250,8 +250,17 @@ def get_levels(category_pk, profile):
         return None
 
     levels = get_all_levels_in_category(category_pk)
-    complete_levels = get_levels_complete_by_profile_in_category(profile.pk, category_pk)
+    # complete_levels = get_levels_complete_by_profile_in_category(profile.pk, category_pk)
+    completions = get_levels_complete_by_profile_in_category(profile.pk, category_pk)
+    if len(completions) > 0:
+        complete_levels, hints_used = zip(*completions)
+    else:
+        complete_levels, hints_used = [], 0
 
+    # hints_used = sum(QuoteCompletion.objects.select_related('quote__category') \
+    #                                         .filter(profile=profile_pk, quote__category=category_pk, kind__in=(QuoteCompletion.Kind.NORMAL, QuoteCompletion.Kind.SKIPPED)) \
+    #                                         .values_list('hints_used', flat=True))
+    #
     result = []
     for item in levels:
         flat_item = {
@@ -261,9 +270,14 @@ def get_levels(category_pk, profile):
             'reward': item.get_reward(profile),
             'beautiful': beautiful_text(item.text),
             'order': item.order_in_category,
-            'complete': item in complete_levels,
-            'splitted': quote_split(item.text)
+            'splitted': quote_split(item.text),
+            'complete': False,
+            'hints_used': 0,
         }
+        if item in complete_levels:
+            flat_item['complete'] = True
+            flat_item['hints_used'] = hints_used[complete_levels.index(item)]
+
         result += [flat_item]
     return result
 
@@ -454,20 +468,25 @@ def clean_unlock_cache(*args, **kwargs):
     pass
 
 
-class QuoteCompletionKind:
-    DEFAULT = NORMAL = 'normal'
-    SKIPPED = 'skipped'
-
-    choices = (
-        ('normal', 'Normally completed level.'),
-        ('skipped', 'Skipped the level.'),
-    )
 
 
 class QuoteCompletion(models.Model):
+    class Kind:
+        DEFAULT = NORMAL = 'normal'
+        SKIPPED = 'skipped'
+        NOT_YET = 'not_yet'
+
+        choices = (
+            ('normal', 'Normally completed level.'),
+            ('skipped', 'Skipped the level.'),
+            ('not_yet', 'Not yet complete.')
+        )
+
     quote = models.ForeignKey('Quote', on_delete=models.CASCADE)
     profile = models.ForeignKey('Profile', on_delete=models.CASCADE)
-    kind = models.CharField(max_length=16, choices=QuoteCompletionKind.choices, default=QuoteCompletionKind.DEFAULT)
+    kind = models.CharField(max_length=16, choices=Kind.choices, default=Kind.NOT_YET)
+
+    hints_used = models.PositiveIntegerField(default=0)
 
 
 class Quote(RewardableEntity):
@@ -526,9 +545,13 @@ class Quote(RewardableEntity):
     bubbles.short_description = 'Предпросмотр'
     bubbles.allow_tags = True
 
-    def add_completion(self, profile, completion_kind=QuoteCompletionKind.DEFAULT, *args, **kwargs):
-        # self.complete_by_users.add(profile)
-        qc = QuoteCompletion.objects.create(quote=self, profile=profile, kind=completion_kind)
+    def get_completion_for_profile(self, profile):
+        qc, created = QuoteCompletion.objects.get_or_create(quote=self, profile=profile)
+        return qc
+
+    def add_completion(self, profile, completion_kind=QuoteCompletion.Kind.DEFAULT, *args, **kwargs):
+        qc = self.get_completion_for_profile(profile)
+        qc.kind = completion_kind
         qc.save()
 
     def get_reward(self, profile):
@@ -537,7 +560,7 @@ class Quote(RewardableEntity):
     def is_completion_condition_met_by(self, profile):
         return True  # stub
 
-    def mark_complete(self, profile, solution=None, completion_kind=QuoteCompletionKind.DEFAULT):
+    def mark_complete(self, profile, solution=None, completion_kind=QuoteCompletion.Kind.DEFAULT):
         if not self.category.is_available_to_user(profile):
             raise self.NoAccess('The user have the category locked and he cannot complete this level.')
 
@@ -652,17 +675,45 @@ class BaseCoinProductProcessor:
 class AuthorSuggestionCoinProductProcessor(BaseCoinProductProcessor):
     def process(self, profile, quote, *args, **kwargs):
         self.coin_product.consume_by_profile(profile)
-        return []
+
+        qc = quote.get_completion_for_profile(profile)
+        qc.hints_used = qc.hints_used + 1
+        qc.save()
+
+        events = []
+        events += [UserEvents.new(UserEvents.HINT_USED_AUTHOR, quote.pk)]
+        events += handle_rank_update(profile, events)
+
+        return events
+
 
 class NextWordSuggestionCoinProductProcessor(BaseCoinProductProcessor):
     def process(self, profile, quote, *args, **kwargs):
         self.coin_product.consume_by_profile(profile)
-        return []
+
+        qc = quote.get_completion_for_profile(profile)
+        qc.hints_used = qc.hints_used + 1
+        qc.save()
+
+        events = []
+        events += [UserEvents.new(UserEvents.HINT_USED_NEXT_WORD, quote.pk)]
+        events += handle_rank_update(profile, events)
+
+        return events
 
 class SkipLevelSuggestionCoinProductProcessor(BaseCoinProductProcessor):
     def process(self, profile, quote, *args, **kwargs):
-        events = quote.mark_complete(profile, completion_kind=QuoteCompletionKind.SKIPPED)
         self.coin_product.consume_by_profile(profile)
+
+        qc = quote.get_completion_for_profile(profile)
+        qc.hints_used = qc.hints_used + 1
+        qc.save()
+
+        events = quote.mark_complete(profile, completion_kind=QuoteCompletion.Kind.SKIPPED)
+
+        events += [UserEvents.new(UserEvents.HINT_USED_SKIPPED_LEVEL, quote.pk)]
+        events += handle_rank_update(profile, events)
+
         return events
 
 

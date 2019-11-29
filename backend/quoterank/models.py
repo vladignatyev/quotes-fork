@@ -68,6 +68,10 @@ class ProfileRank(models.Model):
     total_section_achievements_received = models.PositiveIntegerField(default=0)
     total_topic_achievements_received = models.PositiveIntegerField(default=0)
 
+    total_hints_author_used = models.PositiveIntegerField(default=0)
+    total_hints_next_word_used = models.PositiveIntegerField(default=0)
+    total_hints_skipped_levels_used = models.PositiveIntegerField(default=0)
+
     rank_cached = models.PositiveIntegerField(default=0)
 
     rank_change_since_last_update = models.BigIntegerField(default=0)
@@ -98,6 +102,15 @@ class ProfileRank(models.Model):
                 self.total_section_achievements_received += 1
             if name == UserEvents.RECEIVED_TOPIC_ACHIEVEMENT:
                 self.total_topic_achievements_received += 1
+
+            if name == UserEvents.HINT_USED_AUTHOR:
+                self.total_hints_author_used += 1
+            if name == UserEvents.HINT_USED_NEXT_WORD:
+                self.total_hints_next_word_used += 1
+            if name == UserEvents.HINT_USED_SKIPPED_LEVEL:
+                self.total_hints_skipped_levels_used += 1
+
+
 
         new_rank = int(calculate_quote_rank_v1_0(self))
 

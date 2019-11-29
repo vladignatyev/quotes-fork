@@ -117,7 +117,7 @@ class LevelsListTest(AuthenticatedTestCase, ContentMixin):
             fields = ('id', 'text', 'author',
                       'reward', 'beautiful',
                       'order', 'complete',
-                      'splitted')
+                      'splitted', 'hints_used')
             self.assertEqual(set(fields), set(o.keys()))
 
     def test_get_levels_list_for_payable_category_returns_402_if_category_locked_for_user(self):
@@ -873,7 +873,7 @@ class LevelCompleteView(AuthenticatedTestCase, ContentMixin):
         self.assertEqual(200, response.status_code)
         response_objs = json.loads(response.content)['objects']
 
-        complete_levels = get_levels_complete_by_profile_in_category(self.profile.pk, self.category.pk)
+        complete_levels, _ = zip(*get_levels_complete_by_profile_in_category(self.profile.pk, self.category.pk))
         self.assertIn(quote_ut, complete_levels)
 
 class LevelsListViewTest(AuthenticatedTestCase, ContentMixin):

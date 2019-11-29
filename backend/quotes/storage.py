@@ -46,11 +46,12 @@ class ProfilesDataStorage(InMemoryCacheStorage):
             QuoteCompletion = apps.get_model('quotes.QuoteCompletion')
 
             quote_completions = QuoteCompletion.objects.select_related('quote__category') \
-                                               .filter(profile=profile_pk, quote__category=category_pk) \
-                                               .values_list('profile', flat=True)
-            result = list(Quote.objects.select_related('category') \
-                                       .filter(complete_by_users2__in=quote_completions,
-                                               category=category_pk).all())
+                                               .filter(profile=profile_pk, quote__category=category_pk, kind__in=(QuoteCompletion.Kind.NORMAL, QuoteCompletion.Kind.SKIPPED))
+            # result = list(Quote.objects.select_related('category') \
+            #                            .filter(complete_by_users2__in=quote_completions,
+            #                                    category=category_pk).all())
+
+            result = [(qc.quote, qc.hints_used) for qc in quote_completions]
             bucket[key] = result
 
         return result
@@ -67,7 +68,7 @@ class ProfilesDataStorage(InMemoryCacheStorage):
             QuoteCompletion = apps.get_model('quotes.QuoteCompletion')
 
             quote_completions = QuoteCompletion.objects \
-                                               .filter(profile=profile_pk) \
+                                               .filter(profile=profile_pk, kind__in=(QuoteCompletion.Kind.NORMAL, QuoteCompletion.Kind.SKIPPED)) \
                                                .values_list('profile', flat=True)
 
             result = Quote.objects.select_related('category', 'category__section') \
@@ -88,7 +89,7 @@ class ProfilesDataStorage(InMemoryCacheStorage):
             Quote = apps.get_model('quotes.Quote')
             QuoteCompletion = apps.get_model('quotes.QuoteCompletion')
 
-            quote_completions = QuoteCompletion.objects.filter(profile=profile_pk).values_list('profile', flat=True)
+            quote_completions = QuoteCompletion.objects.filter(profile=profile_pk, kind__in=(QuoteCompletion.Kind.NORMAL, QuoteCompletion.Kind.SKIPPED)).values_list('profile', flat=True)
             result = Quote.objects.select_related('category__section__topic') \
                                   .filter(complete_by_users2__in=quote_completions,
                                           category__section__topic=topic_pk).count()

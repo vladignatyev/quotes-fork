@@ -22,6 +22,12 @@ _reward_fields = {
     'total_topic_reward': 34.0
 }
 
+_hints_fields = {
+    'total_hints_author_used': -1.0,
+    'total_hints_next_word_used': -0.5,
+    'total_hints_skipped_levels_used': -4.0
+}
+
 _ach_fields = {
     'total_quote_achievements_received': 89.0,
     'total_category_achievements_received': 144.0,
@@ -65,6 +71,10 @@ def calculate_quote_rank_v1_0(o):
         total_section_achievements_received
         total_topic_achievements_received
 
+        total_hints_author_used
+        total_hints_next_word_used
+        total_hints_skipped_levels_used
+
         last_update
     """
 
@@ -72,6 +82,7 @@ def calculate_quote_rank_v1_0(o):
 
     points_for_rewards = sum([_reward_coeff * float(getattr(o, k)) for k, _reward_coeff in _reward_fields.items()])
     points_for_achievements = sum([_achievements_coeff * float(getattr(o, k)) for k, _achievements_coeff in _ach_fields.items()])
+    points_for_hints = sum([_hints_coeff * float(getattr(o, k)) for k, _hints_coeff in _hints_fields.items()])
 
     rank = round(gompertz(days) * (points_for_rewards + points_for_achievements))
 

@@ -454,11 +454,11 @@ class LevelProgressTestCase(TestCase, ContentMixin):
         self.assertEqual(0, len(quote_completions))
 
         # When
-        self.quotes[0].mark_complete(self.profile, completion_kind=QuoteCompletionKind.SKIPPED)
-        self.quotes[5].mark_complete(self.profile, completion_kind=QuoteCompletionKind.SKIPPED)
+        self.quotes[0].mark_complete(self.profile, completion_kind=QuoteCompletion.Kind.SKIPPED)
+        self.quotes[5].mark_complete(self.profile, completion_kind=QuoteCompletion.Kind.SKIPPED)
 
         # Then
-        quote_completions = QuoteCompletion.objects.filter(profile=self.profile, kind=QuoteCompletionKind.SKIPPED).values_list('pk', flat=True)
+        quote_completions = QuoteCompletion.objects.filter(profile=self.profile, kind=QuoteCompletion.Kind.SKIPPED).values_list('pk', flat=True)
         complete = Quote.objects.filter(complete_by_users2__in=quote_completions)
         self.assertIn(self.quotes[0], complete)
         self.assertIn(self.quotes[5], complete)
@@ -473,7 +473,7 @@ class LevelProgressTestCase(TestCase, ContentMixin):
         self.quotes[3].mark_complete(self.profile)
 
         # Then
-        complete = get_levels_complete_by_profile_in_category(self.profile, self.category)
+        complete, _ = zip(*get_levels_complete_by_profile_in_category(self.profile, self.category))
         self.assertIn(self.quotes[3], complete)
 
         self.assertNotIn(self.quotes[0], complete)
@@ -491,7 +491,7 @@ class LevelProgressTestCase(TestCase, ContentMixin):
         # self.quotes[3].mark_complete(self.profile)
 
         # Then
-        complete = get_levels_complete_by_profile_in_category(self.profile, self.category)
+        complete, _ = zip(*get_levels_complete_by_profile_in_category(self.profile, self.category))
         self.assertIn(self.quotes[0], complete)
         self.assertIn(self.quotes[1], complete)
         self.assertIn(self.quotes[2], complete)
@@ -589,6 +589,25 @@ class LevelProgressTestCase(TestCase, ContentMixin):
         achievement_pk = category_achievements[0][1]
         self.assertEqual(achievement_pk, category_achievement.pk)
 
+    def test_shouldnt_make_multiple_objects(self):
+        self._create_content_hierarchy()
+        quotes2 = self._create_multiple_quotes()
+
+        quotes2[0].mark_complete(self.profile)
+        quotes2[0].mark_complete(self.profile)
+        quotes2[0].mark_complete(self.profile)
+
+        self.assertEqual(QuoteCompletion.objects.count(), 1)
+
+    def test_should_save_skipped(self):
+        self._create_content_hierarchy()
+        quotes = self._create_multiple_quotes()
+
+        quotes[0].mark_complete(self.profile, completion_kind=QuoteCompletion.Kind.SKIPPED)
+
+        self.assertEqual(QuoteCompletion.objects.count(), 1)
+        qc = QuoteCompletion.objects.get()
+        self.assertEqual(qc.kind, QuoteCompletion.Kind.SKIPPED)
 
     def test_complex_case_multiple_categories(self):
         # Given
