@@ -41,14 +41,6 @@ object GameDialogBuilder {
             viewModel = sharedViewModel
 
             collectCoins.setOnClickListener {
-                val titleResId = when (counter) {
-                    1 -> R.string.game_button_success_collect_coins_2
-                    2 -> R.string.game_button_success_collect_coins_3
-                    3 -> R.string.game_button_success_collect_coins_4
-                    else -> R.string.game_button_success_collect_coins
-                }
-                collectCoins.setText(titleResId)
-
                 if (counter < 3) {
                     binding.image.playAnimation()
                     iconEmitter.emitIconFromView(binding.centerPoint)
@@ -57,6 +49,15 @@ object GameDialogBuilder {
                 } else {
                     onCompleted(alert)
                 }
+
+                val titleResId = when (counter) {
+                    0 -> R.string.game_button_success_collect_coins
+                    1 -> R.string.game_button_success_collect_coins_2
+                    2 -> R.string.game_button_success_collect_coins_3
+                    3 -> R.string.game_button_success_collect_coins_4
+                    else -> R.string.game_button_success_collect_coins
+                }
+                collectCoins.setText(titleResId)
             }
 
             close.setOnClickListener { alert.dismiss() }
@@ -113,15 +114,7 @@ object GameDialogBuilder {
 
         binding.run {
             collectCoins.setOnClickListener {
-                val titleResId = when (counter) {
-                    1 -> R.string.game_button_success_collect_coins_2
-                    2 -> R.string.game_button_success_collect_coins_3
-                    3 -> R.string.game_button_success_collect_coins_4
-                    else -> R.string.game_button_success_collect_coins
-                }
-                collectCoins.setText(titleResId)
-
-                if (counter < 4) {
+                if (counter < 3) {
                     binding.image.playAnimation()
                     iconEmitter.emitIconFromView(binding.centerPoint)
                     Vibrator.vibrate(context)
@@ -129,6 +122,15 @@ object GameDialogBuilder {
                 } else {
                     onCompleted(alert)
                 }
+
+                val titleResId = when (counter) {
+                    0 -> R.string.game_button_success_collect_coins
+                    1 -> R.string.game_button_success_collect_coins_2
+                    2 -> R.string.game_button_success_collect_coins_3
+                    3 -> R.string.game_button_success_collect_coins_4
+                    else -> R.string.game_button_success_collect_coins
+                }
+                collectCoins.setText(titleResId)
             }
         }
     }
