@@ -1,6 +1,7 @@
 package com.quote.mosaic.data.api
 
 import com.quote.mosaic.data.model.*
+import com.quote.mosaic.data.model.hints.HintsVariantsDO
 import com.quote.mosaic.data.model.overview.MainTopicDO
 import com.quote.mosaic.data.model.overview.QuoteDO
 import com.quote.mosaic.data.model.overview.TopicDO
@@ -87,4 +88,17 @@ interface ApiService {
         @Header("X-Client-Auth") token: String,
         @Body body: HashMap<String, String>
     ): Single<Response<ResponseData<PurchaseIdDO>>>
+
+    // ---------------- HINTS ---------------- //
+    @GET("coin/products/")
+    fun getHintsList(
+        @Header("X-Client-Auth") token: String
+    ): Single<Response<ResponseData<HintsVariantsDO>>>
+
+    @POST("coin/consume/")
+    fun validateHint(
+        @Header("X-Client-Auth") token: String,
+        @Body body: HashMap<String, String>
+    ): Single<Response<Void>>
+
 }

@@ -1,5 +1,6 @@
 package com.quote.mosaic.data.api
 
+import com.quote.mosaic.data.model.hints.HintsVariantsDO
 import com.quote.mosaic.data.model.overview.MainTopicDO
 import com.quote.mosaic.data.model.overview.QuoteDO
 import com.quote.mosaic.data.model.overview.TopicDO
@@ -41,5 +42,10 @@ interface ApiClient {
     fun getPurchaseStatus(token: String): Single<PurchaseStatusDO>
 
     fun registerPurchase(orderId: String, purchaseToken: String, appProduct: String, payload: String?): Single<PurchaseIdDO>
+
+    // Hints
+    fun getHints(): Single<HintsVariantsDO>
+
+    fun validateHint(hintId: String, levelId: String): Completable
 
 }

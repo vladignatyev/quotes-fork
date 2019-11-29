@@ -264,6 +264,8 @@ class InAppBillingManager(
         val pendingProduct =
             pendingVerificationProducts.firstOrNull { it.billingProduct.sku == purchase.sku }
 
+        val pendingSku = pendingProduct?.billingProduct?.sku
+
         disposeBag += apiClient
             .registerPurchase(
                 orderId = purchase.orderId,
@@ -295,7 +297,7 @@ class InAppBillingManager(
                         disposeBag.clear()
                     }
                     PurchaseStatus.PURCHASED -> {
-                        resultTrigger.onNext(BillingManagerResult.Success)
+                        resultTrigger.onNext(BillingManagerResult.Success(pendingSku))
                         disposeBag.clear()
                     }
                     PurchaseStatus.UNKNOWN -> {

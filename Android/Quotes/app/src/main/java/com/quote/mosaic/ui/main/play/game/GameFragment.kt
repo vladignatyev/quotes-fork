@@ -1,26 +1,27 @@
 package com.quote.mosaic.ui.main.play.game
 
+import android.app.AlertDialog
 import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.FragmentNavigatorExtras
 import androidx.navigation.fragment.findNavController
-import com.google.android.material.snackbar.Snackbar
 import com.quote.mosaic.R
 import com.quote.mosaic.core.AppFragment
 import com.quote.mosaic.core.billing.BillingManager
 import com.quote.mosaic.core.common.args
-import com.quote.mosaic.core.common.utils.DialogBuilder
 import com.quote.mosaic.core.common.utils.findColor
 import com.quote.mosaic.core.common.utils.manageViewGroupTapable
 import com.quote.mosaic.databinding.GameFragmentBinding
 import com.quote.mosaic.game.GameListener
 import com.quote.mosaic.ui.main.MainActivity
+import com.quote.mosaic.ui.main.play.game.utils.GameDialogBuilder
+import com.quote.mosaic.ui.main.play.game.utils.HintDialogBuilder
+import com.quote.mosaic.ui.main.play.game.utils.SnackbarBuilder
 import io.reactivex.Completable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import nl.dionsegijn.konfetti.models.Shape
@@ -39,6 +40,7 @@ class GameFragment : AppFragment(), GameListener {
     private val vm: GameViewModel by viewModels { vmFactory }
 
     private var levelCompleted = false
+    private var visibleAlert: AlertDialog? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -64,17 +66,27 @@ class GameFragment : AppFragment(), GameListener {
         super.onStart()
 
         vm.state.onNextLevelReceived.subscribe { mixedQuote ->
+            visibleAlert?.dismiss()
             levelCompleted = false
             binding().root.manageViewGroupTapable(binding().root, true)
-            binding().gameView.setData(mixedQuote)
+            binding().gameView.setData(vm.state.userVariantQuote.get())
         }.untilStopped()
 
         vm.state.levelCompletedTrigger.subscribe {
+            visibleAlert?.dismiss()
             showSuccessDialog()
         }.untilStopped()
 
         vm.state.hintReceivedTrigger.subscribe {
-            onHintReceived(it)
+            binding().menu.close(true)
+            visibleAlert?.dismiss()
+            SnackbarBuilder.showHintSnackbar(binding().root, userPreferences, it)
+        }.untilStopped()
+
+        vm.state.insufficientBalanceTriggered.subscribe {
+            binding().menu.close(true)
+            visibleAlert?.dismiss()
+            topupClicked()
         }.untilStopped()
 
     }
@@ -82,6 +94,17 @@ class GameFragment : AppFragment(), GameListener {
     override fun onResume() {
         super.onResume()
         billingManager.warmUp()
+    }
+
+    override fun onQuoteOrderChanged(userVariant: ArrayList<String>) {
+        val correctQuote = vm.state.currentQuote.get()!!.splitted
+        if (!levelCompleted && userVariant == correctQuote) {
+            levelCompleted = true
+            onLevelCompleted()
+            vm.markLevelAsCompleted()
+        } else {
+            vm.setCurrentVariant(userVariant)
+        }
     }
 
     fun topupClicked() {
@@ -96,29 +119,26 @@ class GameFragment : AppFragment(), GameListener {
         )
     }
 
-    override fun onQuoteOrderChanged(userVariant: ArrayList<String>) {
-        val correctQuote = vm.state.currentQuote.get()!!.splitted
-        if (!levelCompleted && userVariant == correctQuote) {
-            levelCompleted = true
-            onLevelCompleted()
-            vm.markLevelAsCompleted()
-        } else {
-            vm.setCurrentVariant(userVariant)
+    fun findNextWordClicked() {
+        vm.verifyVideoProducts()
+        binding().menu.close(true)
+        visibleAlert = HintDialogBuilder.showNextWordDialog(requireContext(), vm) {
+            vm.findNextWordVideo(requireActivity())
         }
     }
 
-    private fun onHintReceived(hint: String) {
-        val snackbar = Snackbar.make(binding().root, hint, Snackbar.LENGTH_INDEFINITE)
-        snackbar.view.findViewById<TextView>(com.google.android.material.R.id.snackbar_text)
-            .maxLines = 5
-        snackbar
-            .setAction(R.string.shared_label_remember) { snackbar.dismiss() }
-            .setActionTextColor(requireContext().findColor(R.color.white))
-            .show()
+    fun skipLevelClicked() {
+        binding().menu.close(true)
+        visibleAlert = HintDialogBuilder.showSkipLevelDialog(requireContext(), vm)
+    }
+
+    fun findAuthorClicked() {
+        binding().menu.close(true)
+        visibleAlert = HintDialogBuilder.showAuthorHintDialog(requireContext(), vm)
     }
 
     private fun showSuccessDialog() {
-        DialogBuilder.showGameSuccessDialog(requireContext(), vm) { successDialog ->
+        GameDialogBuilder.showGameSuccessDialog(requireContext(), vm) { successDialog ->
             successDialog.dismiss()
             vm.reset()
 
@@ -130,7 +150,7 @@ class GameFragment : AppFragment(), GameListener {
                 if (vm.doubleUpPossible()) {
                     Completable.timer(500, TimeUnit.MILLISECONDS, AndroidSchedulers.mainThread())
                         .subscribe {
-                            DialogBuilder.showDoubleUpDialog(requireContext(), vm) {
+                            GameDialogBuilder.showDoubleUpDialog(requireContext(), vm) {
                                 vm.showDoubleUpVideo(requireActivity())
                                 it.dismiss()
                             }

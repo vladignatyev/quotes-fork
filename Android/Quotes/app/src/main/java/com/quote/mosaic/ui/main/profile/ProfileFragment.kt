@@ -61,7 +61,7 @@ class ProfileFragment : AppFragment(), SimpleDialog.OnDialogResultListener {
         vm.state.successTrigger.subscribe {
             Ime.hide(binding().nameEditText)
             Snackbar.make(
-                binding().root, R.string.shared_label_saved, Snackbar.LENGTH_LONG
+                binding().root, R.string.shared_label_saved, Snackbar.LENGTH_SHORT
             ).show()
             vm.reset()
         }.untilStopped()

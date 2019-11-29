@@ -9,7 +9,7 @@ import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.activityViewModels
 import com.quote.mosaic.R
 import com.quote.mosaic.core.AppFragment
-import com.quote.mosaic.core.common.utils.DialogBuilder
+import com.quote.mosaic.ui.main.play.game.utils.GameDialogBuilder
 import com.quote.mosaic.core.common.utils.manageViewGroupTapable
 import com.quote.mosaic.data.manager.UserManager
 import com.quote.mosaic.databinding.OnboardingGameFragmentBinding
@@ -91,7 +91,7 @@ class OnboardingGameFragment : AppFragment(), GameListener {
     }
 
     private fun showSuccessDialog() {
-        DialogBuilder.showOnboardingGameSuccessDialog(
+        GameDialogBuilder.showOnboardingGameSuccessDialog(
             requireContext(),
             vm.state.initialBalance.get()
         ) { parentDialog ->
@@ -99,7 +99,7 @@ class OnboardingGameFragment : AppFragment(), GameListener {
 
             Completable.timer(500, TimeUnit.MILLISECONDS, AndroidSchedulers.mainThread())
                 .subscribe {
-                    DialogBuilder.showOnboardingFinishDialog(requireContext()) {
+                    GameDialogBuilder.showOnboardingFinishDialog(requireContext()) {
                         startActivity(MainActivity.newIntent(requireContext()))
                         it.dismiss()
                     }

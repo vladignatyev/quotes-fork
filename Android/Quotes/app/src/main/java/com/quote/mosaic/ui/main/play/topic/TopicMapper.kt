@@ -70,7 +70,6 @@ class TopicMapperImpl(
                 title = section.title,
                 categories = section.categories
                     .filter { it.totalLevels > 0 }
-                    .sortedByDescending { it.isAvailableToUser }
                     .map { mapCategory(it) }
             )
         }

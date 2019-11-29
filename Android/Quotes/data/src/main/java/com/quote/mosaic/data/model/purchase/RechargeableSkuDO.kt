@@ -21,8 +21,8 @@ data class RechargeableSkuDO(
 enum class RemoteProductTag {
     @JsonProperty("topup")
     TOP_UP,
-    @JsonProperty("hint")
-    HINT,
+    @JsonProperty("hint_next_word")
+    HINT_NEXT_WORD,
     @JsonProperty("doubleup")
     DOUBLE_UP
 }

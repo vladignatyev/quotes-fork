@@ -140,7 +140,7 @@
             app:menu_labels_position="left"
             app:menu_labels_showShadow="true"
             app:menu_labels_singleLine="false"
-            app:menu_labels_textColor="@color/game_background_blue"
+            app:menu_labels_textColor="#444444"
             app:menu_labels_textSize="14sp"
             app:menu_openDirection="up"
             app:menu_shadowRadius="4dp"
@@ -152,39 +152,29 @@
                 android:id="@+id/nextWord"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:onClick="@{() -> viewModel.findNextWord()}"
+                android:onClick="@{() -> fragment.findNextWordClicked()}"
                 android:src="@drawable/ic_coins"
-                app:fab_label="Узнать следующее слово"
+                app:fab_label="@string/hint_fab_next_word_fab_title"
                 app:fab_size="mini" />
 
             <com.github.clans.fab.FloatingActionButton
                 android:id="@+id/skip"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:onClick="@{() -> viewModel.skipLevel()}"
+                android:onClick="@{() -> fragment.skipLevelClicked()}"
                 android:src="@drawable/ic_coins"
                 app:fab_colorNormal="@color/white"
-                app:fab_label="Пропустить уровень"
+                app:fab_label="@string/hint_fab_skip_title"
                 app:fab_size="mini" />
 
             <com.github.clans.fab.FloatingActionButton
                 android:id="@+id/author"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:onClick="@{() -> viewModel.findAuthor()}"
+                android:onClick="@{() -> fragment.findAuthorClicked()}"
                 android:src="@drawable/ic_coins"
                 app:fab_colorNormal="@color/gold"
-                app:fab_label="Узнать автора"
-                app:fab_size="mini"
-                tools:visible="@{!TextUtils.isEmpty(viewModel.state.author)}" />
-
-            <com.github.clans.fab.FloatingActionButton
-                android:id="@+id/nextWordVideo"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/ic_video_marketing"
-                app:fab_colorNormal="@color/white"
-                app:fab_label="Узнать следующее слово"
+                app:fab_label="@string/hint_fab_author_title"
                 app:fab_size="mini" />
 
         </com.github.clans.fab.FloatingActionMenu>

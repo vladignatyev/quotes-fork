@@ -1,7 +1,8 @@
 package com.quote.mosaic.data.api
 
-import com.quote.mosaic.data.manager.UserManager
 import com.quote.mosaic.data.error.ResponseErrorMessageExtractor
+import com.quote.mosaic.data.manager.UserManager
+import com.quote.mosaic.data.model.hints.HintsVariantsDO
 import com.quote.mosaic.data.model.overview.MainTopicDO
 import com.quote.mosaic.data.model.overview.QuoteDO
 import com.quote.mosaic.data.model.overview.TopicDO
@@ -103,6 +104,18 @@ class NetworkApiClient(
 
         return apiService.registerPurchase(userManager.getSession(), body).transform()
             .map { it.objects.first() }
+    }
+
+    // ---------------- HINTS ----------------- //
+    override fun getHints(): Single<HintsVariantsDO> =
+        apiService.getHintsList(userManager.getSession()).transform().map { it.objects.first() }
+
+    override fun validateHint(hintId: String, levelId: String): Completable {
+        val body = HashMap<String, String>()
+        body["coin_product"] = hintId
+        body["payload"] = levelId
+
+        return apiService.validateHint(userManager.getSession(), body).transformToCompletable()
     }
 
     // ---------------- COMMON ---------------- //

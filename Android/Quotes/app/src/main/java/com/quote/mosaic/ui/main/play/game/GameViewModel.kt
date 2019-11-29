@@ -5,6 +5,7 @@ import androidx.databinding.ObservableBoolean
 import androidx.databinding.ObservableField
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import com.quote.mosaic.BuildConfig
 import com.quote.mosaic.core.AppViewModel
 import com.quote.mosaic.core.Schedulers
 import com.quote.mosaic.core.billing.BillingManager
@@ -13,12 +14,14 @@ import com.quote.mosaic.core.billing.BillingProduct
 import com.quote.mosaic.core.rx.ClearableBehaviorProcessor
 import com.quote.mosaic.core.rx.NonNullObservableField
 import com.quote.mosaic.data.api.ApiClient
+import com.quote.mosaic.data.error.ResponseException
 import com.quote.mosaic.data.manager.UserManager
 import com.quote.mosaic.data.model.overview.QuoteDO
 import com.quote.mosaic.data.model.purchase.RemoteProductTag
 import com.quote.mosaic.data.model.user.UserDO
 import com.quote.mosaic.ui.main.play.topup.TopUpProductModel
 import io.reactivex.Flowable
+import io.reactivex.processors.BehaviorProcessor
 import io.reactivex.processors.PublishProcessor
 import timber.log.Timber
 import kotlin.random.Random
@@ -30,15 +33,19 @@ class GameViewModel(
     private val billingManager: BillingManager
 ) : AppViewModel() {
 
-    private val onNextLevelReceived = PublishProcessor.create<List<String>>()
+    private val onNextLevelReceived = BehaviorProcessor.create<List<String>>()
     private val levelCompletedTrigger = ClearableBehaviorProcessor.create<Unit>()
 
+    private val insufficientBalanceTriggered = PublishProcessor.create<Unit>()
     private val hintReceivedTrigger = PublishProcessor.create<String>()
     private val skipLevelTriggered = PublishProcessor.create<Unit>()
+
+    private var pendingHint: BillingProduct? = null
 
     val state = State(
         onNextLevelReceived = onNextLevelReceived,
 
+        insufficientBalanceTriggered = insufficientBalanceTriggered,
         levelCompletedTrigger = levelCompletedTrigger.clearable(),
         hintReceivedTrigger = hintReceivedTrigger,
         skipLevelTriggered = skipLevelTriggered
@@ -62,6 +69,38 @@ class GameViewModel(
                 Timber.w(it, "User loading failed")
             }).untilCleared()
 
+        billingManager
+            .billingResultTrigger()
+            .flatMap { result ->
+                apiClient
+                    .profile()
+                    .map { Pair(result, it) }
+                    .subscribeOn(schedulers.io())
+                    .toFlowable()
+            }
+            .subscribeOn(schedulers.io())
+            .observeOn(schedulers.ui())
+            .subscribe({ (result: BillingManagerResult, user: UserDO) ->
+                when (result) {
+                    is BillingManagerResult.Success -> {
+                        checkIfShowNextWordNeeded(result)
+                        saveUser(user)
+                        billingManager.warmUp()
+                    }
+                    is BillingManagerResult.Retry -> {
+                        state.hintLoading.set(false)
+                    }
+                }
+            }, {
+                Timber.e(it, "billingResultTrigger failed")
+            }).untilCleared()
+
+    }
+
+    private fun saveUser(user: UserDO) {
+        userManager.setUser(user)
+        state.userName.set(user.nickname)
+        state.balance.set(user.balance.toString())
     }
 
     //============ Game =============//
@@ -71,8 +110,8 @@ class GameViewModel(
         apiClient.profile()
             .flatMap { user ->
                 apiClient.quotesList(selectedCategoryId)
-                    .subscribeOn(schedulers.io())
                     .map { Pair(it, user) }
+                    .subscribeOn(schedulers.io())
             }
             .subscribeOn(schedulers.io())
             .observeOn(schedulers.ui())
@@ -83,17 +122,17 @@ class GameViewModel(
 
                 val currentQuote = quotes.first { !it.complete }
                 state.currentQuote.set(currentQuote)
+                state.author.set(currentQuote.author)
                 val shuffled = currentQuote.splitted.shuffled(Random(currentQuote.id))
                 state.userVariantQuote.set(shuffled)
                 onNextLevelReceived.onNext(shuffled)
 
-                userManager.setUser(user)
-                state.userName.set(user.nickname)
-                state.balance.set(user.balance.toString())
+                saveUser(user)
             }, {
                 Timber.e(it, "GameViewModel init failed")
             }).untilCleared()
     }
+
 
     fun setCurrentVariant(userVariant: List<String>) {
         state.userVariantQuote.set(userVariant)
@@ -124,12 +163,128 @@ class GameViewModel(
 
     //============ Hints =============//
     private fun loadHints() {
-        //TODO: change
+        apiClient.getHints()
+            .subscribeOn(schedulers.io())
+            .observeOn(schedulers.ui())
+            .subscribe({
+                state.hintAuthorId.set(it.author.first().id)
+                state.hintAuthorCost.set(it.author.first().coinPrice.toString())
+
+                state.hintNextWordId.set(it.nextWord.first().id)
+                state.hintNextWordCost.set(it.nextWord.first().coinPrice.toString())
+
+                state.hintSkipId.set(it.skipLevel.first().id)
+                state.hintSkipCost.set(it.skipLevel.first().coinPrice.toString())
+            }, {
+                Timber.e(it, "getHints failed")
+            }).untilCleared()
+    }
+
+    fun findAuthor() {
+        val currentQuote = state.currentQuote.get() ?: return
+        if (state.hintLoading.get() || currentQuote.author.isNullOrEmpty()) return
+
+        state.hintLoading.set(true)
+        apiClient
+            .validateHint(state.hintAuthorId.get(), currentQuote.id.toString())
+            .andThen(apiClient.profile().subscribeOn(schedulers.io()))
+            .subscribeOn(schedulers.io())
+            .observeOn(schedulers.ui())
+            .subscribe({
+                state.hintLoading.set(false)
+                saveUser(it)
+                hintReceivedTrigger.onNext(currentQuote.author)
+            }, {
+                state.hintLoading.set(false)
+                Timber.e(it, "validateHint findAuthor() failed")
+                if ((it as ResponseException.Application).error.errorCode == 402) {
+                    insufficientBalanceTriggered.onNext(Unit)
+                }
+            }).untilCleared()
+    }
+
+    fun skipLevel() {
+        if (state.hintLoading.get()) return
+        val currentQuote = state.currentQuote.get() ?: return
+        val selectedCategoryId = state.selectedCategory.get() ?: return
+
+        state.hintLoading.set(true)
+        apiClient
+            .validateHint(state.hintSkipId.get(), currentQuote.id.toString())
+            .andThen(apiClient.quotesList(selectedCategoryId).subscribeOn(schedulers.io()))
+            .flatMap { levelCompleted ->
+                apiClient.profile().map { Pair(it, levelCompleted) }.subscribeOn(schedulers.io())
+            }
+            .subscribeOn(schedulers.io())
+            .observeOn(schedulers.ui())
+            .subscribe({ (user: UserDO, quotes: List<QuoteDO>) ->
+                state.hintLoading.set(false)
+                saveUser(user)
+                state.isLastQuote.set(quotes.none { !it.complete })
+                prepareSuccessDialog()
+                levelCompletedTrigger.onNext(Unit)
+            }, {
+                state.hintLoading.set(false)
+                Timber.e(it, "validateHint skipLevel() failed")
+                if ((it as ResponseException.Application).error.errorCode == 402) {
+                    insufficientBalanceTriggered.onNext(Unit)
+                }
+            }).untilCleared()
     }
 
     fun findNextWord() {
+        val currentQuote = state.currentQuote.get() ?: return
+        if (state.hintLoading.get()) return
+
+        state.hintLoading.set(true)
+        apiClient
+            .validateHint(state.hintNextWordId.get(), currentQuote.id.toString())
+            .andThen(apiClient.profile().subscribeOn(schedulers.io()))
+            .subscribeOn(schedulers.io())
+            .observeOn(schedulers.ui())
+            .subscribe({
+                state.hintLoading.set(false)
+                saveUser(it)
+                showNextWord()
+            }, {
+                state.hintLoading.set(false)
+                Timber.e(it, "validateHint findAuthor() failed")
+                if ((it as ResponseException.Application).error.errorCode == 402) {
+                    insufficientBalanceTriggered.onNext(Unit)
+                }
+            }).untilCleared()
+    }
+
+    fun findNextWordVideo(activity: Activity) {
+        if (state.hintLoading.get()) return
+
+        state.hintLoading.set(true)
+
+        val billingProduct: BillingProduct = billingManager
+            .availableSkus()
+            .first { it.remoteProduct.tags.contains(RemoteProductTag.HINT_NEXT_WORD) }
+        pendingHint = billingProduct
+
+        val product = TopUpProductModel.Free(
+            id = billingProduct.remoteProduct.id,
+            title = billingProduct.remoteProduct.title,
+            iconUrl = billingProduct.remoteProduct.imageUrl,
+            billingProduct = billingProduct.skuDetails
+        )
+
+        billingManager
+            .launchBuyWorkFlow(activity, product)
+            .onErrorComplete()
+            .subscribeOn(schedulers.io())
+            .observeOn(schedulers.ui())
+            .subscribe()
+            .untilCleared()
+
+    }
+
+    private fun showNextWord() {
         val correctQuote = state.currentQuote.get()?.splitted!!
-        val userVariantQuote = state.userVariantQuote.get().orEmpty()
+        val userVariantQuote = state.userVariantQuote.get()
 
         var hint = ""
         correctQuote.forEachIndexed { index, word ->
@@ -142,15 +297,14 @@ class GameViewModel(
         }
     }
 
-    fun findAuthor() {
-        state.currentQuote.get()?.author?.let {
-            hintReceivedTrigger.onNext(it)
-        }
-    }
+    private fun checkIfShowNextWordNeeded(result: BillingManagerResult.Success) {
+        val hintSku =
+            if (BuildConfig.DEBUG) pendingHint?.remoteProduct?.testSku else pendingHint?.remoteProduct?.sku
 
-    fun skipLevel() {
-        skipLevelTriggered.onNext(Unit)
-        markLevelAsCompleted()
+        if (result.sku == hintSku) {
+            state.hintLoading.set(false)
+            findNextWord()
+        }
     }
 
     //============ Success Dialog =============//
@@ -161,10 +315,6 @@ class GameViewModel(
         state.successAuthor.set(currentQuote.author.orEmpty())
         state.successWinningCoins.set(currentQuote.reward.toString())
         state.successWinningDoubledCoins.set((currentQuote.reward * 2).toString())
-
-//        TODO: find a way
-//        state.successWinningCategoryCoins.set("30")
-//        state.successWinningAchievement.set("Знаток всего подряд")
     }
 
     fun showDoubleUpVideo(activity: Activity) {
@@ -185,33 +335,16 @@ class GameViewModel(
             .observeOn(schedulers.ui())
             .subscribe()
             .untilCleared()
-
-        billingManager
-            .billingResultTrigger()
-            .flatMap { result ->
-                apiClient
-                    .profile()
-                    .map { Pair(result, it) }
-                    .subscribeOn(schedulers.io())
-                    .toFlowable()
-            }
-            .subscribeOn(schedulers.io())
-            .observeOn(schedulers.ui())
-            .subscribe({ (result: BillingManagerResult, user: UserDO) ->
-                when (result) {
-                    is BillingManagerResult.Success -> {
-                        userManager.setUser(user)
-                        state.balance.set(user.balance.toString())
-                        billingManager.warmUp()
-                    }
-                }
-            }, {
-                Timber.e(it, "billingResultTrigger failed")
-            }).untilCleared()
     }
 
     fun doubleUpPossible(): Boolean = billingManager.availableSkus()
         .any { it.remoteProduct.tags.contains(RemoteProductTag.DOUBLE_UP) }
+
+    fun verifyVideoProducts() {
+        val hintVideoNextWordVisible = billingManager.availableSkus()
+            .any { it.remoteProduct.tags.contains(RemoteProductTag.HINT_NEXT_WORD) }
+        state.hintVideoNextWordVisible.set(hintVideoNextWordVisible)
+    }
 
     fun reset() {
         levelCompletedTrigger.clear()
@@ -231,15 +364,28 @@ class GameViewModel(
 
         val isLastQuote: ObservableBoolean = ObservableBoolean(),
         val currentQuote: ObservableField<QuoteDO> = ObservableField(),
-        val userVariantQuote: ObservableField<List<String>> = ObservableField(),
+        val userVariantQuote: NonNullObservableField<List<String>> = NonNullObservableField(listOf("")),
 
         val onNextLevelReceived: Flowable<List<String>>,
         val levelCompletedTrigger: Flowable<Unit>,
 
         //============ Hint Dialog ===============//
         val author: ObservableField<String> = ObservableField(),
+        val hintLoading: ObservableBoolean = ObservableBoolean(),
         val hintReceivedTrigger: Flowable<String>,
         val skipLevelTriggered: Flowable<Unit>,
+        val insufficientBalanceTriggered: Flowable<Unit>,
+
+        //How much hints
+        val hintAuthorCost: NonNullObservableField<String> = NonNullObservableField(""),
+        val hintSkipCost: NonNullObservableField<String> = NonNullObservableField(""),
+        val hintNextWordCost: NonNullObservableField<String> = NonNullObservableField(""),
+
+        val hintAuthorId: NonNullObservableField<String> = NonNullObservableField(""),
+        val hintSkipId: NonNullObservableField<String> = NonNullObservableField(""),
+        val hintNextWordId: NonNullObservableField<String> = NonNullObservableField(""),
+
+        val hintVideoNextWordVisible: ObservableBoolean = ObservableBoolean(),
 
         //============ Success Dialog =============//
         val successQuote: NonNullObservableField<String> = NonNullObservableField(""),

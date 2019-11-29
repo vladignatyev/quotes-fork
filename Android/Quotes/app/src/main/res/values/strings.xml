@@ -53,6 +53,9 @@
     <string name="game_label_success_title">Молодец!</string>
     <string name="game_label_success_you_win">Вы получаете: </string>
     <string name="game_button_success_collect_coins">Забрать приз!</string>
+    <string name="game_button_success_collect_coins_2">Жми еще!</string>
+    <string name="game_button_success_collect_coins_3">Получи еще монет!</string>
+    <string name="game_button_success_collect_coins_4">И на посошок!</string>
     <string name="game_label_success_quote">«%s»</string>
     <string name="game_label_success_author">© %s</string>
     <string name="game_label_success_coins_reward">- %s монет за угаданную цитату</string>
@@ -63,6 +66,18 @@
     <string name="game_label_double_watch_video_title">Посмотри короткий рекламный видеоролик и получи в два раза больше монет!</string>
     <string name="game_button_double_watch_approve">Получить %s монет!👍</string>
     <string name="game_button_double_watch_decline">Упустить возможность💩</string>
+
+    <!-- HINT -->
+    <string name="hint_label_author_title">Показать автора цитаты?</string>
+    <string name="hint_label_skip_title">Не разгадать? Можно пропустить!</string>
+    <string name="hint_label_next_word_title">Сказать следующее слово?</string>
+    <string name="hint_label_subtitle">Эта подсказка стоит %s монет.</string>
+    <string name="hint_button_confirm">Показать!</string>
+    <string name="hint_button_confirm_say">Сказать!</string>
+    <string name="hint_button_confirm_free">Посмотреть видео и узнать бесплатно!</string>
+    <string name="hint_fab_author_title">Узнать автора</string>
+    <string name="hint_fab_next_word_fab_title">Узнать следующее слово</string>
+    <string name="hint_fab_skip_title">Пропустить уровень</string>
 
     <!-- PROFILE -->
     <string name="profile_name_hint">Ваше имя</string>
