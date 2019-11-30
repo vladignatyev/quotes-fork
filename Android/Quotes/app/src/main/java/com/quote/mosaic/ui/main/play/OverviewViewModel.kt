@@ -6,7 +6,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.quote.mosaic.core.AppViewModel
 import com.quote.mosaic.core.Schedulers
-import com.quote.mosaic.core.rx.ClearableBehaviorProcessor
 import com.quote.mosaic.core.rx.NonNullObservableField
 import com.quote.mosaic.data.manager.UserManager
 import com.quote.mosaic.data.api.ApiClient
@@ -23,29 +22,13 @@ class OverviewViewModel(
 ) : AppViewModel() {
 
     private val categories = BehaviorProcessor.create<List<TopicModel>>()
-    private val errorTrigger = ClearableBehaviorProcessor.create<Unit>()
 
     val state = State(
-        categories = categories,
-        errorTrigger = errorTrigger.clearable()
+        categories = categories
     )
 
     override fun initialise() {
-        state.loading.set(true)
-
-        apiClient.topics()
-            .map { topics -> topics.map { TopicModel(it.id, it.title) } }
-            .flatMap { topics -> apiClient.profile().map { Pair(topics, it) } }
-            .subscribeOn(schedulers.io())
-            .observeOn(schedulers.ui())
-            .subscribe({ (topics: List<TopicModel>, user: UserDO) ->
-                state.loading.set(false)
-                userManager.setUser(user)
-                categories.onNext(topics)
-            }, {
-                state.loading.set(false)
-                Timber.e(it, "OverviewViewModel init failed")
-            }).untilCleared()
+        load()
 
         userManager
             .user()
@@ -66,11 +49,30 @@ class OverviewViewModel(
 
     }
 
+    fun load() {
+        state.loading.set(true)
+        apiClient.topics()
+            .map { topics -> topics.map { TopicModel(it.id, it.title) } }
+            .flatMap { topics -> apiClient.profile().map { Pair(topics, it) } }
+            .subscribeOn(schedulers.io())
+            .observeOn(schedulers.ui())
+            .subscribe({ (topics: List<TopicModel>, user: UserDO) ->
+                state.loading.set(false)
+                state.error.set(false)
+                userManager.setUser(user)
+                categories.onNext(topics)
+            }, {
+                state.loading.set(false)
+                state.error.set(true)
+                Timber.e(it, "OverviewViewModel init failed")
+            }).untilCleared()
+    }
+
     data class State(
         val categories: Flowable<List<TopicModel>>,
-        val errorTrigger: Flowable<Unit>,
 
         val loading: ObservableBoolean = ObservableBoolean(),
+        val error: ObservableBoolean = ObservableBoolean(),
         val balance: ObservableField<String> = ObservableField(""),
         val name: ObservableField<String> = ObservableField(""),
 

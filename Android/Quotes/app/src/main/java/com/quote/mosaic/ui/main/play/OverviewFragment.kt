@@ -62,6 +62,7 @@ class OverviewFragment : AppFragment() {
             topupClicked()
         }.untilStopped()
     }
+
     override fun onResume() {
         super.onResume()
         billingManager.warmUp()

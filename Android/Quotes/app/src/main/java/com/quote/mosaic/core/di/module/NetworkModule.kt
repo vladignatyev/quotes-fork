@@ -1,20 +1,20 @@
 package com.quote.mosaic.core.di.module
 
 import android.content.Context
-import com.quote.mosaic.data.manager.UserManager
+import com.fasterxml.jackson.databind.DeserializationFeature
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.quote.mosaic.BuildConfig
+import com.quote.mosaic.core.App
+import com.quote.mosaic.core.CacheDir
 import com.quote.mosaic.data.api.ApiClient
 import com.quote.mosaic.data.api.ApiService
 import com.quote.mosaic.data.api.NetworkApiClient
 import com.quote.mosaic.data.error.ApiErrorExtractor
 import com.quote.mosaic.data.error.ResponseErrorMessageExtractor
+import com.quote.mosaic.data.manager.UserManager
 import com.quote.mosaic.data.network.BroadcastReceiverBackedNetworkStatusProvider
 import com.quote.mosaic.data.network.NetworkStatusProvider
-import com.quote.mosaic.BuildConfig
-import com.quote.mosaic.core.App
-import com.quote.mosaic.core.CacheDir
-import com.fasterxml.jackson.databind.DeserializationFeature
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import dagger.Module
 import dagger.Provides
 import okhttp3.Cache
@@ -89,7 +89,7 @@ class NetworkModule {
         .connectTimeout(NETWORK_TIMEOUT_SECONDS, TimeUnit.SECONDS)
         .writeTimeout(NETWORK_TIMEOUT_SECONDS, TimeUnit.SECONDS)
         .readTimeout(NETWORK_TIMEOUT_SECONDS, TimeUnit.SECONDS)
-//        .cache(okhttpCache)
+        .cache(okhttpCache)
         .addNetworkInterceptor(httpLoggingInterceptor)
         .build()
 
