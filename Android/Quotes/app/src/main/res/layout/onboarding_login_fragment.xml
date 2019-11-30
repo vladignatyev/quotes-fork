@@ -54,7 +54,7 @@
             android:id="@+id/nameTextInput"
             style="@style/TextInputLayout.White"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="64dp"
             android:layout_marginStart="32dp"
             android:layout_marginEnd="32dp"
             android:layout_marginBottom="32dp"
@@ -66,7 +66,7 @@
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/nameEditText"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:hint="@string/onboarding_label_name_hint"
                 android:maxLength="20"
                 android:singleLine="true"

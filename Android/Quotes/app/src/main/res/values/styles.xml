@@ -53,6 +53,10 @@
         <item name="colorAccent">@color/gold</item>
     </style>
 
+    <style name="progressBarWhite" parent="@style/Theme.AppCompat">
+        <item name="colorAccent">@color/white</item>
+    </style>
+
     <!-- ####### Dialog ####### -->
     <style name="DialogStyle" parent="Theme.AppCompat.Light.Dialog.Alert">
         <item name="android:windowBackground">@android:color/transparent</item>
