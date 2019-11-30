@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="first_names">
+        <item>Небесный</item>
+        <item>Славный</item>
+        <item>Огненный</item>
+        <item>Воздушный</item>
+        <item>Дикий</item>
+        <item>Забавный</item>
+        <item>Веселый</item>
+        <item>Хмурый</item>
+        <item>Меткий</item>
+        <item>Добрый</item>
+        <item>Мирный</item>
+        <item>Опасный</item>
+        <item>Робкий</item>
+        <item>Важный</item>
+        <item>Цепкий</item>
+        <item>Могучий</item>
+        <item>Главный</item>
+        <item>Шустрый</item>
+        <item>Бегущий</item>
+        <item>Страстный</item>
+        <item>Сонный</item>
+        <item>Сумасшедший</item>
+        <item>Волшебный</item>
+        <item>Милый</item>
+        <item>Популярный</item>
+        <item>Озорной</item>
+    </string-array>
+
+    <string-array name="second_names">
+        <item>Апельсин</item>
+        <item>Помидор</item>
+        <item>Кот</item>
+        <item>Босс</item>
+        <item>Диджей</item>
+        <item>Ученый</item>
+        <item>Актер</item>
+        <item>Артист</item>
+        <item>Техник</item>
+        <item>Писатель</item>
+        <item>Космонавт</item>
+        <item>Барыга</item>
+        <item>Знахарь</item>
+        <item>Бомбила</item>
+        <item>Граф</item>
+        <item>Барон</item>
+        <item>Воробей</item>
+        <item>Пёс</item>
+        <item>Волк</item>
+        <item>Орёл</item>
+        <item>Тесак</item>
+        <item>Повар</item>
+        <item>Ленивец</item>
+        <item>Волшебник</item>
+        <item>Джокер</item>
+        <item>Футурист</item>
+    </string-array>
+
+</resources>

@@ -10,6 +10,7 @@ import com.quote.mosaic.core.manager.UserPreferences
 import com.quote.mosaic.crypto.fs.sp.SecurePreferences
 import com.quote.mosaic.data.api.ApiClient
 import com.quote.mosaic.data.manager.UserManager
+import com.quote.mosaic.ui.onboarding.RandomNameGenerator
 import dagger.Module
 import dagger.Provides
 import javax.inject.Singleton
@@ -42,4 +43,10 @@ class ManagerModule {
         schedulers: Schedulers,
         apiClient: ApiClient
     ): BillingManager = InAppBillingManager(context, schedulers, apiClient)
+
+    @Provides
+    @Singleton
+    fun randomNameGenerator(
+        context: Context
+    ): RandomNameGenerator = RandomNameGenerator(context)
 }

@@ -15,6 +15,7 @@ import com.quote.mosaic.ui.main.play.topup.TopUpViewModel
 import com.quote.mosaic.ui.main.profile.ProfileViewModel
 import com.quote.mosaic.ui.main.top.TopViewModel
 import com.quote.mosaic.ui.onboarding.OnboardingViewModel
+import com.quote.mosaic.ui.onboarding.RandomNameGenerator
 import dagger.Module
 import dagger.Provides
 import javax.inject.Singleton
@@ -27,11 +28,13 @@ class ViewModelModule {
     fun onboardingViewModelFactory(
         schedulers: Schedulers,
         apiClient: ApiClient,
-        userManager: UserManager
+        userManager: UserManager,
+        nameGenerator: RandomNameGenerator
     ) = OnboardingViewModel.Factory(
         schedulers,
         apiClient,
-        userManager
+        userManager,
+        nameGenerator
     )
 
     @Provides

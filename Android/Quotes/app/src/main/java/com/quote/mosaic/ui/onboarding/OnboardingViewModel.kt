@@ -26,7 +26,8 @@ import java.util.*
 class OnboardingViewModel(
     private val schedulers: Schedulers,
     private val apiClient: ApiClient,
-    private val userManager: UserManager
+    private val userManager: UserManager,
+    private val nameGenerator: RandomNameGenerator
 ) : AppViewModel() {
 
     private val loginSuccess = PublishProcessor.create<Unit>()
@@ -44,6 +45,8 @@ class OnboardingViewModel(
             .subscribe {
                 state.loginEnabled.set(it)
             }.untilCleared()
+
+        generateRandomName()
     }
 
     fun login() {
@@ -87,6 +90,10 @@ class OnboardingViewModel(
             }).untilCleared()
     }
 
+    fun generateRandomName() {
+        state.nameText.set(nameGenerator.generateName())
+    }
+
     data class State(
         val loading: ObservableBoolean = ObservableBoolean(),
         val loginEnabled: ObservableBoolean = ObservableBoolean(true),
@@ -104,7 +111,8 @@ class OnboardingViewModel(
     class Factory(
         private val schedulers: Schedulers,
         private val apiClient: ApiClient,
-        private val userManager: UserManager
+        private val userManager: UserManager,
+        private val nameGenerator: RandomNameGenerator
     ) : ViewModelProvider.Factory {
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
             if (modelClass.isAssignableFrom(OnboardingViewModel::class.java)) {
@@ -112,7 +120,8 @@ class OnboardingViewModel(
                 return OnboardingViewModel(
                     schedulers,
                     apiClient,
-                    userManager
+                    userManager,
+                    nameGenerator
                 ) as T
             }
             throw IllegalArgumentException("Unknown ViewModel class")

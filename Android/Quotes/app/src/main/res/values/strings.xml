@@ -43,6 +43,7 @@
     <string name="onboarding_label_open_category">Открывай категорию:</string>
     <string name="onboarding_label_warmup">Разминка</string>
     <string name="onboarding_label_go_inside">Заходи в нее!</string>
+    <string name="onboarding_title_enter_yours">или можете написать своё</string>
 
     <!-- MAIN -->
     <string name="overview_label_title">Привет, %s!</string>
