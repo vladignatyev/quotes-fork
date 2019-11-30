@@ -500,8 +500,8 @@ class QuoteRankTop(BaseView):
 
         res_dict = {
             "objects": {
-                "user": ProfileRank.objects.get_flat_enumerated(user_top),
-                "global": ProfileRank.objects.get_flat_enumerated(global_top)
+                "user": list(ProfileRank.objects.get_flat_enumerated(user_top)),
+                "global": list(ProfileRank.objects.get_flat_enumerated(global_top))
             },
             "meta": {}
         }
