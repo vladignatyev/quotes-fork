@@ -14,8 +14,11 @@ import com.quote.mosaic.core.common.args
 import com.quote.mosaic.databinding.OverviewTopicFragmentBinding
 import com.quote.mosaic.ui.main.play.game.GameFragment
 import com.quote.mosaic.ui.main.play.CategoryClickListener
+import io.reactivex.Completable
+import io.reactivex.android.schedulers.AndroidSchedulers
 import nl.dionsegijn.konfetti.models.Shape
 import nl.dionsegijn.konfetti.models.Size
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 class TopicFragment : AppFragment(), CategoryClickListener {
@@ -27,12 +30,16 @@ class TopicFragment : AppFragment(), CategoryClickListener {
 
     private lateinit var adapter: TopicAdapter
 
+    private var initialLoading = true
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         vm = ViewModelProviders.of(this, vmFactory)
             .get(TopicViewModel::class.java)
         vm.setUp(args().getParcelable(MODEL_ID)!!)
         vm.init()
+
+        adapter = TopicAdapter(this@TopicFragment)
     }
 
     override fun onCreateView(
@@ -44,15 +51,31 @@ class TopicFragment : AppFragment(), CategoryClickListener {
     ).apply {
         fragment = this@TopicFragment
         viewModel = vm
-        adapter = TopicAdapter(this@TopicFragment)
-        items.adapter = adapter
+        items.run {
+            adapter = this@TopicFragment.adapter
+            isNestedScrollingEnabled = true
+            setHasFixedSize(true)
+        }
     }.root
 
     override fun onStart() {
         super.onStart()
         vm.state.sections.subscribe {
             adapter.submitList(it)
+            checkIfNeededToScrollUp()
         }.untilStopped()
+    }
+
+    //Work around. Recyclerview scrolled down for some reasons on first loading.
+    private fun checkIfNeededToScrollUp() {
+        if (initialLoading) {
+            Completable
+                .timer(300, TimeUnit.MILLISECONDS, AndroidSchedulers.mainThread())
+                .subscribe {
+                    binding().items.scrollToPosition(0)
+                    initialLoading = false
+                }.untilStopped()
+        }
     }
 
     override fun onClosedClicked(id: Int) {

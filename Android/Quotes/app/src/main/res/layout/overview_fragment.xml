@@ -118,9 +118,9 @@
         <com.quote.mosaic.core.ui.DeactivatedViewPager
             android:id="@+id/topics"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            app:layout_behavior="@string/appbar_scrolling_view_behavior"
-            tools:visibility="visible" />
+            android:layout_height="wrap_content"
+            app:visible="@{!viewModel.state.loading}"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 
         <ImageView
             android:id="@+id/logo"
