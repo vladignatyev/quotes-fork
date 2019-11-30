@@ -28,11 +28,11 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
+            android:layout_marginTop="32dp"
             android:background="@drawable/ic_arrow_back"
             android:onClick="@{() -> fragment.goBack()}"
-            app:layout_constraintBottom_toBottomOf="@+id/topup"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/topup" />
+            app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
             android:id="@+id/title"
@@ -49,6 +49,7 @@
             app:layout_constraintEnd_toStartOf="@+id/balance"
             app:layout_constraintStart_toEndOf="@+id/back"
             app:layout_constraintTop_toTopOf="@+id/topup"
+            app:visible="@{!viewModel.state.isLoading &amp;&amp; !viewModel.state.error}"
             tools:text="Уровень 7 из 10" />
 
         <androidx.cardview.widget.CardView
@@ -65,7 +66,8 @@
             app:layout_constraintBottom_toBottomOf="@+id/balance"
             app:layout_constraintEnd_toEndOf="@+id/balance"
             app:layout_constraintStart_toStartOf="@+id/balance"
-            app:layout_constraintTop_toTopOf="@+id/balance" />
+            app:layout_constraintTop_toTopOf="@+id/balance"
+            app:visible="@{!viewModel.state.isLoading &amp;&amp; !viewModel.state.error}" />
 
         <TextView
             android:id="@+id/balance"
@@ -85,6 +87,7 @@
             android:transitionName="balance"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
+            app:visible="@{!viewModel.state.isLoading &amp;&amp; !viewModel.state.error}"
             tools:text="100" />
 
         <View
@@ -109,7 +112,19 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/title" />
+            app:layout_constraintTop_toBottomOf="@+id/title"
+            app:visible="@{!viewModel.state.isLoading &amp;&amp; !viewModel.state.error}" />
+
+        <ProgressBar
+            android:id="@+id/progressbar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:theme="@style/progressBarGold"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/title"
+            app:visible="@{viewModel.state.isLoading &amp;&amp; !viewModel.state.error}" />
 
         <com.github.clans.fab.FloatingActionMenu
             android:id="@+id/menu"
@@ -146,7 +161,8 @@
             app:menu_shadowRadius="4dp"
             app:menu_shadowXOffset="1dp"
             app:menu_shadowYOffset="3dp"
-            app:menu_showShadow="true">
+            app:menu_showShadow="true"
+            app:visible="@{!viewModel.state.isLoading &amp;&amp; !viewModel.state.error}">
 
             <com.github.clans.fab.FloatingActionButton
                 android:id="@+id/nextWord"
@@ -178,6 +194,82 @@
                 app:fab_size="mini" />
 
         </com.github.clans.fab.FloatingActionMenu>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/topup"
+            app:visible="@{!viewModel.state.isLoading &amp;&amp; viewModel.state.error}">
+
+            <TextView
+                android:id="@+id/oopsTitle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="16dp"
+                android:gravity="center"
+                android:text="@string/shared_label_error_title"
+                android:textColor="@color/white"
+                android:textSize="28sp"
+                android:textStyle="bold"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <com.airbnb.lottie.LottieAnimationView
+                android:id="@+id/image"
+                android:layout_width="wrap_content"
+                android:layout_height="256dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/oopsTitle"
+                app:lottie_autoPlay="true"
+                app:lottie_loop="true"
+                app:lottie_rawRes="@raw/error_animation" />
+
+            <TextView
+                android:id="@+id/subtitle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                android:gravity="center"
+                android:text="@string/error_label_subtitle"
+                android:textColor="@color/white"
+                android:textSize="16sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/image" />
+
+            <com.quote.mosaic.core.ui.button.PreloaderButton
+                android:id="@+id/refresh"
+                android:layout_width="0dp"
+                android:layout_height="64dp"
+                android:layout_marginStart="32dp"
+                android:layout_marginTop="32dp"
+                android:layout_marginEnd="32dp"
+                android:alpha="@{1.0f}"
+                android:onClick="@{() -> viewModel.load()}"
+                android:textSize="15sp"
+                app:backgroundTint="@color/transparent"
+                app:buttonEnabled="@{true}"
+                app:buttonLoading="@{viewModel.state.isLoading}"
+                app:buttonText="@{@string/shared_label_try_again}"
+                app:cornerRadius="8dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/subtitle"
+                app:rippleColor="#33AAAAAA"
+                app:strokeColor="@color/white"
+                app:strokeWidth="2dp" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
         <nl.dionsegijn.konfetti.KonfettiView
             android:id="@+id/viewKonfetti"

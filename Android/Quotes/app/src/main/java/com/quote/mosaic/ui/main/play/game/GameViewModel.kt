@@ -56,18 +56,13 @@ class GameViewModel(
     }
 
     override fun initialise() {
+        state.isLoading.set(true)
+        load()
+    }
+
+    fun load() {
         loadLevel()
         loadHints()
-
-        apiClient.profile()
-            .subscribeOn(schedulers.io())
-            .observeOn(schedulers.ui())
-            .subscribe({
-                state.userName.set(it.nickname)
-                state.balance.set(it.balance.toString())
-            }, {
-                Timber.w(it, "User loading failed")
-            }).untilCleared()
 
         billingManager
             .billingResultTrigger()
@@ -94,7 +89,6 @@ class GameViewModel(
             }, {
                 Timber.e(it, "billingResultTrigger failed")
             }).untilCleared()
-
     }
 
     private fun saveUser(user: UserDO) {
@@ -116,6 +110,8 @@ class GameViewModel(
             .subscribeOn(schedulers.io())
             .observeOn(schedulers.ui())
             .subscribe({ (quotes: List<QuoteDO>, user: UserDO) ->
+                state.error.set(false)
+                state.isLoading.set(false)
                 state.allQuotes.set(quotes)
                 state.totalLevel.set(quotes.count().toString())
                 state.currentLevel.set(quotes.filter { it.complete }.count().plus(1).toString())
@@ -129,6 +125,8 @@ class GameViewModel(
 
                 saveUser(user)
             }, {
+                state.isLoading.set(false)
+                state.error.set(true)
                 Timber.e(it, "GameViewModel init failed")
             }).untilCleared()
     }
@@ -139,9 +137,9 @@ class GameViewModel(
     }
 
     fun markLevelAsCompleted() {
-        if (state.isLoading.get()) return
+        if (state.levelCompletedLoading.get()) return
 
-        state.isLoading.set(true)
+        state.levelCompletedLoading.set(true)
         val currentQuote = state.allQuotes.get().orEmpty().first { !it.complete }
         val selectedCategoryId = state.selectedCategory.get() ?: 0
 
@@ -151,12 +149,12 @@ class GameViewModel(
             .subscribeOn(schedulers.io())
             .observeOn(schedulers.ui())
             .subscribe({ quotes ->
-                state.isLoading.set(false)
+                state.levelCompletedLoading.set(false)
                 state.isLastQuote.set(quotes.none { !it.complete })
                 prepareSuccessDialog()
                 levelCompletedTrigger.onNext(Unit)
             }, {
-                state.isLoading.set(false)
+                state.levelCompletedLoading.set(false)
                 Timber.e(it, "completeLevel failed")
             }).untilCleared()
     }
@@ -358,6 +356,7 @@ class GameViewModel(
         val balance: NonNullObservableField<String> = NonNullObservableField(""),
         val userName: NonNullObservableField<String> = NonNullObservableField(""),
         val isLoading: ObservableBoolean = ObservableBoolean(),
+        val error: ObservableBoolean = ObservableBoolean(),
 
         //============ Game ===============//
         val allQuotes: ObservableField<List<QuoteDO>> = ObservableField(),
@@ -365,6 +364,7 @@ class GameViewModel(
         val isLastQuote: ObservableBoolean = ObservableBoolean(),
         val currentQuote: ObservableField<QuoteDO> = ObservableField(),
         val userVariantQuote: NonNullObservableField<List<String>> = NonNullObservableField(listOf("")),
+        val levelCompletedLoading: ObservableBoolean = ObservableBoolean(),
 
         val onNextLevelReceived: Flowable<List<String>>,
         val levelCompletedTrigger: Flowable<Unit>,

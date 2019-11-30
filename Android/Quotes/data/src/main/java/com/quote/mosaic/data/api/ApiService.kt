@@ -23,6 +23,7 @@ interface ApiService {
     ): Single<Response<TokenDO>>
 
     @GET("profile/")
+    @Headers("Cache-Control: no-cache")
     fun profile(
         @Header("X-Client-Auth") token: String
     ): Single<Response<ResponseData<UserDO>>>
@@ -60,6 +61,7 @@ interface ApiService {
     ): Single<Response<Void>>
 
     @POST("level/{id}/complete")
+    @Headers("Cache-Control: no-cache")
     fun completeLevel(
         @Header("X-Client-Auth") token: String,
         @Path("id") id: Int
@@ -73,17 +75,20 @@ interface ApiService {
 
     // ---------------- PURCHASES ---------------- //
     @GET("purchase/play/products/")
+    @Headers("Cache-Control: no-cache")
     fun getSkuList(
         @Header("X-Client-Auth") token: String
     ): Single<Response<ResponseData<AvailableProductsDO>>>
 
     @GET("purchase/play/status/{purchaseToken}/")
+    @Headers("Cache-Control: no-cache")
     fun getPurchaseStatus(
         @Header("X-Client-Auth") token: String,
         @Path("purchaseToken") purchaseToken: String
     ): Single<Response<ResponseData<PurchaseStatusDO>>>
 
     @POST("purchase/play/")
+    @Headers("Cache-Control: no-cache")
     fun registerPurchase(
         @Header("X-Client-Auth") token: String,
         @Body body: HashMap<String, String>
@@ -91,11 +96,13 @@ interface ApiService {
 
     // ---------------- HINTS ---------------- //
     @GET("coin/products/")
+    @Headers("Cache-Control: no-cache")
     fun getHintsList(
         @Header("X-Client-Auth") token: String
     ): Single<Response<ResponseData<HintsVariantsDO>>>
 
     @POST("coin/consume/")
+    @Headers("Cache-Control: no-cache")
     fun validateHint(
         @Header("X-Client-Auth") token: String,
         @Body body: HashMap<String, String>
