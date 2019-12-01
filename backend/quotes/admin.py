@@ -49,11 +49,12 @@ class QuotesInline(admin.TabularInline):
     autocomplete_fields = ['author']
 
 
+
 @admin.register(QuoteCategory)
 class QuoteCategoryAdmin(admin.ModelAdmin):
-    list_display = ('item_preview_image_view', 'title', 'section', 'num_subitems', 'order', )
+    list_display = ('item_preview_image_view', 'title', 'section', 'num_subitems', 'order', 'on_complete_achievement')
 
-    inlines = [QuotesInline,]
+    inlines = [QuotesInline, ]
 
     exclude = ('is_event', 'event_due_date', 'event_title', 'event_icon',
                'event_description','event_win_achievement',
@@ -167,8 +168,8 @@ class ProfileAdmin(admin.ModelAdmin):
 
 @admin.register(Achievement)
 class AchievementAdmin(admin.ModelAdmin):
-    list_display = ('item_preview_image_view', 'title', 'icon')
-    exclude = ('opened_by_users',)
+    list_display = ('item_preview_image_view', 'title',)
+    exclude = ('opened_by_users', 'icon',)
     search_fields = ['title']
 
     readonly_fields = ('item_image_view', 'item_preview_image_view')
