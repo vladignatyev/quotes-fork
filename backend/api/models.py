@@ -31,8 +31,8 @@ class DeviceSessionManager(models.Manager):
 
 
 class DeviceSession(models.Model):
-    token = models.CharField("Токен устройства", max_length=256, unique=True)
-    auth_token = models.CharField("Токен идентификатор сессии", max_length=256, unique=True, default='')
+    token = models.CharField("Токен устройства", max_length=256, unique=True, db_index=True)
+    auth_token = models.CharField("Токен идентификатор сессии", max_length=256, unique=True, default='', db_index=True)
     timestamp = models.DateTimeField(auto_now_add=True)
 
     objects = DeviceSessionManager()

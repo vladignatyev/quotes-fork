@@ -9,7 +9,7 @@ from ..models import *
 
 
 class TimeAssert:
-    def assertTime(self, t1, t2, delta_microseconds=1E4, f=None):
+    def assertTime(self, t1, t2, delta_microseconds=2E4, f=None):
         _t1 = t1.timestamp()
         _t2 = t2.timestamp()
 

@@ -29,7 +29,7 @@ class RewardableEntity(models.Model):
 
         user_events = [UserEvents.new(self.complete_event_name, self.pk)]
 
-        if self.get_reward(profile) > 0:
+        if self.get_reward(profile) >= 0:
             user_events += self.process_rewards(profile, save_profile=save_profile)
 
         if self.on_complete_achievement:

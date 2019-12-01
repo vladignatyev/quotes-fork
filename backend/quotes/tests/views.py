@@ -1024,5 +1024,5 @@ class CoinProductConsumeViewTest(AuthenticatedTestCase, ContentMixin):
 
         # Then
         self.assertEqual(200, response.status_code)
-        self.assertEqual(Profile.objects.get(pk=self.profile.pk).balance, self.INITIAL_BALANCE - coin_price + GameBalance.objects.get_actual().reward_per_level_completion)
+        self.assertEqual(Profile.objects.get(pk=self.profile.pk).balance, self.INITIAL_BALANCE - coin_price + quote_ut.category.level_bonus_reward)
         self.assertEqual(Quote.objects.get(pk=quote_ut.pk).get_completion_for_profile(self.profile).kind, QuoteCompletion.Kind.SKIPPED)

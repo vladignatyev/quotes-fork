@@ -43,13 +43,14 @@ class ProfileTest(GameBalanceMixin, TimeAssert):
     def test_profile_last_active(self):
         # Given
         from datetime import datetime
-        now1 = datetime.now()
+
 
         self.assertEqual(0, len(Profile.objects.all()))
         session = DeviceSession.objects.create()
 
         # When
         session.save()
+        now1 = datetime.now()
         profile = Profile.objects.get_by_session(session)
         profile_last_active = profile.last_active
         profile.balance = 1000
@@ -429,7 +430,7 @@ class LevelProgressTestCase(TestCase, ContentMixin):
     def test_marking_user_complete_will_update_balance(self):
         # Given
         QuoteCompletion = apps.get_model('quotes.QuoteCompletion')
-        quote_completions = QuoteCompletion.objects.filter(profile=self.profile).values_list('pk', flat=True)
+        quote_completions = QuoteCompletion.objects.filter(profile=self.profile).values_list('profile__pk', flat=True)
 
         self.assertEqual(0, len(quote_completions))
 
@@ -438,7 +439,7 @@ class LevelProgressTestCase(TestCase, ContentMixin):
         self.quotes[5].mark_complete(self.profile)
 
         # Then
-        quote_completions = QuoteCompletion.objects.filter(profile=self.profile).values_list('pk', flat=True)
+        quote_completions = QuoteCompletion.objects.filter(profile=self.profile).values_list('profile__pk', flat=True)
         complete = Quote.objects.filter(complete_by_users2__in=quote_completions)
         self.assertIn(self.quotes[0], complete)
         self.assertIn(self.quotes[5], complete)
@@ -449,7 +450,7 @@ class LevelProgressTestCase(TestCase, ContentMixin):
     def test_marking_user_complete_with_skip_level_will_update_balance(self):
         # Given
         QuoteCompletion = apps.get_model('quotes.QuoteCompletion')
-        quote_completions = QuoteCompletion.objects.filter(profile=self.profile).values_list('pk', flat=True)
+        quote_completions = QuoteCompletion.objects.filter(profile=self.profile).values_list('profile__pk', flat=True)
 
         self.assertEqual(0, len(quote_completions))
 
@@ -458,7 +459,7 @@ class LevelProgressTestCase(TestCase, ContentMixin):
         self.quotes[5].mark_complete(self.profile, completion_kind=QuoteCompletion.Kind.SKIPPED)
 
         # Then
-        quote_completions = QuoteCompletion.objects.filter(profile=self.profile, kind=QuoteCompletion.Kind.SKIPPED).values_list('pk', flat=True)
+        quote_completions = QuoteCompletion.objects.filter(profile=self.profile, kind=QuoteCompletion.Kind.SKIPPED).values_list('profile__pk', flat=True)
         complete = Quote.objects.filter(complete_by_users2__in=quote_completions)
         self.assertIn(self.quotes[0], complete)
         self.assertIn(self.quotes[5], complete)
@@ -508,7 +509,7 @@ class LevelProgressTestCase(TestCase, ContentMixin):
         # Given
         game_settings = GameBalance.objects.get_actual()
 
-        expected_reward = game_settings.reward_per_level_completion
+        expected_reward = self.quotes[0].category.level_bonus_reward
         profile_balance = self.profile.balance
 
         # When
@@ -528,6 +529,7 @@ class LevelProgressTestCase(TestCase, ContentMixin):
             title='category test achievement',
         )
         self.category.bonus_reward = 10
+        self.category.level_bonus_reward = 5
         self.category.on_complete_achievement = category_achievement
         self.category.save()
 
