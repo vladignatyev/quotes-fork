@@ -288,6 +288,8 @@ class QuoteCategory(RewardableEntity, ItemWithImageMixin):
     title = models.CharField("Название Категории", max_length=256)
     icon = models.CharField("Название иконки", max_length=256, default='', blank=True)
 
+    level_bonus_reward = models.BigIntegerField(default=10, verbose_name='Бонус за прохождение Цитаты в этой категории')
+
     # Publishing status
     is_published = models.BooleanField("Категория опубликована?", default=True, blank=True)
     order = models.PositiveIntegerField("Порядок сортировки: чем ниже значение, тем выше Категория в Разделе", default=1000, blank=True)
@@ -555,7 +557,8 @@ class Quote(RewardableEntity):
         qc.save()
 
     def get_reward(self, profile):
-        return profile.settings.reward_per_level_completion
+        # return profile.settings.reward_per_level_completion
+        return self.category.level_bonus_reward
 
     def is_completion_condition_met_by(self, profile):
         return True  # stub

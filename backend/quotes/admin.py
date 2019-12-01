@@ -52,14 +52,15 @@ class QuotesInline(admin.TabularInline):
 
 @admin.register(QuoteCategory)
 class QuoteCategoryAdmin(admin.ModelAdmin):
-    list_display = ('item_preview_image_view', 'title', 'section', 'num_subitems', 'order', 'on_complete_achievement')
+    list_display = ('item_preview_image_view', 'title', 'section', 'level_bonus_reward', 'bonus_reward',
+                    'on_complete_achievement', 'num_subitems', 'order',)
 
     inlines = [QuotesInline, ]
 
     exclude = ('is_event', 'event_due_date', 'event_title', 'event_icon',
                'event_description','event_win_achievement',
                'available_to_users', 'complete_by_users')
-    fields = ( 'title', 'section', 'bonus_reward', 'is_payable',
+    fields = ( 'title', 'section', 'bonus_reward', 'level_bonus_reward', 'is_payable',
                'price_to_unlock', 'on_complete_achievement', 'icon',
                'item_image', 'item_image_view', 'is_published', 'tags',
                'order')
@@ -169,7 +170,7 @@ class ProfileAdmin(admin.ModelAdmin):
 @admin.register(Achievement)
 class AchievementAdmin(admin.ModelAdmin):
     list_display = ('item_preview_image_view', 'title',)
-    exclude = ('opened_by_users', 'icon',)
+    exclude = ('opened_by_users', 'icon', 'item_image', 'item_image_preview')
     search_fields = ['title']
 
     readonly_fields = ('item_image_view', 'item_preview_image_view')
