@@ -11,6 +11,7 @@ import com.quote.mosaic.R
 import com.quote.mosaic.core.AppFragment
 import com.quote.mosaic.ui.main.play.game.utils.GameDialogBuilder
 import com.quote.mosaic.core.common.utils.manageViewGroupTapable
+import com.quote.mosaic.core.manager.AnalyticsManager
 import com.quote.mosaic.data.manager.UserManager
 import com.quote.mosaic.databinding.OnboardingGameFragmentBinding
 import com.quote.mosaic.game.GameListener
@@ -28,10 +29,14 @@ class OnboardingGameFragment : AppFragment(), GameListener {
     @Inject
     lateinit var userManager: UserManager
 
+    @Inject
+    lateinit var analyticsManager: AnalyticsManager
+
     private val vm: OnboardingViewModel by activityViewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        analyticsManager.logOnboardingGameStarted()
         vm.loadUser()
     }
 
@@ -50,6 +55,7 @@ class OnboardingGameFragment : AppFragment(), GameListener {
 
     override fun onResume() {
         super.onResume()
+        analyticsManager.logCurrentScreen(requireActivity(), "Onboarding Game Screen")
         binding().welcomeMsg.text =
             getString(R.string.onboarding_label_welcome_aboard, userManager.getUserName())
     }
@@ -66,6 +72,7 @@ class OnboardingGameFragment : AppFragment(), GameListener {
     }
 
     private fun levelCompleted() {
+        analyticsManager.logOnboardingGameFinished()
         binding().container.manageViewGroupTapable(binding().container, false)
         showKonfetti()
         Completable
@@ -100,6 +107,7 @@ class OnboardingGameFragment : AppFragment(), GameListener {
             Completable.timer(500, TimeUnit.MILLISECONDS, AndroidSchedulers.mainThread())
                 .subscribe {
                     GameDialogBuilder.showOnboardingFinishDialog(requireContext()) {
+                        analyticsManager.logOnboardingFinished()
                         startActivity(MainActivity.newIntent(requireContext()))
                         it.dismiss()
                     }

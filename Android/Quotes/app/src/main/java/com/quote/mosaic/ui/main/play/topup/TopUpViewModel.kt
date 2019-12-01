@@ -9,6 +9,7 @@ import com.quote.mosaic.core.AppViewModel
 import com.quote.mosaic.core.Schedulers
 import com.quote.mosaic.core.billing.BillingManager
 import com.quote.mosaic.core.billing.BillingManagerResult
+import com.quote.mosaic.core.manager.AnalyticsManager
 import com.quote.mosaic.core.rx.ClearableBehaviorProcessor
 import com.quote.mosaic.data.api.ApiClient
 import com.quote.mosaic.data.manager.UserManager
@@ -23,7 +24,8 @@ class TopUpViewModel(
     private val apiClient: ApiClient,
     private val billingManager: BillingManager,
     private val userManager: UserManager,
-    private val productsMapper: TopUpProductMapper
+    private val productsMapper: TopUpProductMapper,
+    private val analyticsManager: AnalyticsManager
 ) : AppViewModel() {
 
     private val products = BehaviorProcessor.create<List<TopUpProductModel>>()
@@ -61,6 +63,7 @@ class TopUpViewModel(
                         state.loading.set(true)
                     }
                     is BillingManagerResult.Success -> {
+                        analyticsManager.logTopupItemPurchaseSuccess(result.sku.orEmpty())
                         state.loading.set(false)
                         userManager.setUser(user)
                         state.balance.set(user.balance.toString())
@@ -68,6 +71,7 @@ class TopUpViewModel(
                         successTrigger.onNext(Unit)
                     }
                     is BillingManagerResult.Retry -> {
+                        analyticsManager.logTopupItemPurchaseError(result.sku.orEmpty(), result.cause)
                         state.loading.set(false)
                         userManager.setUser(user)
                         state.balance.set(user.balance.toString())
@@ -91,6 +95,7 @@ class TopUpViewModel(
     }
 
     fun buyProduct(activity: Activity, model: TopUpProductModel) {
+        analyticsManager.logTopupItemPurchaseStarted(model.billingProduct.sku)
         billingManager
             .launchBuyWorkFlow(activity, model)
             .onErrorComplete()
@@ -121,13 +126,19 @@ class TopUpViewModel(
         private val apiClient: ApiClient,
         private val billingManager: BillingManager,
         private val userManager: UserManager,
-        private val productsMapper: TopUpProductMapper
+        private val productsMapper: TopUpProductMapper,
+        private val analyticsManager: AnalyticsManager
     ) : ViewModelProvider.Factory {
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
             if (modelClass.isAssignableFrom(TopUpViewModel::class.java)) {
                 @Suppress("UNCHECKED_CAST")
                 return TopUpViewModel(
-                    schedulers, apiClient, billingManager, userManager, productsMapper
+                    schedulers,
+                    apiClient,
+                    billingManager,
+                    userManager,
+                    productsMapper,
+                    analyticsManager
                 ) as T
             }
             throw IllegalArgumentException("Unknown ViewModel class")

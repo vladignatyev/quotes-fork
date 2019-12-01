@@ -12,6 +12,7 @@ import androidx.transition.TransitionInflater
 import com.quote.mosaic.R
 import com.quote.mosaic.core.AppFragment
 import com.quote.mosaic.core.ext.supportEmailIntent
+import com.quote.mosaic.core.manager.AnalyticsManager
 import com.quote.mosaic.data.manager.UserManager
 import com.quote.mosaic.databinding.TopupCompletePopupBinding
 import com.quote.mosaic.databinding.TopupFailedPopupBinding
@@ -19,6 +20,9 @@ import com.quote.mosaic.databinding.TopupFragmentBinding
 import javax.inject.Inject
 
 class TopUpFragment : AppFragment() {
+
+    @Inject
+    lateinit var analyticsManager: AnalyticsManager
 
     @Inject
     lateinit var userManager: UserManager
@@ -73,6 +77,11 @@ class TopUpFragment : AppFragment() {
             vm.reset()
             showSuccess()
         }.untilStopped()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        analyticsManager.logCurrentScreen(requireActivity(), "Topup Screen")
     }
 
     private fun showError() {

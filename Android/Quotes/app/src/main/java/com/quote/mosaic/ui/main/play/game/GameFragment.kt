@@ -16,6 +16,7 @@ import com.quote.mosaic.core.billing.BillingManager
 import com.quote.mosaic.core.common.args
 import com.quote.mosaic.core.common.utils.findColor
 import com.quote.mosaic.core.common.utils.manageViewGroupTapable
+import com.quote.mosaic.core.manager.AnalyticsManager
 import com.quote.mosaic.databinding.GameFragmentBinding
 import com.quote.mosaic.game.GameListener
 import com.quote.mosaic.ui.main.MainActivity
@@ -30,6 +31,9 @@ import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 class GameFragment : AppFragment(), GameListener {
+
+    @Inject
+    lateinit var analyticsManager: AnalyticsManager
 
     @Inject
     lateinit var billingManager: BillingManager
@@ -86,7 +90,7 @@ class GameFragment : AppFragment(), GameListener {
         vm.state.insufficientBalanceTriggered.subscribe {
             binding().menu.close(true)
             visibleAlert?.dismiss()
-            topupClicked()
+            topupClicked("Game Screen with Low balance")
         }.untilStopped()
 
     }
@@ -94,6 +98,7 @@ class GameFragment : AppFragment(), GameListener {
     override fun onResume() {
         super.onResume()
         billingManager.warmUp()
+        analyticsManager.logCurrentScreen(requireActivity(), "Game Screen")
     }
 
     override fun onQuoteOrderChanged(userVariant: ArrayList<String>) {
@@ -108,6 +113,11 @@ class GameFragment : AppFragment(), GameListener {
     }
 
     fun topupClicked() {
+        topupClicked("Game Screen")
+    }
+
+    private fun topupClicked(source: String) {
+        analyticsManager.logTopupScreenOpened(source)
         val extras = FragmentNavigatorExtras(
             binding().title to "title",
             binding().balance to "balance",
@@ -122,6 +132,7 @@ class GameFragment : AppFragment(), GameListener {
     fun findNextWordClicked() {
         vm.verifyVideoProducts()
         binding().menu.close(true)
+        analyticsManager.logNextWordClicked(vm.state.currentQuote.get()?.id ?: 0)
         visibleAlert = HintDialogBuilder.showNextWordDialog(requireContext(), vm) {
             vm.findNextWordVideo(requireActivity())
         }
@@ -129,11 +140,13 @@ class GameFragment : AppFragment(), GameListener {
 
     fun skipLevelClicked() {
         binding().menu.close(true)
+        analyticsManager.logSkipClicked(vm.state.currentQuote.get()?.id ?: 0)
         visibleAlert = HintDialogBuilder.showSkipLevelDialog(requireContext(), vm)
     }
 
     fun findAuthorClicked() {
         binding().menu.close(true)
+        analyticsManager.logAuthorClicked(vm.state.currentQuote.get()?.id ?: 0)
         visibleAlert = HintDialogBuilder.showAuthorHintDialog(requireContext(), vm)
     }
 

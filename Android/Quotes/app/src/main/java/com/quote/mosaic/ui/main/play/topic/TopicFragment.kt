@@ -11,6 +11,7 @@ import androidx.navigation.fragment.findNavController
 import com.quote.mosaic.R
 import com.quote.mosaic.core.AppFragment
 import com.quote.mosaic.core.common.args
+import com.quote.mosaic.core.manager.AnalyticsManager
 import com.quote.mosaic.databinding.OverviewTopicFragmentBinding
 import com.quote.mosaic.ui.main.play.game.GameFragment
 import com.quote.mosaic.ui.main.play.CategoryClickListener
@@ -22,6 +23,9 @@ import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 class TopicFragment : AppFragment(), CategoryClickListener {
+
+    @Inject
+    lateinit var analyticsManager: AnalyticsManager
 
     @Inject
     lateinit var vmFactory: TopicViewModel.Factory
@@ -66,6 +70,11 @@ class TopicFragment : AppFragment(), CategoryClickListener {
         }.untilStopped()
     }
 
+    override fun onResume() {
+        super.onResume()
+        analyticsManager.logCurrentScreen(requireActivity(), "Topic Screen")
+    }
+
     //Work around. Recyclerview scrolled down for some reasons on first loading.
     private fun checkIfNeededToScrollUp() {
         if (initialLoading) {
@@ -78,7 +87,8 @@ class TopicFragment : AppFragment(), CategoryClickListener {
         }
     }
 
-    override fun onClosedClicked(id: Int) {
+    override fun onClosedClicked(id: Int, name: String) {
+        analyticsManager.logClosedCategoryTapped(id, name)
         vm.openCategory(id)
     }
 
@@ -95,7 +105,8 @@ class TopicFragment : AppFragment(), CategoryClickListener {
             .streamFor(300, 30L)
     }
 
-    override fun onOpenedClicked(id: Int) {
+    override fun onOpenedClicked(id: Int, name: String) {
+        analyticsManager.logOpenedCategoryTapped(id, name)
         findNavController().navigate(
             R.id.action_overviewFragment_to_gameFragment, Bundle().apply {
                 putInt(GameFragment.SELECTED_CATEGORY_ID, id)

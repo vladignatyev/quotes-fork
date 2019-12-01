@@ -11,6 +11,7 @@ import com.quote.mosaic.core.Schedulers
 import com.quote.mosaic.core.billing.BillingManager
 import com.quote.mosaic.core.billing.BillingManagerResult
 import com.quote.mosaic.core.billing.BillingProduct
+import com.quote.mosaic.core.manager.AnalyticsManager
 import com.quote.mosaic.core.rx.ClearableBehaviorProcessor
 import com.quote.mosaic.core.rx.NonNullObservableField
 import com.quote.mosaic.data.api.ApiClient
@@ -30,7 +31,8 @@ class GameViewModel(
     private val schedulers: Schedulers,
     private val apiClient: ApiClient,
     private val userManager: UserManager,
-    private val billingManager: BillingManager
+    private val billingManager: BillingManager,
+    private val analyticsManager: AnalyticsManager
 ) : AppViewModel() {
 
     private val onNextLevelReceived = BehaviorProcessor.create<List<String>>()
@@ -117,6 +119,7 @@ class GameViewModel(
                 state.currentLevel.set(quotes.filter { it.complete }.count().plus(1).toString())
 
                 val currentQuote = quotes.first { !it.complete }
+                analyticsManager.logGameStarted(currentQuote.id, state.selectedCategory.get() ?: 0)
                 state.currentQuote.set(currentQuote)
                 state.author.set(currentQuote.author)
                 val shuffled = currentQuote.splitted.shuffled(Random(currentQuote.id))
@@ -149,6 +152,7 @@ class GameViewModel(
             .subscribeOn(schedulers.io())
             .observeOn(schedulers.ui())
             .subscribe({ quotes ->
+                analyticsManager.logGameCompleted(currentQuote.id, selectedCategoryId)
                 state.levelCompletedLoading.set(false)
                 state.isLastQuote.set(quotes.none { !it.complete })
                 prepareSuccessDialog()
@@ -181,7 +185,6 @@ class GameViewModel(
     fun findAuthor() {
         val currentQuote = state.currentQuote.get() ?: return
         if (state.hintLoading.get() || currentQuote.author.isNullOrEmpty()) return
-
         state.hintLoading.set(true)
         apiClient
             .validateHint(state.hintAuthorId.get(), currentQuote.id.toString())
@@ -190,6 +193,7 @@ class GameViewModel(
             .observeOn(schedulers.ui())
             .subscribe({
                 state.hintLoading.set(false)
+                analyticsManager.logAuthorUsed(currentQuote.id)
                 saveUser(it)
                 hintReceivedTrigger.onNext(currentQuote.author)
             }, {
@@ -217,6 +221,7 @@ class GameViewModel(
             .observeOn(schedulers.ui())
             .subscribe({ (user: UserDO, quotes: List<QuoteDO>) ->
                 state.hintLoading.set(false)
+                analyticsManager.logSkipUsed(currentQuote.id)
                 saveUser(user)
                 state.isLastQuote.set(quotes.none { !it.complete })
                 prepareSuccessDialog()
@@ -231,9 +236,12 @@ class GameViewModel(
     }
 
     fun findNextWord() {
-        val currentQuote = state.currentQuote.get() ?: return
         if (state.hintLoading.get()) return
+        findNextWord(false)
+    }
 
+    private fun findNextWord(isRewarded: Boolean) {
+        val currentQuote = state.currentQuote.get() ?: return
         state.hintLoading.set(true)
         apiClient
             .validateHint(state.hintNextWordId.get(), currentQuote.id.toString())
@@ -242,6 +250,7 @@ class GameViewModel(
             .observeOn(schedulers.ui())
             .subscribe({
                 state.hintLoading.set(false)
+                analyticsManager.logNextWordUsed(currentQuote.id, isRewarded)
                 saveUser(it)
                 showNextWord()
             }, {
@@ -301,7 +310,7 @@ class GameViewModel(
 
         if (result.sku == hintSku) {
             state.hintLoading.set(false)
-            findNextWord()
+            findNextWord(true)
         }
     }
 
@@ -326,7 +335,9 @@ class GameViewModel(
             billingProduct = billingProduct.skuDetails,
             payload = state.selectedCategory.get().toString()
         )
-
+        analyticsManager.logDoubleUpClicked(
+            state.currentQuote.get()?.id ?: 0, state.selectedCategory.get() ?: 0
+        )
         billingManager.launchBuyWorkFlow(activity, product)
             .onErrorComplete()
             .subscribeOn(schedulers.io())
@@ -400,12 +411,19 @@ class GameViewModel(
         private val schedulers: Schedulers,
         private val apiClient: ApiClient,
         private val userManager: UserManager,
-        private val billingManager: BillingManager
+        private val billingManager: BillingManager,
+        private val analyticsManager: AnalyticsManager
     ) : ViewModelProvider.Factory {
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
             if (modelClass.isAssignableFrom(GameViewModel::class.java)) {
                 @Suppress("UNCHECKED_CAST")
-                return GameViewModel(schedulers, apiClient, userManager, billingManager) as T
+                return GameViewModel(
+                    schedulers,
+                    apiClient,
+                    userManager,
+                    billingManager,
+                    analyticsManager
+                ) as T
             }
             throw IllegalArgumentException("Unknown ViewModel class")
         }

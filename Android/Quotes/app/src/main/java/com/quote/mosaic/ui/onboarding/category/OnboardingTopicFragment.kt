@@ -10,6 +10,7 @@ import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import com.quote.mosaic.R
 import com.quote.mosaic.core.AppFragment
+import com.quote.mosaic.core.manager.AnalyticsManager
 import com.quote.mosaic.databinding.OnboardingTopicFragmentBinding
 import com.quote.mosaic.ui.main.play.CategoryClickListener
 import com.quote.mosaic.ui.main.play.topic.TopicAdapter
@@ -18,12 +19,21 @@ import com.quote.mosaic.ui.main.play.topic.section.SectionModel
 import com.quote.mosaic.ui.onboarding.OnboardingViewModel
 import nl.dionsegijn.konfetti.models.Shape
 import nl.dionsegijn.konfetti.models.Size
+import javax.inject.Inject
 
 class OnboardingTopicFragment : AppFragment(), CategoryClickListener {
+
+    @Inject
+    lateinit var analyticsManager: AnalyticsManager
 
     private val vm: OnboardingViewModel by activityViewModels()
 
     private lateinit var adapter: TopicAdapter
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        analyticsManager.logOnboardingOpenCategoryStarted()
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -38,15 +48,23 @@ class OnboardingTopicFragment : AppFragment(), CategoryClickListener {
         adapter.submitList(defaultList())
     }.root
 
+    override fun onResume() {
+        super.onResume()
+        analyticsManager.logCurrentScreen(requireActivity(), "Onboarding Topic Screen")
+    }
+
     override fun onCompletedClicked(id: Int) {}
 
-    override fun onOpenedClicked(id: Int) {
+    override fun onOpenedClicked(id: Int, name: String) {
+        analyticsManager.logOnboardingOpenedTapped()
+        analyticsManager.logOnboardingOpenCategoryFinished()
         findNavController().navigate(R.id.action_onboardingCategoryFragment_to_onboardingGameFragment)
     }
 
     override fun onRefreshClicked() {}
 
-    override fun onClosedClicked(id: Int) {
+    override fun onClosedClicked(id: Int, name: String) {
+        analyticsManager.logOnboardingClosedTapped()
         vm.state.balance.set("10")
         adapter.submitList(openCategoryList())
         binding().viewKonfetti.build()

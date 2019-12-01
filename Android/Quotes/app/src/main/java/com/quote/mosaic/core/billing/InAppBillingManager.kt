@@ -5,6 +5,7 @@ import android.content.Context
 import com.android.billingclient.api.*
 import com.quote.mosaic.BuildConfig
 import com.quote.mosaic.core.Schedulers
+import com.quote.mosaic.core.manager.AnalyticsManager
 import com.quote.mosaic.data.api.ApiClient
 import com.quote.mosaic.data.model.purchase.AvailableProductsDO
 import com.quote.mosaic.data.model.purchase.PurchaseStatus
@@ -188,7 +189,12 @@ class InAppBillingManager(
             else -> {
                 Timber.e("onPurchasesUpdated() failed with code: ${billingResult?.responseCode}")
                 clearCachedHistory()
-                resultTrigger.onNext(BillingManagerResult.Retry("clearCachedHistory() called"))
+                resultTrigger.onNext(
+                    BillingManagerResult.Retry(
+                        purchases?.first()?.sku,
+                        "clearCachedHistory() called: ${billingResult?.debugMessage}"
+                    )
+                )
             }
         }
         purchases?.maxBy { it.purchaseTime }?.let {
@@ -286,13 +292,13 @@ class InAppBillingManager(
                 when (it.status) {
                     PurchaseStatus.INVALID -> {
                         resultTrigger.onNext(
-                            BillingManagerResult.Retry("registerTokenOnServer failed: Invalid")
+                            BillingManagerResult.Retry(pendingSku,"registerTokenOnServer failed: Invalid")
                         )
                         disposeBag.clear()
                     }
                     PurchaseStatus.CANCELLED -> {
                         resultTrigger.onNext(
-                            BillingManagerResult.Retry("registerTokenOnServer failed: Canceled")
+                            BillingManagerResult.Retry(pendingSku,"registerTokenOnServer failed: Canceled")
                         )
                         disposeBag.clear()
                     }
@@ -306,7 +312,7 @@ class InAppBillingManager(
                 }
             }, {
                 pendingVerificationProducts.remove(pendingProduct)
-                resultTrigger.onNext(BillingManagerResult.Retry("registerTokenOnServer failed, try again"))
+                resultTrigger.onNext(BillingManagerResult.Retry(pendingSku,"registerTokenOnServer failed, try again"))
                 disposeBag.clear()
             })
     }

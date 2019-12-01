@@ -2,6 +2,7 @@ package com.quote.mosaic.core.di.module
 
 import com.quote.mosaic.core.Schedulers
 import com.quote.mosaic.core.billing.BillingManager
+import com.quote.mosaic.core.manager.AnalyticsManager
 import com.quote.mosaic.core.manager.UserPreferences
 import com.quote.mosaic.data.api.ApiClient
 import com.quote.mosaic.data.manager.UserManager
@@ -53,12 +54,14 @@ class ViewModelModule {
         schedulers: Schedulers,
         apiClient: ApiClient,
         userManager: UserManager,
-        billingManager: BillingManager
+        billingManager: BillingManager,
+        analyticsManager: AnalyticsManager
     ) = GameViewModel.Factory(
         schedulers,
         apiClient,
         userManager,
-        billingManager
+        billingManager,
+        analyticsManager
     )
 
     @Provides
@@ -106,13 +109,15 @@ class ViewModelModule {
         apiClient: ApiClient,
         billingManager: BillingManager,
         userManager: UserManager,
-        productsMapper: TopUpProductMapper
+        productsMapper: TopUpProductMapper,
+        analyticsManager: AnalyticsManager
     ) = TopUpViewModel.Factory(
         schedulers,
         apiClient,
         billingManager,
         userManager,
-        productsMapper
+        productsMapper,
+        analyticsManager
     )
 
     @Provides

@@ -8,11 +8,15 @@ import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.activityViewModels
 import com.quote.mosaic.R
 import com.quote.mosaic.core.AppFragment
+import com.quote.mosaic.core.manager.AnalyticsManager
 import com.quote.mosaic.databinding.OnboardingOverviewFragmentBinding
 import com.quote.mosaic.ui.main.play.topic.TopicModel
 import com.quote.mosaic.ui.onboarding.OnboardingViewModel
+import javax.inject.Inject
 
 class OnboardingOverviewFragment : AppFragment() {
+
+    @Inject lateinit var analyticsManager: AnalyticsManager
 
     private val vm: OnboardingViewModel by activityViewModels()
 
@@ -31,4 +35,9 @@ class OnboardingOverviewFragment : AppFragment() {
         topics.adapter = adapter
         adapter.submitList(listOf(TopicModel(0, "")))
     }.root
+
+    override fun onResume() {
+        super.onResume()
+        analyticsManager.logCurrentScreen(requireActivity(), "Onboarding Overview Screen")
+    }
 }

@@ -30,7 +30,7 @@ class CategoryAdapter(
                     container.setOnClickListener {
                         item?.loading = true
                         notifyDataSetChanged()
-                        listener.onClosedClicked(item!!.id)
+                        listener.onClosedClicked(item!!.id, item!!.title)
                     }
                 }
             )
@@ -41,7 +41,7 @@ class CategoryAdapter(
                     LayoutInflater.from(parent.context), parent, false
                 ).apply {
                     cardView.setOnClickListener {
-                        listener.onOpenedClicked(item!!.id)
+                        listener.onOpenedClicked(item!!.id, item!!.title)
                     }
                 }
             )

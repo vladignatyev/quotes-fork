@@ -12,6 +12,7 @@ import com.quote.mosaic.core.common.utils.TimedActionConfirmHelper
 import com.quote.mosaic.core.manager.UserPreferences
 import com.quote.mosaic.data.manager.UserManager
 import com.quote.mosaic.core.common.utils.findColor
+import com.quote.mosaic.core.manager.AnalyticsManager
 import dagger.android.AndroidInjector
 import dagger.android.DispatchingAndroidInjector
 import dagger.android.HasAndroidInjector
@@ -19,6 +20,9 @@ import kotlinx.android.synthetic.main.onboarding_activity.*
 import javax.inject.Inject
 
 class OnboardingActivity : AppActivity(), HasAndroidInjector {
+
+    @Inject
+    lateinit var analyticsManager: AnalyticsManager
 
     @Inject
     lateinit var vmFactory: OnboardingViewModel.Factory
@@ -48,11 +52,14 @@ class OnboardingActivity : AppActivity(), HasAndroidInjector {
         vm.init()
 
         appExitTimer.setListener { finishAffinity() }
+
+        analyticsManager.logOnboardingStarted()
     }
 
     override fun onStart() {
         super.onStart()
         vm.state.loginSuccess.subscribe {
+            analyticsManager.logOnboardingNameFinished()
             val hostFragment = onboardingContainer as NavHostFragment
             hostFragment.navController.navigate(R.id.action_loginFragment_to_onboardingCategoryFragment)
         }.untilStopped()

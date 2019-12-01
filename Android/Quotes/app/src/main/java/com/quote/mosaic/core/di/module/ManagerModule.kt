@@ -5,6 +5,8 @@ import android.content.SharedPreferences
 import com.quote.mosaic.core.Schedulers
 import com.quote.mosaic.core.billing.BillingManager
 import com.quote.mosaic.core.billing.InAppBillingManager
+import com.quote.mosaic.core.manager.AnalyticsManager
+import com.quote.mosaic.core.manager.AnalyticsManagerImpl
 import com.quote.mosaic.core.manager.FirebaseManager
 import com.quote.mosaic.core.manager.UserPreferences
 import com.quote.mosaic.crypto.fs.sp.SecurePreferences
@@ -49,4 +51,10 @@ class ManagerModule {
     fun randomNameGenerator(
         context: Context
     ): RandomNameGenerator = RandomNameGenerator(context)
+
+    @Provides
+    @Singleton
+    fun analyticsManager(
+        context: Context
+    ): AnalyticsManager = AnalyticsManagerImpl(context)
 }

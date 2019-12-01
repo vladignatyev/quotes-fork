@@ -13,6 +13,7 @@ import com.quote.mosaic.core.AppFragment
 import com.quote.mosaic.core.common.utils.Ime
 import com.quote.mosaic.core.ext.shareAppIntent
 import com.quote.mosaic.core.ext.supportEmailIntent
+import com.quote.mosaic.core.manager.AnalyticsManager
 import com.quote.mosaic.data.manager.UserManager
 import com.quote.mosaic.databinding.ProfileFragmentBinding
 import com.quote.mosaic.ui.onboarding.OnboardingActivity
@@ -21,6 +22,9 @@ import eltos.simpledialogfragment.color.SimpleColorDialog
 import javax.inject.Inject
 
 class ProfileFragment : AppFragment(), SimpleDialog.OnDialogResultListener {
+
+    @Inject
+    lateinit var analyticsManager: AnalyticsManager
 
     @Inject
     lateinit var userManager: UserManager
@@ -68,6 +72,11 @@ class ProfileFragment : AppFragment(), SimpleDialog.OnDialogResultListener {
 
     }
 
+    override fun onResume() {
+        super.onResume()
+        analyticsManager.logCurrentScreen(requireActivity(), "Profile Screen")
+    }
+
     override fun onResult(dialogTag: String, which: Int, extras: Bundle): Boolean {
         if (which == SimpleDialog.OnDialogResultListener.BUTTON_POSITIVE) {
             when (dialogTag) {
@@ -87,6 +96,18 @@ class ProfileFragment : AppFragment(), SimpleDialog.OnDialogResultListener {
             R.drawable.ic_circle_shape_black
         )
 
+        analyticsManager.logBackgroundColorChanged(
+            when (colors[position]) {
+                R.drawable.ic_circle_shape_blue -> "Blue"
+                R.drawable.ic_circle_shape_purple -> "Purple"
+                R.drawable.ic_circle_shape_gray -> "Gray"
+                R.drawable.ic_circle_shape_green -> "Green"
+                R.drawable.ic_circle_shape_red -> "Red"
+                R.drawable.ic_circle_shape_black -> "Black"
+                else -> "Unknown"
+            }
+        )
+
         vm.changeColor(colors[position])
         updateBackgroundColor(binding().container)
     }
@@ -99,11 +120,13 @@ class ProfileFragment : AppFragment(), SimpleDialog.OnDialogResultListener {
     }
 
     fun shareClicked() {
+        analyticsManager.logShareClicked()
         val intent = Intent().shareAppIntent(requireContext())
         startActivity(intent)
     }
 
     fun feedbackClicked() {
+        analyticsManager.logProblemFeedbackClicked()
         val intent = Intent.createChooser(
             Intent().supportEmailIntent(requireContext(), userManager),
             requireContext().getString(R.string.shared_label_send)
