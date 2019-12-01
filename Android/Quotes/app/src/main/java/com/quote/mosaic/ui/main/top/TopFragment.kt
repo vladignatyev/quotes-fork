@@ -5,7 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
-import androidx.lifecycle.ViewModelProviders
+import androidx.fragment.app.viewModels
 import com.quote.mosaic.R
 import com.quote.mosaic.core.AppFragment
 import com.quote.mosaic.databinding.TopFragmentBinding
@@ -16,13 +16,10 @@ class TopFragment : AppFragment() {
     @Inject
     lateinit var vmFactory: TopViewModel.Factory
 
-    private lateinit var vm: TopViewModel
+    private val vm: TopViewModel by viewModels { vmFactory }
 
-     override fun onCreate(savedInstanceState: Bundle?) {
+    override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        vm = ViewModelProviders
-                .of(this, vmFactory)
-                .get(TopViewModel::class.java)
         vm.init()
     }
 
@@ -37,5 +34,10 @@ class TopFragment : AppFragment() {
         viewModel = vm
         updateBackgroundColor(this.container)
     }.root
+
+    override fun onStart() {
+        super.onStart()
+        vm.load()
+    }
 
 }

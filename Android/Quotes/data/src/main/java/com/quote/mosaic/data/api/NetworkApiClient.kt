@@ -118,6 +118,19 @@ class NetworkApiClient(
         return apiService.validateHint(userManager.getSession(), body).transformToCompletable()
     }
 
+    // ---------------- STATS ----------------- //
+    override fun globalTop(): Single<String> =
+        apiService.globalTop(userManager.getSession()).transform()
+            .map { it.objects.first() }
+
+    override fun globalAchievements(): Single<String> =
+        apiService.globalAchievements(userManager.getSession()).transform()
+            .map { it.objects.first() }
+
+    override fun userAchievements(): Single<String> =
+        apiService.userAchievements(userManager.getSession()).transform()
+            .map { it.objects.first() }
+
     // ---------------- COMMON ---------------- //
     private fun <T> Single<Response<T>>.transform() =
         compose(

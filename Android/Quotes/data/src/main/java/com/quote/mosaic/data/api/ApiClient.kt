@@ -48,4 +48,11 @@ interface ApiClient {
 
     fun validateHint(hintId: String, levelId: String): Completable
 
+    // Stats
+    fun globalTop(): Single<String>
+
+    fun globalAchievements(): Single<String>
+
+    fun userAchievements(): Single<String>
+
 }

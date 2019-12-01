@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.quote.mosaic.data.api.ApiClient
 import com.quote.mosaic.core.AppViewModel
 import com.quote.mosaic.core.Schedulers
+import timber.log.Timber
 
 class TopViewModel(
     private val schedulers: Schedulers,
@@ -12,7 +13,18 @@ class TopViewModel(
 ) : AppViewModel() {
 
     override fun initialise() {
+        load()
+    }
 
+    fun load() {
+        apiClient.globalTop()
+            .subscribeOn(schedulers.io())
+            .observeOn(schedulers.ui())
+            .subscribe({
+
+            }, {
+                Timber.w(it, "")
+            }).untilCleared()
     }
 
     class Factory(

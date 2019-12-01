@@ -6,10 +6,10 @@
         android:icon="@drawable/ic_game"
         android:title="@string/navigation_label_game" />
 
-    <item
-        android:id="@+id/top"
-        android:icon="@drawable/ic_chart"
-        android:title="@string/navigation_label_top" />
+<!--    <item-->
+<!--        android:id="@+id/top"-->
+<!--        android:icon="@drawable/ic_chart"-->
+<!--        android:title="@string/navigation_label_top" />-->
 
     <item
         android:id="@+id/profile"

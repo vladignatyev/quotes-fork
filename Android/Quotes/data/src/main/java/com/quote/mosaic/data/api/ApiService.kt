@@ -1,6 +1,6 @@
 package com.quote.mosaic.data.api
 
-import com.quote.mosaic.data.model.*
+import com.quote.mosaic.data.model.ResponseData
 import com.quote.mosaic.data.model.hints.HintsVariantsDO
 import com.quote.mosaic.data.model.overview.MainTopicDO
 import com.quote.mosaic.data.model.overview.QuoteDO
@@ -107,5 +107,24 @@ interface ApiService {
         @Header("X-Client-Auth") token: String,
         @Body body: HashMap<String, String>
     ): Single<Response<Void>>
+
+    // ---------------- STATS ---------------- //
+    @GET("quoterank/")
+    @Headers("Cache-Control: no-cache")
+    fun globalTop(
+        @Header("X-Client-Auth") token: String
+    ): Single<Response<ResponseData<String>>>
+
+    @GET("achievements/all/")
+    @Headers("Cache-Control: no-cache")
+    fun globalAchievements(
+        @Header("X-Client-Auth") token: String
+    ): Single<Response<ResponseData<String>>>
+
+    @GET("achievements/")
+    @Headers("Cache-Control: no-cache")
+    fun userAchievements(
+        @Header("X-Client-Auth") token: String
+    ): Single<Response<ResponseData<String>>>
 
 }
