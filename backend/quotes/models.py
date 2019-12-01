@@ -153,7 +153,7 @@ class Topic(RewardableEntity):
 
         for category in categories:
             for section in flat_topic['sections']:
-                if category.section.id == section['id']:
+                if str(category.section.id) == str(section['id']):
                     section['categories'] = section.get('categories', [])
 
                     flat_category = category.get_flat()
