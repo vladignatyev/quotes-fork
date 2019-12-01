@@ -51,10 +51,10 @@ class QuoteAuthor(models.Model):
 
 
 class Achievement(models.Model, ItemWithImageMixin):
-    icon = models.CharField("Имя иконки в приложении", max_length=256)
+    icon = models.CharField("Имя иконки в приложении", max_length=256, blank=True)
     title = models.CharField("Название", max_length=256)
-    received_text = models.TextField("Текст для юзера при вручении ему достижения", default='')
-    description_text = models.TextField("Описание достижения для юзера", default='')
+    received_text = models.TextField("Текст для юзера при вручении ему достижения", default='', blank=True)
+    description_text = models.TextField("Описание достижения для юзера", default='', blank=True)
 
     opened_by_users = models.ManyToManyField('Profile', verbose_name='Профили пользователей которые открыли ачивку', blank=True, through='AchievementReceiving')
 
