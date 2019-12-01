@@ -2,4 +2,6 @@
 <resources>
     <integer name="anim_duration_quick">300</integer>
     <string name="empty" translatable="false" />
+    <string name="facebook_app_id" translatable="false">1013990252278005</string>
+    <string name="fb_login_protocol_scheme" translatable="false">fb1013990252278005</string>
 </resources>

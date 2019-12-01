@@ -41,7 +41,7 @@ class TopUpFragment : AppFragment() {
         vm = ViewModelProviders
             .of(this, vmFactory)
             .get(TopUpViewModel::class.java)
-        vm.setUp(userManager.getUserName(), userManager.getUserBalance())
+        vm.setUp(userManager.getUserName(), userManager.getUserBalance().toString())
         vm.init()
     }
 

@@ -4,6 +4,9 @@ import android.app.Application
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.databinding.DataBindingUtil
 import com.crashlytics.android.Crashlytics
+import com.facebook.FacebookSdk
+import com.facebook.LoggingBehavior
+import com.facebook.appevents.AppEventsLogger
 import com.quote.mosaic.core.analytics.CrashlyticsTimberTree
 import com.quote.mosaic.core.di.AppComponent
 import com.quote.mosaic.core.di.AppDataBindingComponent
@@ -27,7 +30,8 @@ class App : Application(), HasAndroidInjector {
     private lateinit var appComponent: AppComponent
 
     //Don't remove, needed to have up-to-date data on application start.
-    @Inject lateinit var firebaseManager: FirebaseManager
+    @Inject
+    lateinit var firebaseManager: FirebaseManager
 
     override fun onCreate() {
         super.onCreate()
@@ -39,6 +43,12 @@ class App : Application(), HasAndroidInjector {
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true)
 
         setupDagger()
+
+        setupFacebook()
+    }
+
+    private fun setupFacebook() {
+        AppEventsLogger.activateApp(this)
     }
 
     private fun setupDagger() {

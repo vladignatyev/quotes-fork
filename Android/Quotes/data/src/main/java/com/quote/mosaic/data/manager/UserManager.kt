@@ -37,7 +37,7 @@ class UserManager(
 
     fun getUserName(): String = securePreferences.getString(KEY_USERNAME, "").orEmpty()
 
-    fun getUserBalance(): String = (userTrigger.value?.balance ?: 0).toString()
+    fun getUserBalance(): Int = userTrigger.value?.balance ?: 0
 
     fun saveSession(token: String) {
         securePreferences.putString(KEY_ACCESS_TOKEN, token)

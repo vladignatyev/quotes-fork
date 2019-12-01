@@ -336,7 +336,7 @@ class GameViewModel(
             payload = state.selectedCategory.get().toString()
         )
         analyticsManager.logDoubleUpClicked(
-            state.currentQuote.get()?.id ?: 0, state.selectedCategory.get() ?: 0
+            state.currentQuote.get()?.id ?: 0, userManager.getUserBalance()
         )
         billingManager.launchBuyWorkFlow(activity, product)
             .onErrorComplete()

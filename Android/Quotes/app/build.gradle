@@ -133,5 +133,8 @@ dependencies {
 
     //Billing
     implementation "com.android.billingclient:billing:$versions.billing"
+
+    //Analytics
+    implementation "com.facebook.android:facebook-android-sdk:$versions.facebook"
 }
 apply plugin: 'com.google.gms.google-services'

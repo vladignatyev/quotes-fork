@@ -80,7 +80,8 @@ ext {
             fragmentKtx         : "1.1.0",
             flexbox             : "2.0.0",
             fireLikes           : "0.0.2",
-            fab                 : "1.6.4"
+            fab                 : "1.6.4",
+            facebook            : "5.0.0"
 
     ]
 
