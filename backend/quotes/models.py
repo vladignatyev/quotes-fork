@@ -143,7 +143,7 @@ class Topic(RewardableEntity):
         categories = QuoteCategory.objects.filter(section__in=sections, is_published=True).select_related('on_complete_achievement').order_by('order').all()
 
         flat_topic = {
-            'id': self.pk,
+            'id': str(self.pk),
             'title': self.title,
             'bonus_reward': self.bonus_reward,
             'order': self.order,
@@ -214,7 +214,7 @@ class Section(RewardableEntity):
 
     def get_flat(self):
         return {
-            'id': self.pk,
+            'id': str(self.pk),
             'title': self.title,
             'order': self.order,
             'tags': list(self.tags.all()),
@@ -264,7 +264,7 @@ def get_levels(category_pk, profile):
     result = []
     for item in levels:
         flat_item = {
-            'id': item.id,
+            'id': str(item.id),
             'text': item.text,
             'author': item.author.name if item.author else None,
             'reward': item.get_reward(profile),
@@ -381,7 +381,7 @@ class QuoteCategory(RewardableEntity, ItemWithImageMixin):
 
     def get_flat(self):
         return {
-            'id': self.id,
+            'id': str(self.id),
             'icon': self.icon,
             'title': self.title,
             'section_id': self.section.id,
@@ -624,7 +624,7 @@ class BaseProduct(models.Model, ProductFlow, ItemWithImageMixin):
 
     def get_flat(self):
         flat = {}
-        flat['id'] = self.id
+        flat['id'] = str(self.id)
         flat['admin_title'] = self.admin_title
         flat['is_featured'] = self.is_featured
 
@@ -911,7 +911,7 @@ class Profile(models.Model):
 
     def get_flat(self):
         return {
-            'id': self.pk,
+            'id': str(self.pk),
             'last_active': self.last_active.strftime('%Y-%m-%dT%H:%M:%S%z'),
             'nickname': self.nickname,
             'balance': self.balance,

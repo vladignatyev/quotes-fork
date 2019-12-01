@@ -901,7 +901,7 @@ class LevelsListViewTest(AuthenticatedTestCase, ContentMixin):
         response = self.client.get(url, **self.auth())
         self.assertEqual(200, response.status_code)
         response_objs = json.loads(response.content)['objects']
-        completed_quote_flat_obj = list(filter(lambda o: o['id'] == quote.pk, response_objs))[0]
+        completed_quote_flat_obj = list(filter(lambda o: o['id'] == str(quote.pk), response_objs))[0]
 
         self.assertTrue(completed_quote_flat_obj['complete'])
 
@@ -911,7 +911,7 @@ class LevelsListViewTest(AuthenticatedTestCase, ContentMixin):
 
         quote = self.quotes[2]
 
-        url = reverse('level-complete', kwargs={'level_pk': quote.pk })
+        url = reverse('level-complete', kwargs={'level_pk': str(quote.pk) })
         response = self.client.post(url, **self.auth())
         self.assertEqual(200, response.status_code)
 
@@ -921,7 +921,7 @@ class LevelsListViewTest(AuthenticatedTestCase, ContentMixin):
         response = self.client.get(url, **self.auth())
         self.assertEqual(200, response.status_code)
         response_objs = json.loads(response.content)['objects']
-        completed_quote_flat_obj = list(filter(lambda o: o['id'] == quote.pk, response_objs))[0]
+        completed_quote_flat_obj = list(filter(lambda o: o['id'] == str(quote.pk), response_objs))[0]
 
         self.assertTrue(completed_quote_flat_obj['complete'])
 
