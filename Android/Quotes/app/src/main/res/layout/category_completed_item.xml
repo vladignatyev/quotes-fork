@@ -5,6 +5,8 @@
 
     <data>
 
+        <import type="com.quote.mosaic.R" />
+
         <variable
             name="item"
             type="com.quote.mosaic.ui.main.play.topic.category.CategoryModel.Completed" />
@@ -25,12 +27,13 @@
                 android:layout_width="144dp"
                 android:layout_height="144dp"
                 android:layout_marginBottom="16dp"
+                app:imagePlaceholder="@{R.drawable.ic_placeholder}"
                 app:imageUri="@{item.iconUrl}"
-                app:rounded="@{true}"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintTop_toTopOf="parent"
+                app:rounded="@{true}" />
 
             <View
                 android:layout_width="144dp"

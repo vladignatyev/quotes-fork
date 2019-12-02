@@ -4,8 +4,6 @@ import android.app.Application
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.databinding.DataBindingUtil
 import com.crashlytics.android.Crashlytics
-import com.facebook.FacebookSdk
-import com.facebook.LoggingBehavior
 import com.facebook.appevents.AppEventsLogger
 import com.quote.mosaic.core.analytics.CrashlyticsTimberTree
 import com.quote.mosaic.core.di.AppComponent

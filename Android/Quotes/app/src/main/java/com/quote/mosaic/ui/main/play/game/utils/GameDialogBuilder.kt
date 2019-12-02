@@ -27,7 +27,7 @@ object GameDialogBuilder {
 
         val iconEmitter = IconEmitterManager(
             binding.container,
-            FireLike.flame(R.drawable.ic_coins)
+            FireLike.flame(R.drawable.ic_coin_reward)
         )
 
         val alert = AlertDialog
@@ -101,7 +101,7 @@ object GameDialogBuilder {
 
         val iconEmitter = IconEmitterManager(
             binding.container,
-            FireLike.flame(R.drawable.ic_coins)
+            FireLike.flame(R.drawable.ic_coin_reward)
         )
 
         val alert = AlertDialog
