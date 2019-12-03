@@ -1,5 +1,6 @@
 package com.quote.mosaic.game.utils
 
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
@@ -9,14 +10,13 @@ import androidx.recyclerview.widget.RecyclerView
 import com.quote.mosaic.game.R
 import kotlinx.android.extensions.LayoutContainer
 import java.util.*
-import kotlin.collections.ArrayList
 
 class AisAdapter(
-    private val onQuoteOrderChanged: (ArrayList<String>) -> Unit
+    private val onQuoteOrderChanged: (ArrayList<String>) -> Unit,
+    private val onClickListener: (RecyclerView.ViewHolder) -> Unit
 ) : RecyclerView.Adapter<AisAdapter.AisVH>(), AisTouchHelperAdapter {
 
     private var data: ArrayList<String> = emptyArrayList()
-    private var listener: AisClickListener? = null
 
     private var textColor = R.color.black
 
@@ -63,8 +63,11 @@ class AisAdapter(
             (itemView as TextView).text = model
             (itemView as TextView).setTextColor(ContextCompat.getColor(itemView.context, textColor))
 
-            itemView.setOnClickListener {
-                listener?.invoke(model)
+            itemView.setOnTouchListener { v, event ->
+                if (event.action == MotionEvent.ACTION_DOWN) {
+                    onClickListener(this)
+                }
+                true
             }
         }
 

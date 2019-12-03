@@ -52,7 +52,7 @@ android {
             dimension "environment"
         }
         production {
-            resValue "string", "app_name", "Quotes"
+            resValue "string", "app_name", "Угадай цитату"
             resValue "string", "app_package", "com.quote.mosaic"
             dimension "environment"
         }

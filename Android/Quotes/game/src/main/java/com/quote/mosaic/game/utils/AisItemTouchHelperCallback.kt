@@ -11,7 +11,7 @@ class AisItemTouchHelperCallback(
     private val adapter: AisTouchHelperAdapter
 ) : ItemTouchHelper.Callback() {
 
-    override fun isLongPressDragEnabled(): Boolean = true
+    override fun isLongPressDragEnabled(): Boolean = false
     override fun isItemViewSwipeEnabled(): Boolean = true
 
     override fun getMovementFlags(

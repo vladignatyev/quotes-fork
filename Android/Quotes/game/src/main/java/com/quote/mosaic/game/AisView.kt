@@ -23,13 +23,18 @@ class AisView @JvmOverloads constructor(
 
     private val mLayoutManager by lazy { FlexboxLayoutManager(context, FlexDirection.ROW) }
 
-    private val mAdapter by lazy { AisAdapter { listener?.onQuoteOrderChanged(it) } }
+    private val mAdapter = AisAdapter({
+        listener?.onQuoteOrderChanged(it)
+    }, {
+        touchHelper.startDrag(it)
+    })
+
+    private val touchHelper: ItemTouchHelper = ItemTouchHelper(AisItemTouchHelperCallback(mAdapter))
 
     init {
         layoutManager = mLayoutManager
 
-        val callback: ItemTouchHelper.Callback = AisItemTouchHelperCallback(mAdapter)
-        ItemTouchHelper(callback).attachToRecyclerView(this)
+        touchHelper.attachToRecyclerView(this)
     }
 
     fun setTextColor(color: Int) {
