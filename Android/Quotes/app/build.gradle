@@ -22,6 +22,7 @@ android {
 
         multiDexEnabled true
         vectorDrawables.useSupportLibrary true
+        resConfigs "en", "ru"
     }
 
     buildTypes {
