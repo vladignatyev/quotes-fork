@@ -70,6 +70,7 @@ class TopicMapperImpl(
                 title = section.title,
                 categories = section.categories
                     .filter { it.totalLevels > 0 }
+                    .sortedByDescending { it.isAvailableToUser }
                     .map { mapCategory(it) }
             )
         }
@@ -79,7 +80,7 @@ class TopicMapperImpl(
             //Completed
             CategoryModel.Completed(
                 id = category.id,
-                title = category.onCompleteAchievement ?: context.getString(R.string.topic_label_achievement_placeholder, category.title),
+                title = context.getString(R.string.topic_label_achievement_placeholder, category.title),
                 iconUrl = category.image
             )
         } else {

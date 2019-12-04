@@ -169,8 +169,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:onClick="@{() -> fragment.findNextWordClicked()}"
-                android:src="@drawable/ic_hint_next_word"
-                app:fab_colorNormal="@color/gold"
+                android:src="@drawable/ic_hint_nextword"
+                app:fab_colorNormal="#F9F9F9"
                 app:fab_label="@string/hint_fab_next_word_fab_title"
                 app:fab_size="mini" />
 
@@ -179,7 +179,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:onClick="@{() -> fragment.skipLevelClicked()}"
-                android:src="@drawable/ic_hint_skip"
+                android:src="@drawable/ic_hint_skiplevel"
+                app:fab_colorNormal="#F9F9F9"
                 app:fab_label="@string/hint_fab_skip_title"
                 app:fab_size="mini" />
 
@@ -189,7 +190,7 @@
                 android:layout_height="wrap_content"
                 android:onClick="@{() -> fragment.findAuthorClicked()}"
                 android:src="@drawable/ic_hint_author"
-                app:fab_colorNormal="@color/gold"
+                app:fab_colorNormal="#F9F9F9"
                 app:fab_label="@string/hint_fab_author_title"
                 app:fab_size="mini" />
 
