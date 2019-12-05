@@ -3,9 +3,11 @@ package com.quote.mosaic.ui.main.play.game
 import android.app.Activity
 import androidx.databinding.ObservableBoolean
 import androidx.databinding.ObservableField
+import androidx.databinding.ObservableInt
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.quote.mosaic.BuildConfig
+import com.quote.mosaic.R
 import com.quote.mosaic.core.AppViewModel
 import com.quote.mosaic.core.Schedulers
 import com.quote.mosaic.core.billing.BillingManager
@@ -21,10 +23,12 @@ import com.quote.mosaic.data.model.overview.QuoteDO
 import com.quote.mosaic.data.model.purchase.RemoteProductTag
 import com.quote.mosaic.data.model.user.UserDO
 import com.quote.mosaic.ui.main.play.topup.TopUpProductModel
+import io.reactivex.Completable
 import io.reactivex.Flowable
 import io.reactivex.processors.BehaviorProcessor
 import io.reactivex.processors.PublishProcessor
 import timber.log.Timber
+import java.util.concurrent.TimeUnit
 import kotlin.random.Random
 
 class GameViewModel(
@@ -346,6 +350,14 @@ class GameViewModel(
             .untilCleared()
     }
 
+    fun startDoubleUpDelay() {
+        state.doubleUpLoading.set(true)
+        Completable.timer(2500, TimeUnit.MILLISECONDS, schedulers.ui()).subscribe {
+            state.doubleUpLoading.set(false)
+            state.doubleUpColorRes.set(R.drawable.shape_solid_orange_rounded_corners)
+        }.untilCleared()
+    }
+
     fun doubleUpPossible(): Boolean = billingManager.availableSkus()
         .any { it.remoteProduct.tags.contains(RemoteProductTag.DOUBLE_UP) }
 
@@ -357,6 +369,7 @@ class GameViewModel(
 
     fun reset() {
         levelCompletedTrigger.clear()
+        state.doubleUpColorRes.set(R.drawable.shape_solid_gray_rounded_corners)
     }
 
     data class State(
@@ -404,7 +417,9 @@ class GameViewModel(
         val successWinningCoins: NonNullObservableField<String> = NonNullObservableField(""),
         val successWinningDoubledCoins: NonNullObservableField<String> = NonNullObservableField(""),
         val successWinningCategoryCoins: NonNullObservableField<String> = NonNullObservableField(""),
-        val successWinningAchievement: NonNullObservableField<String> = NonNullObservableField("")
+        val successWinningAchievement: NonNullObservableField<String> = NonNullObservableField(""),
+        val doubleUpColorRes: ObservableInt = ObservableInt(R.drawable.shape_solid_gray_rounded_corners),
+        val doubleUpLoading: ObservableBoolean = ObservableBoolean()
     )
 
     class Factory(

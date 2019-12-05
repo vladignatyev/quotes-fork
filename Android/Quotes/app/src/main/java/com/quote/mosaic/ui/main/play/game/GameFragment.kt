@@ -14,6 +14,7 @@ import com.quote.mosaic.R
 import com.quote.mosaic.core.AppFragment
 import com.quote.mosaic.core.billing.BillingManager
 import com.quote.mosaic.core.common.args
+import com.quote.mosaic.core.common.utils.Vibrator
 import com.quote.mosaic.core.common.utils.findColor
 import com.quote.mosaic.core.common.utils.manageViewGroupTapable
 import com.quote.mosaic.core.manager.AnalyticsManager
@@ -161,11 +162,16 @@ class GameFragment : AppFragment(), GameListener {
                 vm.loadLevel()
 
                 if (vm.doubleUpPossible()) {
-                    Completable.timer(500, TimeUnit.MILLISECONDS, AndroidSchedulers.mainThread())
+                    Completable.timer(200, TimeUnit.MILLISECONDS, AndroidSchedulers.mainThread())
                         .subscribe {
+                            vm.startDoubleUpDelay()
                             GameDialogBuilder.showDoubleUpDialog(requireContext(), vm) {
-                                vm.showDoubleUpVideo(requireActivity())
-                                it.dismiss()
+                                if (!vm.state.doubleUpLoading.get()) {
+                                    vm.showDoubleUpVideo(requireActivity())
+                                    it.dismiss()
+                                } else {
+                                    Vibrator.vibrate(requireContext())
+                                }
                             }
                         }
                 }
