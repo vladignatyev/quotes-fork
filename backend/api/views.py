@@ -47,6 +47,7 @@ class AuthenticateView(View):
 
     def make_form_from_request(self, request):
         data = request.body[:self.PAYLOAD_MAX_LENGTH]
+
         try:
             deserialized = json.loads(data)
         except json.decoder.JSONDecodeError:

@@ -37,6 +37,8 @@ from quoterank.models import ProfileRank
 
 from django.utils.html import escape
 
+from django.core.exceptions import ObjectDoesNotExist
+
 
 
 class QuoteAuthor(models.Model):
@@ -852,9 +854,16 @@ class PurchaseProductDiscovery:
         return product_type, product_pk
 
     def get_product_by_product_id(self, product_id):
-        product_type, product_id = self.unwrap_product_id(product_id)
-        model_cls = self.product_types[product_type]
-        return model_cls.objects.get(id=product_id)
+        try:
+            product_type, product_id = self.unwrap_product_id(product_id)
+            model_cls = self.product_types[product_type]
+            return model_cls.objects.get(id=product_id)
+        except KeyError:
+            raise self.DiscoveryError(f'Wrong product type provided: {product_id}')
+        except ValueError:
+            raise self.DiscoveryError(f'No product type provided: {product_id}')
+        except ObjectDoesNotExist:
+            raise self.DiscoveryError(f'No product available with ID: {product_id}')
 
     def get_all_products(self):
         products = {}

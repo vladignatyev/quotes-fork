@@ -247,6 +247,7 @@ class GenericPurchaseView(FormBasedView):
 
     def post(self, request, *args, **kwargs):
         form = self.make_form_from_request(request)
+
         if not form or not form.is_valid():
             return HttpResponse(status=400)
 
@@ -288,6 +289,8 @@ class GenericPurchaseView(FormBasedView):
             return json_response(res_dict)
         except PurchaseProductDiscovery.DiscoveryError:
             return HttpResponse(status=404)
+        except ValueError:
+            return HttpResponse(status=406)
 
         return HttpResponse(status=501)
 
