@@ -179,7 +179,7 @@ class ProfileUpdateView(FormBasedView):
 
 
 class GooglePlayIAPForm(forms.Form):
-    order_id = forms.CharField(label='Google Play Billing Order ID', max_length=256)
+    order_id = forms.CharField(label='Google Play Billing Order ID', max_length=256, required=False)
     purchase_token = forms.CharField(label='Google Play Billing Purchase Token', max_length=256)
 
 # class RechargeForm(GooglePlayIAPForm):
