@@ -248,6 +248,9 @@ class GenericPurchaseView(FormBasedView):
     def post(self, request, *args, **kwargs):
         form = self.make_form_from_request(request)
 
+        print(request)
+        print(request.body)
+
         if not form or not form.is_valid():
             return HttpResponse(status=400)
 
