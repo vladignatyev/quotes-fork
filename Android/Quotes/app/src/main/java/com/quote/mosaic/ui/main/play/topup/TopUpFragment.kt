@@ -100,12 +100,14 @@ class TopUpFragment : AppFragment() {
         }
 
         binding.askSupport.setOnClickListener {
-            alert.dismiss()
-            val intent = Intent.createChooser(
-                Intent().supportEmailIntent(requireContext(), userManager),
-                requireContext().getString(R.string.shared_label_send)
-            )
-            startActivity(intent)
+            if (isAdded) {
+                alert.dismiss()
+                val intent = Intent.createChooser(
+                    Intent().supportEmailIntent(requireContext(), userManager),
+                    requireContext().getString(R.string.shared_label_send)
+                )
+                startActivity(intent)
+            }
         }
 
     }

@@ -20,6 +20,7 @@
     <string name="shared_label_error_title">Упс!</string>
 
     <string name="error_label_subtitle">Что-то пошло не так, попробуйте еще раз!</string>
+    <string name="error_label_no_connection">Проверьте свой интернет и попробуйте еще раз!</string>
 
     <string name="navigation_label_game">Игра</string>
     <string name="navigation_label_top">Топ</string>

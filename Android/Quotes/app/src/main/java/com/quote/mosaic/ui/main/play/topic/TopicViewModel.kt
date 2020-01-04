@@ -122,7 +122,7 @@ class TopicViewModel(
                 if (it is ResponseException.Application && it.error.lowBalance()) {
                     userManager.hasEmptyBalance()
                 }
-                Timber.e(it, "openCategory: $id failed")
+                Timber.w(it, "openCategory: $id failed")
             }).untilCleared()
     }
 

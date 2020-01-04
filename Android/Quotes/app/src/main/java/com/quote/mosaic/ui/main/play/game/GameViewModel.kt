@@ -273,7 +273,9 @@ class GameViewModel(
 
         val billingProduct: BillingProduct = billingManager
             .availableSkus()
-            .first { it.remoteProduct.tags.contains(RemoteProductTag.HINT_NEXT_WORD) }
+            .firstOrNull { it.remoteProduct.tags.contains(RemoteProductTag.HINT_NEXT_WORD) }
+            ?: return
+
         pendingHint = billingProduct
 
         val product = TopUpProductModel.Free(

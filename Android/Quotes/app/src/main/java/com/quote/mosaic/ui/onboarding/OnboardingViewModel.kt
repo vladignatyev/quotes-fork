@@ -4,7 +4,6 @@ import androidx.databinding.ObservableBoolean
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.quote.mosaic.BuildConfig
-import com.quote.mosaic.R
 import com.quote.mosaic.core.AppViewModel
 import com.quote.mosaic.core.Schedulers
 import com.quote.mosaic.core.common.toFlowable
@@ -12,12 +11,7 @@ import com.quote.mosaic.core.ext.Digest
 import com.quote.mosaic.core.rx.NonNullObservableField
 import com.quote.mosaic.data.api.ApiClient
 import com.quote.mosaic.data.manager.UserManager
-import com.quote.mosaic.ui.main.play.topic.TopicModel
-import com.quote.mosaic.ui.main.play.topic.category.CategoryModel
-import com.quote.mosaic.ui.main.play.topic.section.SectionModel
 import io.reactivex.Flowable
-import io.reactivex.Single
-import io.reactivex.processors.BehaviorProcessor
 import io.reactivex.processors.PublishProcessor
 import timber.log.Timber
 import java.text.SimpleDateFormat
@@ -31,7 +25,7 @@ class OnboardingViewModel(
 ) : AppViewModel() {
 
     private val loginSuccess = PublishProcessor.create<Unit>()
-    private val loginFailure = PublishProcessor.create<String>()
+    private val loginFailure = PublishProcessor.create<Throwable>()
 
     val state = State(
         loginFailure = loginFailure,
@@ -73,7 +67,7 @@ class OnboardingViewModel(
                 loginSuccess.onNext(Unit)
             }, {
                 state.loading.set(false)
-                loginFailure.onNext(it.message)
+                loginFailure.onNext(it)
                 Timber.e(it, "OnboardingViewModel login failed")
             }).untilCleared()
     }
@@ -105,7 +99,7 @@ class OnboardingViewModel(
         val initialBalance: NonNullObservableField<String> = NonNullObservableField("100"),
 
         val loginSuccess: Flowable<Unit>,
-        val loginFailure: Flowable<String>
+        val loginFailure: Flowable<Throwable>
     )
 
     class Factory(
