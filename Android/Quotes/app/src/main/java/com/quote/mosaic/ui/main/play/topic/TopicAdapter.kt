@@ -86,7 +86,7 @@ class TopicAdapter(
             ): Boolean = when (oldItem) {
                 is SectionModel.Item -> newItem is SectionModel.Item
                 is SectionModel.Error -> newItem is SectionModel.Error
-                is SectionModel.Loading -> newItem is SectionModel.Loading || newItem is SectionModel.Item || newItem is SectionModel.Error
+                is SectionModel.Loading -> newItem is SectionModel.Loading
             }
 
             override fun areContentsTheSame(
