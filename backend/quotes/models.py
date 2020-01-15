@@ -559,7 +559,8 @@ class Quote(RewardableEntity):
         qc.save()
 
     def get_reward(self, profile):
-        # return profile.settings.reward_per_level_completion
+        if not self.category:
+            return profile.settings.reward_per_level_completion
         return self.category.level_bonus_reward
 
     def is_completion_condition_met_by(self, profile):
