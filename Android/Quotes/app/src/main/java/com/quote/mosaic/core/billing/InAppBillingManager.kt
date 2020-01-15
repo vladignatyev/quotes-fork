@@ -269,6 +269,7 @@ class InAppBillingManager(
 
         val pendingProduct =
             pendingVerificationProducts.firstOrNull { it.billingProduct.sku == purchase.sku }
+                ?: return
 
         val pendingSku = pendingProduct?.billingProduct?.sku
 
