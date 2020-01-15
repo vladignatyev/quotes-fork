@@ -63,7 +63,11 @@ class Worker:
         at_least_one = False
         for purchase in purchases:
             at_least_one = True
-            self.process_purchase(purchase)
+            try:
+                self.process_purchase(purchase)
+            except Exception as e:
+                logger.error(f'An error has occured while processing purchase {purchase.pk}')
+                logger.error(f'Exception: {e}')
         return at_least_one
 
     def process_normal_purchases(self):
