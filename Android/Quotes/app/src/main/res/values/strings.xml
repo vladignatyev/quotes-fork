@@ -37,8 +37,8 @@
     <string name="onboarding_button_grab">Продолжить!</string>
     <string name="onboarding_label_author">© Луцию Аннею Сенеке</string>
     <string name="onboarding_label_quote">«Через тернии к звёздам.»‎</string>
-    <string name="onboarding_label_default_quote">Через тернии к звёздам</string>
-    <string name="onboarding_label_default_quote_mixed">звёздам Через тернии к‎</string>
+    <string name="onboarding_label_default_quote">Через тернии к звёздам.</string>
+    <string name="onboarding_label_default_quote_mixed">к звёздам Через тернии</string>
     <string name="onboarding_label_reward"> - %s монет для старта</string>
     <string name="onboarding_button_start_play">Поехали!</string>
     <string name="onboarding_label_open_category">Открывай категорию:</string>

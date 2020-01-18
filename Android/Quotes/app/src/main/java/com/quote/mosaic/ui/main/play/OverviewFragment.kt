@@ -62,7 +62,12 @@ class OverviewFragment : AppFragment() {
 
         binding().topics.addOnPageChangeListener(object : ViewPager.OnPageChangeListener {
             override fun onPageScrollStateChanged(state: Int) {}
-            override fun onPageScrolled(position: Int, positionOffset: Float, positionOffsetPixels: Int) {}
+            override fun onPageScrolled(
+                position: Int,
+                positionOffset: Float,
+                positionOffsetPixels: Int
+            ) {
+            }
 
             override fun onPageSelected(position: Int) {
                 analyticsManager.logTopicChanged(adapter.getPageTitle(position))
@@ -100,9 +105,11 @@ class OverviewFragment : AppFragment() {
             binding().topup to "topup"
         )
 
-        findNavController().navigate(
-            R.id.action_overviewFragment_to_topUpFragment, null, null, extras
-        )
+        if (findNavController().currentDestination?.id == R.id.overviewFragment) {
+            findNavController().navigate(
+                R.id.action_overviewFragment_to_topUpFragment, null, null, extras
+            )
+        }
     }
 
     private fun binding() = viewBinding<OverviewFragmentBinding>()

@@ -4,7 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
-import androidx.lifecycle.ViewModelProviders
+import androidx.activity.viewModels
 import androidx.navigation.fragment.NavHostFragment
 import com.quote.mosaic.R
 import com.quote.mosaic.core.AppActivity
@@ -40,16 +40,13 @@ class OnboardingActivity : AppActivity(), HasAndroidInjector {
     @Inject
     lateinit var fragmentDispatchingAndroidInjector: DispatchingAndroidInjector<Any>
 
-    private lateinit var vm: OnboardingViewModel
+    private val vm: OnboardingViewModel by viewModels { vmFactory }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.onboarding_activity)
         window.statusBarColor = findColor(R.color.darkBlue)
         userPreferences.setBackgroundColor(R.color.bar_background_blue)
-        vm = ViewModelProviders
-            .of(this, vmFactory)
-            .get(OnboardingViewModel::class.java)
         vm.init()
 
         appExitTimer.setListener { finishAffinity() }

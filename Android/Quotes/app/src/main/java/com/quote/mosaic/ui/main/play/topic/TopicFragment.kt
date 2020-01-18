@@ -13,8 +13,8 @@ import com.quote.mosaic.core.AppFragment
 import com.quote.mosaic.core.common.args
 import com.quote.mosaic.core.manager.AnalyticsManager
 import com.quote.mosaic.databinding.OverviewTopicFragmentBinding
-import com.quote.mosaic.ui.main.play.game.GameFragment
 import com.quote.mosaic.ui.main.play.CategoryClickListener
+import com.quote.mosaic.ui.main.play.game.GameFragment
 import io.reactivex.Completable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import nl.dionsegijn.konfetti.models.Shape
@@ -106,12 +106,16 @@ class TopicFragment : AppFragment(), CategoryClickListener {
     }
 
     override fun onOpenedClicked(id: Int, name: String) {
-        analyticsManager.logOpenedCategoryTapped(id, name)
-        findNavController().navigate(
-            R.id.action_overviewFragment_to_gameFragment, Bundle().apply {
-                putInt(GameFragment.SELECTED_CATEGORY_ID, id)
-            }
-        )
+        if (findNavController().currentDestination?.id == R.id.overviewFragment) {
+            analyticsManager.logOpenedCategoryTapped(id, name)
+            findNavController().navigate(
+                R.id.action_overviewFragment_to_gameFragment, Bundle().apply {
+                    putInt(GameFragment.SELECTED_CATEGORY_ID, id)
+                }
+            )
+        }
+
+
     }
 
     override fun onRefreshClicked() {

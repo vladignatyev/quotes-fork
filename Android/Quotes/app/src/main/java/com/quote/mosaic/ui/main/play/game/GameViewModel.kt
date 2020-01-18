@@ -122,13 +122,21 @@ class GameViewModel(
                 state.totalLevel.set(quotes.count().toString())
                 state.currentLevel.set(quotes.filter { it.complete }.count().plus(1).toString())
 
-                val currentQuote = quotes.first { !it.complete }
-                analyticsManager.logGameStarted(currentQuote.id, state.selectedCategory.get() ?: 0)
-                state.currentQuote.set(currentQuote)
-                state.author.set(currentQuote.author)
-                val shuffled = currentQuote.splitted.shuffled(Random(currentQuote.id))
-                state.userVariantQuote.set(shuffled)
-                onNextLevelReceived.onNext(shuffled)
+                val currentQuote = quotes.firstOrNull { !it.complete }
+
+                if (currentQuote == null) {
+                    Timber.w("Category $selectedCategoryId is empty for user ${user.id}")
+                    state.error.set(true)
+                } else {
+                    analyticsManager.logGameStarted(
+                        currentQuote.id, state.selectedCategory.get() ?: 0
+                    )
+                    state.currentQuote.set(currentQuote)
+                    state.author.set(currentQuote.author)
+                    val shuffled = currentQuote.splitted.shuffled(Random(currentQuote.id))
+                    state.userVariantQuote.set(shuffled)
+                    onNextLevelReceived.onNext(shuffled)
+                }
 
                 saveUser(user)
             }, {
@@ -203,8 +211,10 @@ class GameViewModel(
             }, {
                 state.hintLoading.set(false)
                 Timber.e(it, "validateHint findAuthor() failed")
-                if ((it as ResponseException.Application).error.errorCode == 402) {
-                    insufficientBalanceTriggered.onNext(Unit)
+                when (it) {
+                    is ResponseException.Application -> {
+                        if (it.error.errorCode == 402) insufficientBalanceTriggered.onNext(Unit)
+                    }
                 }
             }).untilCleared()
     }
@@ -233,8 +243,10 @@ class GameViewModel(
             }, {
                 state.hintLoading.set(false)
                 Timber.e(it, "validateHint skipLevel() failed")
-                if ((it as ResponseException.Application).error.errorCode == 402) {
-                    insufficientBalanceTriggered.onNext(Unit)
+                when (it) {
+                    is ResponseException.Application -> {
+                        if (it.error.errorCode == 402) insufficientBalanceTriggered.onNext(Unit)
+                    }
                 }
             }).untilCleared()
     }
@@ -260,8 +272,10 @@ class GameViewModel(
             }, {
                 state.hintLoading.set(false)
                 Timber.e(it, "validateHint findAuthor() failed")
-                if ((it as ResponseException.Application).error.errorCode == 402) {
-                    insufficientBalanceTriggered.onNext(Unit)
+                when (it) {
+                    is ResponseException.Application -> {
+                        if (it.error.errorCode == 402) insufficientBalanceTriggered.onNext(Unit)
+                    }
                 }
             }).untilCleared()
     }

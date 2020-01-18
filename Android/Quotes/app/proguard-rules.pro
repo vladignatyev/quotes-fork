@@ -83,3 +83,9 @@
     static void checkParameterIsNotNull(java.lang.Object, java.lang.String);
 }
 # ===== BEGIN Kotlin ======
+
+# ===== BEGIN Dagger ======
+-keepclassmembers,allowobfuscation class * extends androidx.lifecycle.AndroidViewModel {
+    <init>(android.app.Application);
+}
+# ===== END Dagger ======

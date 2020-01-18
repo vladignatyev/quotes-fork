@@ -103,6 +103,7 @@ class GameFragment : AppFragment(), GameListener {
     }
 
     override fun onQuoteOrderChanged(userVariant: ArrayList<String>) {
+        if (!isAdded) return
         val correctQuote = vm.state.currentQuote.get()!!.splitted
         if (!levelCompleted && userVariant == correctQuote) {
             levelCompleted = true
@@ -180,6 +181,7 @@ class GameFragment : AppFragment(), GameListener {
     }
 
     private fun onLevelCompleted() {
+        if (!isAdded) return
         binding().root.manageViewGroupTapable(binding().root, false)
         showKonfetti()
         Completable

@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.viewModels
 import com.quote.mosaic.R
 import com.quote.mosaic.core.AppFragment
 import com.quote.mosaic.ui.main.play.game.utils.GameDialogBuilder
@@ -32,7 +33,10 @@ class OnboardingGameFragment : AppFragment(), GameListener {
     @Inject
     lateinit var analyticsManager: AnalyticsManager
 
-    private val vm: OnboardingViewModel by activityViewModels()
+    @Inject
+    lateinit var vmFactory: OnboardingViewModel.Factory
+
+    private val vm: OnboardingViewModel by viewModels { vmFactory }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -48,7 +52,7 @@ class OnboardingGameFragment : AppFragment(), GameListener {
         inflater, R.layout.onboarding_game_fragment, container, false
     ).apply {
         viewModel = vm
-        gameView.setData(getString(R.string.onboarding_label_default_quote_mixed).split(" "))
+        gameView.setData(listOf("Через", "к звёздам.", "тернии"))
         gameView.setListener(this@OnboardingGameFragment)
         gameView.setTextColor(R.color.game_background_blue)
     }.root
