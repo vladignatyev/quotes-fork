@@ -42,7 +42,7 @@ def consume_product_on_purchase(sender, instance, created, raw, **kwargs):
 
         if instance.status == PurchaseStatus.PURCHASED:
             app_product.consume_by_profile(profile, purchase=instance)
-        elif instance.status == PurchaseStatus.CANCELLED:
+        elif instance.status == PurchaseStatus.CANCELLED and instance.previous_status == PurchaseStatus.PURCHASED:
             app_product.unconsume_by_profile(profile, purchase=instance)
 
         logger.debug('Profile %s consumed product: %s', profile, app_product)
