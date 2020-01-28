@@ -49,7 +49,6 @@ class QuotesInline(admin.TabularInline):
     autocomplete_fields = ['author']
 
 
-
 @admin.register(QuoteCategory)
 class QuoteCategoryAdmin(admin.ModelAdmin):
     list_display = ('item_preview_image_view', 'title', 'section', 'level_bonus_reward', 'bonus_reward',
@@ -63,10 +62,10 @@ class QuoteCategoryAdmin(admin.ModelAdmin):
     fields = ( 'title', 'section', 'bonus_reward', 'level_bonus_reward', 'is_payable',
                'price_to_unlock', 'on_complete_achievement', 'icon',
                'item_image', 'item_image_view', 'is_published', 'tags',
-               'order')
+               'order',)
     search_fields = ['title']
 
-    autocomplete_fields = ['tags', 'on_complete_achievement', 'section']
+    autocomplete_fields = ['tags', 'on_complete_achievement', 'section',]
 
     readonly_fields = ('item_image_view', 'item_preview_image_view')
     actions = [unpublish, publish]
@@ -103,10 +102,13 @@ class QuoteAdmin(admin.ModelAdmin):
     exclude = ('available_to_users',)
     ordering = ('order_in_category',)
     fields = ('text', 'author', 'order_in_category', 'on_complete_achievement', 'category', 'bubbles',)
-    search_fields = ['text', 'author__name']
+    search_fields = ['text', 'author__name', 'category__title']
     view_on_site = True
     readonly_fields = ['bubbles', 'get_beautiful']
 
+    list_filter = (
+        ('category__title', )
+    )
     autocomplete_fields = ['author', 'on_complete_achievement', 'category']
 
     form = QuoteForm
