@@ -430,7 +430,7 @@ def clean_profile_progress_cache(profile):
 # Content cacheable
 # @lru_cache(maxsize=2**16)
 def get_all_levels_in_category(category_pk):
-    return list(Quote.objects.select_related('author').filter(category=category_pk).order_by('-order_in_category').order_by('-date_added').all())
+    return list(Quote.objects.select_related('author').filter(category=category_pk).order_by('-order_in_category').all())
 
 # @lru_cache(maxsize=2**16)
 def get_all_levels_in_category_count(category_pk):
