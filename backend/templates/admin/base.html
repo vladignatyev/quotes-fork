@@ -13,6 +13,10 @@
     {% if LANGUAGE_BIDI %}<link rel="stylesheet" type="text/css" href="{% static "admin/css/responsive_rtl.css" %}">{% endif %}
 {% endblock %}
 {% block blockbots %}<meta name="robots" content="NONE,NOARCHIVE">{% endblock %}
+
+  <style media="screen">
+    .dynamic-quote_set .field-text input[type=text] { width: 700px; }
+  </style>
 </head>
 {% load i18n %}
 
