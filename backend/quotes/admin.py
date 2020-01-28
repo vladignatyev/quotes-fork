@@ -103,7 +103,7 @@ class QuoteAdmin(admin.ModelAdmin):
     exclude = ('available_to_users',)
     ordering = ('order_in_category',)
     fields = ('text', 'author', 'order_in_category', 'on_complete_achievement', 'category', 'bubbles',)
-    search_fields = ['text', 'author']
+    search_fields = ['text', 'author__name']
     view_on_site = True
     readonly_fields = ['bubbles', 'get_beautiful']
 
