@@ -9,9 +9,11 @@ import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.fragment.FragmentNavigatorExtras
 import androidx.navigation.fragment.findNavController
 import androidx.viewpager.widget.ViewPager
+import com.google.android.material.tabs.TabLayout
 import com.quote.mosaic.R
 import com.quote.mosaic.core.AppFragment
 import com.quote.mosaic.core.billing.BillingManager
+import com.quote.mosaic.core.manager.AdsManager
 import com.quote.mosaic.core.manager.AnalyticsManager
 import com.quote.mosaic.data.manager.UserManager
 import com.quote.mosaic.databinding.OverviewFragmentBinding
@@ -30,6 +32,9 @@ class OverviewFragment : AppFragment() {
 
     @Inject
     lateinit var vmFactory: OverviewViewModel.Factory
+
+    @Inject
+    lateinit var adsManager: AdsManager
 
     private lateinit var vm: OverviewViewModel
 
@@ -70,6 +75,7 @@ class OverviewFragment : AppFragment() {
             }
 
             override fun onPageSelected(position: Int) {
+                adsManager.showMainChangeTopicInter()
                 analyticsManager.logTopicChanged(adapter.getPageTitle(position))
             }
         })
@@ -95,6 +101,11 @@ class OverviewFragment : AppFragment() {
 
     fun topupClicked() {
         topupClicked("Main Screen")
+    }
+
+    fun retry() {
+        vm.load()
+        adsManager.showErrorRetryInter()
     }
 
     private fun topupClicked(source: String) {

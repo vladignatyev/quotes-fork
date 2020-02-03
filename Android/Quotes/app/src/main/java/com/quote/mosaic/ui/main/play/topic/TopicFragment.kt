@@ -11,6 +11,7 @@ import androidx.navigation.fragment.findNavController
 import com.quote.mosaic.R
 import com.quote.mosaic.core.AppFragment
 import com.quote.mosaic.core.common.args
+import com.quote.mosaic.core.manager.AdsManager
 import com.quote.mosaic.core.manager.AnalyticsManager
 import com.quote.mosaic.databinding.OverviewTopicFragmentBinding
 import com.quote.mosaic.ui.main.play.CategoryClickListener
@@ -23,6 +24,9 @@ import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 class TopicFragment : AppFragment(), CategoryClickListener {
+
+    @Inject
+    lateinit var adsManager: AdsManager
 
     @Inject
     lateinit var analyticsManager: AnalyticsManager
@@ -120,6 +124,7 @@ class TopicFragment : AppFragment(), CategoryClickListener {
 
     override fun onRefreshClicked() {
         vm.refresh()
+        adsManager.showErrorRetryInter()
     }
 
     private fun binding() = viewBinding<OverviewTopicFragmentBinding>()

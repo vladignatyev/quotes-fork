@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatDelegate
 import androidx.databinding.DataBindingUtil
 import com.crashlytics.android.Crashlytics
 import com.facebook.appevents.AppEventsLogger
+import com.google.android.gms.ads.MobileAds
 import com.quote.mosaic.core.analytics.CrashlyticsTimberTree
 import com.quote.mosaic.core.di.AppComponent
 import com.quote.mosaic.core.di.AppDataBindingComponent
@@ -37,6 +38,8 @@ class App : Application(), HasAndroidInjector {
         Fabric.with(this, Crashlytics())
 
         Timber.plant(CrashlyticsTimberTree())
+
+        MobileAds.initialize(this)
 
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true)
 

@@ -67,7 +67,8 @@ object GameDialogBuilder {
     fun showDoubleUpDialog(
         context: Context,
         sharedViewModel: GameViewModel,
-        onCompleted: (alert: AlertDialog) -> Unit
+        onCompleted: (alert: AlertDialog) -> Unit,
+        onCloseClicked: (alert: AlertDialog) -> Unit
     ) {
         val binding: GameSuccessDoubleUpBinding =
             DataBindingUtil.inflate(
@@ -82,7 +83,7 @@ object GameDialogBuilder {
 
         binding.run {
             viewModel = sharedViewModel
-            close.setOnClickListener { alert.dismiss() }
+            close.setOnClickListener { onCloseClicked(alert) }
             doubleUp.setOnClickListener { onCompleted(alert) }
         }
     }

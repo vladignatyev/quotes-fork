@@ -68,7 +68,7 @@ class InAppBillingManager(
                     }
                 }
             }, {
-                Timber.e(it, "load failed")
+                Timber.w(it, "load failed")
             })
     }
 
@@ -187,7 +187,7 @@ class InAppBillingManager(
         when (billingResult?.responseCode) {
             BillingClient.BillingResponseCode.OK -> consumePurchase(purchases)
             else -> {
-                Timber.e("onPurchasesUpdated() failed with code: ${billingResult?.responseCode}")
+                Timber.w("onPurchasesUpdated() failed with code: ${billingResult?.responseCode}")
                 clearCachedHistory()
                 resultTrigger.onNext(
                     BillingManagerResult.Retry(
@@ -220,11 +220,11 @@ class InAppBillingManager(
                 .build()
             billingClient?.consumeAsync(params) { result, purchaseToken ->
                 if (result.responseCode != BillingClient.BillingResponseCode.OK) {
-                    Timber.e("Consume failed: ${result.responseCode}")
+                    Timber.w("Consume failed: ${result.responseCode}")
                 }
             }
         } else {
-            Timber.e("Consume failed purchases are empty, can't find purchase to consume")
+            Timber.w("Consume failed purchases are empty, can't find purchase to consume")
         }
     }
 

@@ -10,6 +10,7 @@ import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import com.quote.mosaic.R
 import com.quote.mosaic.core.AppFragment
+import com.quote.mosaic.core.manager.AdsManager
 import com.quote.mosaic.core.manager.AnalyticsManager
 import com.quote.mosaic.databinding.OnboardingTopicFragmentBinding
 import com.quote.mosaic.ui.main.play.CategoryClickListener
@@ -23,8 +24,9 @@ import javax.inject.Inject
 
 class OnboardingTopicFragment : AppFragment(), CategoryClickListener {
 
-    @Inject
-    lateinit var analyticsManager: AnalyticsManager
+    @Inject lateinit var adsManager: AdsManager
+
+    @Inject lateinit var analyticsManager: AnalyticsManager
 
     private val vm: OnboardingViewModel by activityViewModels()
 
@@ -56,6 +58,7 @@ class OnboardingTopicFragment : AppFragment(), CategoryClickListener {
     override fun onCompletedClicked(id: Int) {}
 
     override fun onOpenedClicked(id: Int, name: String) {
+        adsManager.showOnboardingGameInter()
         analyticsManager.logOnboardingOpenedTapped()
         analyticsManager.logOnboardingOpenCategoryFinished()
         findNavController().navigate(R.id.action_onboardingCategoryFragment_to_onboardingGameFragment)

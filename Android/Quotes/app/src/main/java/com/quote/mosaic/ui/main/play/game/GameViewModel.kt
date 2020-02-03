@@ -93,7 +93,7 @@ class GameViewModel(
                     }
                 }
             }, {
-                Timber.e(it, "billingResultTrigger failed")
+                Timber.w(it, "billingResultTrigger failed")
             }).untilCleared()
     }
 
@@ -142,7 +142,7 @@ class GameViewModel(
             }, {
                 state.isLoading.set(false)
                 state.error.set(true)
-                Timber.e(it, "GameViewModel init failed")
+                Timber.w(it, "GameViewModel init failed")
             }).untilCleared()
     }
 
@@ -171,7 +171,7 @@ class GameViewModel(
                 levelCompletedTrigger.onNext(Unit)
             }, {
                 state.levelCompletedLoading.set(false)
-                Timber.e(it, "completeLevel failed")
+                Timber.w(it, "completeLevel failed")
             }).untilCleared()
     }
 
@@ -190,7 +190,7 @@ class GameViewModel(
                 state.hintSkipId.set(it.skipLevel.first().id)
                 state.hintSkipCost.set(it.skipLevel.first().coinPrice.toString())
             }, {
-                Timber.e(it, "getHints failed")
+                Timber.w(it, "getHints failed")
             }).untilCleared()
     }
 
@@ -210,7 +210,7 @@ class GameViewModel(
                 hintReceivedTrigger.onNext(currentQuote.author)
             }, {
                 state.hintLoading.set(false)
-                Timber.e(it, "validateHint findAuthor() failed")
+                Timber.w(it, "validateHint findAuthor() failed")
                 when (it) {
                     is ResponseException.Application -> {
                         if (it.error.errorCode == 402) insufficientBalanceTriggered.onNext(Unit)
@@ -242,7 +242,7 @@ class GameViewModel(
                 levelCompletedTrigger.onNext(Unit)
             }, {
                 state.hintLoading.set(false)
-                Timber.e(it, "validateHint skipLevel() failed")
+                Timber.w(it, "validateHint skipLevel() failed")
                 when (it) {
                     is ResponseException.Application -> {
                         if (it.error.errorCode == 402) insufficientBalanceTriggered.onNext(Unit)
@@ -271,7 +271,7 @@ class GameViewModel(
                 showNextWord()
             }, {
                 state.hintLoading.set(false)
-                Timber.e(it, "validateHint findAuthor() failed")
+                Timber.w(it, "validateHint findAuthor() failed")
                 when (it) {
                     is ResponseException.Application -> {
                         if (it.error.errorCode == 402) insufficientBalanceTriggered.onNext(Unit)

@@ -77,10 +77,6 @@ abstract class AppFragment : Fragment() {
         return this
     }
 
-    fun goBack() {
-        findNavController().popBackStack()
-    }
-
     fun updateBackgroundColor(
         container: ViewGroup,
         views: List<View> = emptyList()
@@ -89,6 +85,7 @@ abstract class AppFragment : Fragment() {
             it.binding.bottomBar.setBackgroundResource(userPreferences.getBackgroundBarColor())
             it.window.statusBarColor =
                 requireContext().findColor(userPreferences.getBackgroundBarColor())
+            it.binding.adView.setBackgroundResource(userPreferences.getBackgroundBarColor())
         }
         container.setBackgroundResource(userPreferences.getBackgroundColor())
 

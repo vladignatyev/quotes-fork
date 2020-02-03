@@ -10,6 +10,7 @@ import com.quote.mosaic.R
 import com.quote.mosaic.core.AppActivity
 import com.quote.mosaic.core.common.utils.TimedActionConfirmHelper
 import com.quote.mosaic.core.common.utils.findColor
+import com.quote.mosaic.core.manager.AdsManager
 import com.quote.mosaic.core.manager.AnalyticsManager
 import com.quote.mosaic.core.manager.UserPreferences
 import com.quote.mosaic.data.error.ResponseException

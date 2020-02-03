@@ -13,6 +13,7 @@ import com.quote.mosaic.core.AppFragment
 import com.quote.mosaic.core.common.utils.Ime
 import com.quote.mosaic.core.ext.shareAppIntent
 import com.quote.mosaic.core.ext.supportEmailIntent
+import com.quote.mosaic.core.manager.AdsManager
 import com.quote.mosaic.core.manager.AnalyticsManager
 import com.quote.mosaic.data.manager.UserManager
 import com.quote.mosaic.databinding.ProfileFragmentBinding
@@ -22,6 +23,9 @@ import eltos.simpledialogfragment.color.SimpleColorDialog
 import javax.inject.Inject
 
 class ProfileFragment : AppFragment(), SimpleDialog.OnDialogResultListener {
+
+    @Inject
+    lateinit var adsManager: AdsManager
 
     @Inject
     lateinit var analyticsManager: AnalyticsManager
@@ -87,6 +91,7 @@ class ProfileFragment : AppFragment(), SimpleDialog.OnDialogResultListener {
     }
 
     private fun changeBackgroundColor(position: Int) {
+        adsManager.showColorChaneInter()
         val colors = listOf(
             R.drawable.ic_circle_shape_blue,
             R.drawable.ic_circle_shape_purple,

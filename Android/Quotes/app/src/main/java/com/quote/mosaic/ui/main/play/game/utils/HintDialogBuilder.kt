@@ -14,7 +14,7 @@ object HintDialogBuilder {
 
     //=========== Author Hint =============//
     fun showAuthorHintDialog(
-        context: Context, sharedViewModel: GameViewModel
+        context: Context, sharedViewModel: GameViewModel, onCloseClicked: (AlertDialog) -> Unit
     ): AlertDialog {
         val binding: GameHintAuthorDialogBinding =
             DataBindingUtil.inflate(
@@ -28,7 +28,7 @@ object HintDialogBuilder {
             .show()
 
         binding.viewModel = sharedViewModel
-        binding.close.setOnClickListener { alert.dismiss() }
+        binding.close.setOnClickListener { onCloseClicked(alert) }
 
         alert.show()
 
@@ -37,7 +37,7 @@ object HintDialogBuilder {
 
     //=========== Skip Level Hint =============//
     fun showSkipLevelDialog(
-        context: Context, sharedViewModel: GameViewModel
+        context: Context, sharedViewModel: GameViewModel, onCloseClicked: (AlertDialog) -> Unit
     ): AlertDialog {
         val binding: GameHintSkipDialogBinding =
             DataBindingUtil.inflate(
@@ -51,7 +51,7 @@ object HintDialogBuilder {
             .show()
 
         binding.viewModel = sharedViewModel
-        binding.close.setOnClickListener { alert.dismiss() }
+        binding.close.setOnClickListener { onCloseClicked(alert) }
 
         alert.show()
 
@@ -60,7 +60,7 @@ object HintDialogBuilder {
 
     //=========== Skip Level Hint =============//
     fun showNextWordDialog(
-        context: Context, sharedViewModel: GameViewModel, onSkipVideoClicked: () -> Unit
+        context: Context, sharedViewModel: GameViewModel, onSkipVideoClicked: () -> Unit, onCloseClicked: (AlertDialog) -> Unit
     ): AlertDialog {
         val binding: GameHintNextWordDialogBinding =
             DataBindingUtil.inflate(
@@ -74,7 +74,7 @@ object HintDialogBuilder {
             .show()
 
         binding.viewModel = sharedViewModel
-        binding.close.setOnClickListener { alert.dismiss() }
+        binding.close.setOnClickListener { onCloseClicked(alert) }
         binding.videoSkip.setOnClickListener { onSkipVideoClicked() }
 
         alert.show()

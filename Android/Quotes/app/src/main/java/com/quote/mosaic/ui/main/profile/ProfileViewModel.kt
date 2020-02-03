@@ -50,7 +50,7 @@ class ProfileViewModel(
             .subscribe({
                 logoutTrigger.onNext(Unit)
             }, {
-                Timber.e(it, "ProfileViewModel logout failed")
+                Timber.w(it, "ProfileViewModel logout failed")
             }).untilCleared()
     }
 

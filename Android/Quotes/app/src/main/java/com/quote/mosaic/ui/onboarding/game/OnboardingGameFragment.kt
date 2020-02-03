@@ -12,6 +12,7 @@ import com.quote.mosaic.R
 import com.quote.mosaic.core.AppFragment
 import com.quote.mosaic.ui.main.play.game.utils.GameDialogBuilder
 import com.quote.mosaic.core.common.utils.manageViewGroupTapable
+import com.quote.mosaic.core.manager.AdsManager
 import com.quote.mosaic.core.manager.AnalyticsManager
 import com.quote.mosaic.data.manager.UserManager
 import com.quote.mosaic.databinding.OnboardingGameFragmentBinding
@@ -35,6 +36,9 @@ class OnboardingGameFragment : AppFragment(), GameListener {
 
     @Inject
     lateinit var vmFactory: OnboardingViewModel.Factory
+
+    @Inject
+    lateinit var adsManager: AdsManager
 
     private val vm: OnboardingViewModel by viewModels { vmFactory }
 
@@ -106,6 +110,8 @@ class OnboardingGameFragment : AppFragment(), GameListener {
             requireContext(),
             vm.state.initialBalance.get()
         ) { parentDialog ->
+            adsManager.showOnboardingCoinsInter()
+
             parentDialog.dismiss()
 
             Completable.timer(500, TimeUnit.MILLISECONDS, AndroidSchedulers.mainThread())

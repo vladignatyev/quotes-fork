@@ -64,7 +64,7 @@ class TopicViewModel(
                 }
             }, {
                 sections.onNext(mapper.errorState())
-                Timber.e(it, "TopicViewModel init failed")
+                Timber.w(it, "TopicViewModel init failed")
             }).untilCleared()
 
         refreshTrigger.onNext(Unit)
@@ -102,7 +102,7 @@ class TopicViewModel(
             }, {
                 state.isRefreshing.set(false)
                 sections.onNext(mapper.errorState())
-                Timber.e(it, "TopicViewModel refresh() failed")
+                Timber.w(it, "TopicViewModel refresh() failed")
             }).untilCleared()
     }
 

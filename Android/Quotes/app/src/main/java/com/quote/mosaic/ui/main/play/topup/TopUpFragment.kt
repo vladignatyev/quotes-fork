@@ -8,10 +8,12 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProviders
+import androidx.navigation.fragment.findNavController
 import androidx.transition.TransitionInflater
 import com.quote.mosaic.R
 import com.quote.mosaic.core.AppFragment
 import com.quote.mosaic.core.ext.supportEmailIntent
+import com.quote.mosaic.core.manager.AdsManager
 import com.quote.mosaic.core.manager.AnalyticsManager
 import com.quote.mosaic.data.manager.UserManager
 import com.quote.mosaic.databinding.TopupCompletePopupBinding
@@ -20,6 +22,9 @@ import com.quote.mosaic.databinding.TopupFragmentBinding
 import javax.inject.Inject
 
 class TopUpFragment : AppFragment() {
+
+    @Inject
+    lateinit var adsManager: AdsManager
 
     @Inject
     lateinit var analyticsManager: AnalyticsManager
@@ -82,6 +87,11 @@ class TopUpFragment : AppFragment() {
     override fun onResume() {
         super.onResume()
         analyticsManager.logCurrentScreen(requireActivity(), "Topup Screen")
+    }
+
+    fun goBack() {
+        findNavController().popBackStack()
+        adsManager.showBackButtonInter()
     }
 
     private fun showError() {

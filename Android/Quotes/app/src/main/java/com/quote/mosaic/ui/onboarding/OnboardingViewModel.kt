@@ -8,6 +8,7 @@ import com.quote.mosaic.core.AppViewModel
 import com.quote.mosaic.core.Schedulers
 import com.quote.mosaic.core.common.toFlowable
 import com.quote.mosaic.core.ext.Digest
+import com.quote.mosaic.core.manager.AdsManager
 import com.quote.mosaic.core.rx.NonNullObservableField
 import com.quote.mosaic.data.api.ApiClient
 import com.quote.mosaic.data.manager.UserManager
@@ -44,6 +45,7 @@ class OnboardingViewModel(
     }
 
     fun login() {
+        if (state.loading.get()) return
         state.loading.set(true)
 
         val userName = state.nameText.get()
@@ -68,7 +70,7 @@ class OnboardingViewModel(
             }, {
                 state.loading.set(false)
                 loginFailure.onNext(it)
-                Timber.e(it, "OnboardingViewModel login failed")
+                Timber.w(it, "OnboardingViewModel login failed")
             }).untilCleared()
     }
 

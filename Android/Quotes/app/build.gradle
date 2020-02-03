@@ -133,6 +133,7 @@ dependencies {
 
     //Billing
     implementation "com.android.billingclient:billing:$versions.billing"
+    implementation "com.google.android.gms:play-services-ads:$versions.admob"
 
     //Analytics
     implementation "com.facebook.android:facebook-android-sdk:$versions.facebook"

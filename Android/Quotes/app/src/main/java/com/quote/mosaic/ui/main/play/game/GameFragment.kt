@@ -17,6 +17,7 @@ import com.quote.mosaic.core.common.args
 import com.quote.mosaic.core.common.utils.Vibrator
 import com.quote.mosaic.core.common.utils.findColor
 import com.quote.mosaic.core.common.utils.manageViewGroupTapable
+import com.quote.mosaic.core.manager.AdsManager
 import com.quote.mosaic.core.manager.AnalyticsManager
 import com.quote.mosaic.databinding.GameFragmentBinding
 import com.quote.mosaic.game.GameListener
@@ -32,6 +33,9 @@ import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 class GameFragment : AppFragment(), GameListener {
+
+    @Inject
+    lateinit var adsManager: AdsManager
 
     @Inject
     lateinit var analyticsManager: AnalyticsManager
@@ -114,6 +118,16 @@ class GameFragment : AppFragment(), GameListener {
         }
     }
 
+    fun goBack() {
+        findNavController().popBackStack()
+        adsManager.showBackButtonInter()
+    }
+
+    fun retry() {
+        vm.load()
+        adsManager.showErrorRetryInter()
+    }
+
     fun topupClicked() {
         topupClicked("Game Screen")
     }
@@ -135,21 +149,33 @@ class GameFragment : AppFragment(), GameListener {
         vm.verifyVideoProducts()
         binding().menu.close(true)
         analyticsManager.logNextWordClicked(vm.state.currentQuote.get()?.id ?: 0)
-        visibleAlert = HintDialogBuilder.showNextWordDialog(requireContext(), vm) {
-            vm.findNextWordVideo(requireActivity())
-        }
+        visibleAlert =
+            HintDialogBuilder.showNextWordDialog(
+                context = requireContext(),
+                sharedViewModel = vm,
+                onSkipVideoClicked = { vm.findNextWordVideo(requireActivity()) }
+                , onCloseClicked = {
+                    adsManager.showPopupCloseInter()
+                    it.dismiss()
+                })
     }
 
     fun skipLevelClicked() {
         binding().menu.close(true)
         analyticsManager.logSkipClicked(vm.state.currentQuote.get()?.id ?: 0)
-        visibleAlert = HintDialogBuilder.showSkipLevelDialog(requireContext(), vm)
+        visibleAlert = HintDialogBuilder.showSkipLevelDialog(requireContext(), vm) {
+            adsManager.showPopupCloseInter()
+            it.dismiss()
+        }
     }
 
     fun findAuthorClicked() {
         binding().menu.close(true)
         analyticsManager.logAuthorClicked(vm.state.currentQuote.get()?.id ?: 0)
-        visibleAlert = HintDialogBuilder.showAuthorHintDialog(requireContext(), vm)
+        visibleAlert = HintDialogBuilder.showAuthorHintDialog(requireContext(), vm) {
+            adsManager.showPopupCloseInter()
+            it.dismiss()
+        }
     }
 
     private fun showSuccessDialog() {
@@ -158,6 +184,7 @@ class GameFragment : AppFragment(), GameListener {
             vm.reset()
 
             if (vm.state.isLastQuote.get()) {
+                adsManager.showGameCompleteInter()
                 startActivity(MainActivity.newIntent(requireContext()))
             } else {
                 vm.loadLevel()
@@ -166,15 +193,24 @@ class GameFragment : AppFragment(), GameListener {
                     Completable.timer(200, TimeUnit.MILLISECONDS, AndroidSchedulers.mainThread())
                         .subscribe {
                             vm.startDoubleUpDelay()
-                            GameDialogBuilder.showDoubleUpDialog(requireContext(), vm) {
-                                if (!vm.state.doubleUpLoading.get()) {
-                                    vm.showDoubleUpVideo(requireActivity())
+                            GameDialogBuilder.showDoubleUpDialog(
+                                context = requireContext(),
+                                sharedViewModel = vm,
+                                onCompleted = {
+                                    if (!vm.state.doubleUpLoading.get()) {
+                                        vm.showDoubleUpVideo(requireActivity())
+                                        it.dismiss()
+                                    } else {
+                                        Vibrator.vibrate(requireContext())
+                                    }
+                                },
+                                onCloseClicked = {
+                                    adsManager.showGameCompleteInter()
                                     it.dismiss()
-                                } else {
-                                    Vibrator.vibrate(requireContext())
-                                }
-                            }
+                                })
                         }
+                } else {
+                    adsManager.showGameCompleteInter()
                 }
             }
         }

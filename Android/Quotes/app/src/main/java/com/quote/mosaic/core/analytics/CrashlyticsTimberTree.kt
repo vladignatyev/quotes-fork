@@ -10,5 +10,5 @@ class CrashlyticsTimberTree : Timber.DebugTree() {
         Crashlytics.logException(t ?: Exception(message))
     }
 
-    override fun isLoggable(tag: String?, priority: Int) = priority >= Log.ERROR
+    override fun isLoggable(tag: String?, priority: Int) = priority >= Log.WARN
 }

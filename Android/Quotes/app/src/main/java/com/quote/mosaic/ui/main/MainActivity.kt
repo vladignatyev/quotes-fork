@@ -5,10 +5,12 @@ import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.databinding.DataBindingUtil
+import com.google.android.gms.ads.AdRequest
 import com.quote.mosaic.core.AppActivity
 import com.quote.mosaic.core.common.utils.TimedActionConfirmHelper
 import com.quote.mosaic.core.ext.setupWithNavController
 import com.quote.mosaic.R
+import com.quote.mosaic.core.manager.AdsManager
 import com.quote.mosaic.databinding.MainActivityBinding
 import dagger.android.AndroidInjector
 import dagger.android.DispatchingAndroidInjector
@@ -16,6 +18,9 @@ import dagger.android.HasAndroidInjector
 import javax.inject.Inject
 
 class MainActivity : AppActivity(), HasAndroidInjector {
+
+    @Inject
+    lateinit var adsManager: AdsManager
 
     @Inject
     lateinit var appExitTimer: TimedActionConfirmHelper
@@ -33,6 +38,9 @@ class MainActivity : AppActivity(), HasAndroidInjector {
         if (savedInstanceState == null) {
             setupBottomNavigationBar()
         } // Else, need to wait for onRestoreInstanceState
+
+        val adRequest = AdRequest.Builder().build()
+        binding.adView.loadAd(adRequest)
 
         appExitTimer.setListener {
             finishAffinity()
@@ -57,7 +65,8 @@ class MainActivity : AppActivity(), HasAndroidInjector {
     private fun promptToCloseApp() {
         val notify = appExitTimer.onAction()
         if (notify) {
-            Toast.makeText(this, R.string.shared_button_press_again_to_exit, Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, R.string.shared_button_press_again_to_exit, Toast.LENGTH_SHORT)
+                .show()
         }
     }
 
@@ -67,7 +76,8 @@ class MainActivity : AppActivity(), HasAndroidInjector {
             navGraphIds = listOf(R.navigation.overview, R.navigation.top, R.navigation.profile),
             fragmentManager = supportFragmentManager,
             containerId = R.id.fragmentContainer,
-            intent = intent
+            intent = intent,
+            onChanged = { adsManager.showMainNavigationInter() }
         )
     }
 

@@ -2,6 +2,31 @@
 <resources>
     <integer name="anim_duration_quick">300</integer>
     <string name="empty" translatable="false" />
+
     <string name="facebook_app_id" translatable="false">1013990252278005</string>
     <string name="fb_login_protocol_scheme" translatable="false">fb1013990252278005</string>
+
+    <string name="admob_id" translatable="false">ca-app-pub-1995244283612276~6667785244</string>
+
+    <string name="banner_main" translatable="false">ca-app-pub-1995244283612276/4701357604</string>
+
+    <string name="reward_next_word" translatable="false">ca-app-pub-1995244283612276/5032174875</string>
+    <string name="reward_double_up" translatable="false">ca-app-pub-1995244283612276/1348435952</string>
+    <string name="reward_free_coins" translatable="false">ca-app-pub-1995244283612276/8432170312</string>
+
+    <string name="inter_splash" translatable="false">ca-app-pub-1995244283612276/1340697092</string>
+
+    <string name="inter_onboarding_name" translatable="false">ca-app-pub-1995244283612276/6500975691</string>
+    <string name="inter_onboarding_game" translatable="false">ca-app-pub-1995244283612276/3663608105</string>
+    <string name="inter_onboarding_coins" translatable="false">ca-app-pub-1995244283612276/6042359431</string>
+
+    <string name="inter_game_complete" translatable="false">ca-app-pub-1995244283612276/9790032759</string>
+
+    <string name="inter_popup_close" translatable="false">ca-app-pub-1995244283612276/9271158002</string>
+    <string name="inter_back_button" translatable="false">ca-app-pub-1995244283612276/3962991008</string>
+    <string name="inter_error_retry" translatable="false">ca-app-pub-1995244283612276/6644994668</string>
+    <string name="inter_main_change_topic" translatable="false">ca-app-pub-1995244283612276/7519092632</string>
+    <string name="inter_main_navigation" translatable="false">ca-app-pub-1995244283612276/3579847620</string>
+    <string name="inter_color_change" translatable="false">ca-app-pub-1995244283612276/9953684282</string>
+
 </resources>

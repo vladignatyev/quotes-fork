@@ -75,14 +75,14 @@ class TopUpViewModel(
                         state.loading.set(false)
                         userManager.setUser(user)
                         state.balance.set(user.balance.toString())
-                        Timber.e(
+                        Timber.w(
                             result.cause, "Billing Failed for user: ${userManager.getSession()}"
                         )
                         failureTrigger.onNext(Unit)
                     }
                 }
             }, {
-                Timber.e(it, "billingResultTrigger failed")
+                Timber.w(it, "billingResultTrigger failed")
             }).untilCleared()
     }
 

@@ -64,7 +64,7 @@ class OverviewViewModel(
             }, {
                 state.loading.set(false)
                 state.error.set(true)
-                Timber.e(it, "OverviewViewModel init failed")
+                Timber.w(it, "OverviewViewModel init failed")
             }).untilCleared()
     }
 

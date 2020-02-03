@@ -16,6 +16,8 @@ interface AnalyticsManager {
     fun logUserErrorAppeared(text: String)
 
     //------------ ONBOARDING ------------ //
+    fun logSplashLoadingTime(seconds: String)
+
     fun logOnboardingStarted()
 
     //Step one started
@@ -104,7 +106,15 @@ class AnalyticsManagerImpl(
         })
     }
 
-    // Onboarding
+    override fun logSplashLoadingTime(seconds: String) {
+        firebaseAnalytics.logEvent("splash_loading", Bundle().apply {
+            putString("load_seconds", seconds)
+        })
+        facebookAnalytics.logEvent("splash_loading", Bundle().apply {
+            putString("load_seconds", seconds)
+        })
+    }
+
     override fun logOnboardingStarted() {
         firebaseAnalytics.logEvent("onboarding_started", null)
         facebookAnalytics.logEvent("onboarding_started", null)

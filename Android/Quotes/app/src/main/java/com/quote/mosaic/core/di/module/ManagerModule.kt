@@ -5,10 +5,7 @@ import android.content.SharedPreferences
 import com.quote.mosaic.core.Schedulers
 import com.quote.mosaic.core.billing.BillingManager
 import com.quote.mosaic.core.billing.InAppBillingManager
-import com.quote.mosaic.core.manager.AnalyticsManager
-import com.quote.mosaic.core.manager.AnalyticsManagerImpl
-import com.quote.mosaic.core.manager.FirebaseManager
-import com.quote.mosaic.core.manager.UserPreferences
+import com.quote.mosaic.core.manager.*
 import com.quote.mosaic.crypto.fs.sp.SecurePreferences
 import com.quote.mosaic.data.api.ApiClient
 import com.quote.mosaic.data.manager.UserManager
@@ -57,4 +54,10 @@ class ManagerModule {
     fun analyticsManager(
         context: Context
     ): AnalyticsManager = AnalyticsManagerImpl(context)
+
+    @Provides
+    @Singleton
+    fun adsManager(
+        context: Context
+    ): AdsManager = AdsManagerImpl(context)
 }
