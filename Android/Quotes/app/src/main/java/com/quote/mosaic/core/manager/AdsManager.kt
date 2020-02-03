@@ -2,6 +2,8 @@ package com.quote.mosaic.core.manager
 
 interface AdsManager {
 
+    fun loadAds()
+
     fun loadInterSplash(
         onWatched: () -> Unit,
         onLoaded: () -> Unit

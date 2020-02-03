@@ -28,6 +28,7 @@ class SplashActivity : AppActivity() {
         setContentView(R.layout.splash_activity)
 
         if (userManager.getSession().isEmpty()) {
+            adsManager.loadAds()
             startActivity(OnboardingActivity.newIntent(this))
         } else {
             val start = System.nanoTime()
@@ -39,6 +40,8 @@ class SplashActivity : AppActivity() {
                     val diffSeconds =
                         TimeUnit.SECONDS.convert(System.nanoTime() - start, TimeUnit.NANOSECONDS)
                     analyticsManager.logSplashLoadingTime(diffSeconds.toString())
+
+                    adsManager.loadAds()
                 }
             )
         }

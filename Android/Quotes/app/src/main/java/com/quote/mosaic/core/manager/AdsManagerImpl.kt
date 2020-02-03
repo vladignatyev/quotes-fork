@@ -4,7 +4,6 @@ import android.content.Context
 import com.google.android.gms.ads.AdListener
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.InterstitialAd
-import com.google.android.gms.ads.MobileAds
 import com.quote.mosaic.R
 
 class AdsManagerImpl(
@@ -18,7 +17,6 @@ class AdsManagerImpl(
                 loadAd(AdRequest.Builder().build())
             }
         }
-        loadAd(AdRequest.Builder().build())
     }
 
     private val interOnboardingGame = InterstitialAd(context).apply {
@@ -28,7 +26,6 @@ class AdsManagerImpl(
                 loadAd(AdRequest.Builder().build())
             }
         }
-        loadAd(AdRequest.Builder().build())
     }
 
     private val interOnboardingCoins = InterstitialAd(context).apply {
@@ -38,7 +35,6 @@ class AdsManagerImpl(
                 loadAd(AdRequest.Builder().build())
             }
         }
-        loadAd(AdRequest.Builder().build())
     }
 
     private val interGameComplete = InterstitialAd(context).apply {
@@ -48,7 +44,6 @@ class AdsManagerImpl(
                 loadAd(AdRequest.Builder().build())
             }
         }
-        loadAd(AdRequest.Builder().build())
     }
 
     private val interMainNavigation = InterstitialAd(context).apply {
@@ -58,7 +53,6 @@ class AdsManagerImpl(
                 loadAd(AdRequest.Builder().build())
             }
         }
-        loadAd(AdRequest.Builder().build())
     }
 
     private val interColorChange = InterstitialAd(context).apply {
@@ -68,7 +62,6 @@ class AdsManagerImpl(
                 loadAd(AdRequest.Builder().build())
             }
         }
-        loadAd(AdRequest.Builder().build())
     }
 
     private val interPopupClose = InterstitialAd(context).apply {
@@ -78,7 +71,6 @@ class AdsManagerImpl(
                 loadAd(AdRequest.Builder().build())
             }
         }
-        loadAd(AdRequest.Builder().build())
     }
 
     private val interBackButton = InterstitialAd(context).apply {
@@ -88,7 +80,6 @@ class AdsManagerImpl(
                 loadAd(AdRequest.Builder().build())
             }
         }
-        loadAd(AdRequest.Builder().build())
     }
 
     private val interErrorRetry = InterstitialAd(context).apply {
@@ -98,7 +89,6 @@ class AdsManagerImpl(
                 loadAd(AdRequest.Builder().build())
             }
         }
-        loadAd(AdRequest.Builder().build())
     }
 
     private val interMainChangeTopic = InterstitialAd(context).apply {
@@ -108,7 +98,19 @@ class AdsManagerImpl(
                 loadAd(AdRequest.Builder().build())
             }
         }
-        loadAd(AdRequest.Builder().build())
+    }
+
+    override fun loadAds() {
+        interOnboardingName.loadAd(AdRequest.Builder().build())
+        interOnboardingGame.loadAd(AdRequest.Builder().build())
+        interOnboardingCoins.loadAd(AdRequest.Builder().build())
+        interGameComplete.loadAd(AdRequest.Builder().build())
+        interMainNavigation.loadAd(AdRequest.Builder().build())
+        interColorChange.loadAd(AdRequest.Builder().build())
+        interPopupClose.loadAd(AdRequest.Builder().build())
+        interBackButton.loadAd(AdRequest.Builder().build())
+        interErrorRetry.loadAd(AdRequest.Builder().build())
+        interMainChangeTopic.loadAd(AdRequest.Builder().build())
     }
 
     override fun loadInterSplash(
