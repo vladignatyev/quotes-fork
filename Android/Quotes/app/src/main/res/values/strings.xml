@@ -1,0 +1,98 @@
+<resources>
+    <string name="app_link">https://play.google.com/store/apps/details?id=com.quote.mosaic&amp;hl=ru</string>
+
+    <!-- SHARED -->
+    <string name="shared_button_press_again_to_exit">Нажмите еще раз, чтобы выйти из игры.</string>
+    <string name="shared_button_save">Сохранить</string>
+    <string name="shared_button_continue">Продолжить</string>
+    <string name="shared_button_main">Главная</string>
+    <string name="shared_button_watch_video">Посмотри видео и получи монеты</string>
+    <string name="shared_label_balance">Баланс</string>
+    <string name="shared_label_coins">Монетки</string>
+    <string name="shared_label_hints">Подсказки</string>
+    <string name="shared_label_send">Отправить</string>
+    <string name="shared_label_ura">Ура!</string>
+    <string name="shared_label_ok">Понятно</string>
+    <string name="shared_label_ask_support">Обратиться в поддержку</string>
+    <string name="shared_label_remember">Запомнил!</string>
+    <string name="shared_label_saved">Сохранено:)</string>
+    <string name="shared_label_try_again">Пробую!</string>
+    <string name="shared_label_error_title">Упс!</string>
+
+    <string name="error_label_subtitle">Что-то пошло не так, попробуйте еще раз!</string>
+    <string name="error_label_no_connection">Проверьте свой интернет и попробуйте еще раз!</string>
+
+    <string name="navigation_label_game">Игра</string>
+    <string name="navigation_label_top">Топ</string>
+    <string name="navigation_label_profile">Профиль</string>
+
+    <!-- ONBOARDING -->
+    <string name="onboarding_label_name_hint">Ваше имя</string>
+    <string name="onboarding_label_look_balance">%s, твой баланс:</string>
+    <string name="onboarding_label_welcome">Привет!\nДавай знакомиться.</string>
+    <string name="onboarding_label_welcome_aboard">Добро пожаловать на борт, %s!</string>
+    <string name="onboarding_label_rules">Правила игры просты: меняй слова местами, чтобы собрать фразу!</string>
+    <string name="onboarding_label_success_title">Воу воу воу!</string>
+    <string name="onboarding_label_success_subtitle">Разминка закончилась, пора уже начать настоящую игру!</string>
+    <string name="onboarding_button_grab">Продолжить!</string>
+    <string name="onboarding_label_author">© Луцию Аннею Сенеке</string>
+    <string name="onboarding_label_quote">«Через тернии к звёздам.»‎</string>
+    <string name="onboarding_label_default_quote">Через тернии к звёздам.</string>
+    <string name="onboarding_label_default_quote_mixed">к звёздам Через тернии</string>
+    <string name="onboarding_label_reward"> - %s монет для старта</string>
+    <string name="onboarding_button_start_play">Поехали!</string>
+    <string name="onboarding_label_open_category">Открывай категорию:</string>
+    <string name="onboarding_label_warmup">Разминка</string>
+    <string name="onboarding_label_go_inside">Заходи в нее!</string>
+    <string name="onboarding_title_enter_yours">или можете написать своё</string>
+
+    <!-- MAIN -->
+    <string name="overview_label_title">Привет, %s!</string>
+    <string name="topic_label_achievement_placeholder">Знаток %s</string>
+
+    <!-- GAME -->
+    <string name="game_label_title">Уровень %s из %s</string>
+    <string name="game_label_success_title">Молодец!</string>
+    <string name="game_label_success_you_win">Вы получаете: </string>
+    <string name="game_button_success_collect_coins">Забрать приз!</string>
+    <string name="game_button_success_collect_coins_2">Жми еще!</string>
+    <string name="game_button_success_collect_coins_3">Получи еще монет!</string>
+    <string name="game_button_success_collect_coins_4">И на посошок!</string>
+    <string name="game_label_success_quote">«%s»</string>
+    <string name="game_label_success_author">© %s</string>
+    <string name="game_label_success_coins_reward">- %s монет за угаданную цитату</string>
+    <string name="game_label_success_category_reward">- %s монет за пройденную категорию</string>
+    <string name="game_label_success_category_achievement">- Достижение «%s»</string>
+    <string name="game_label_double_up_title">Но это еще не все подарки!</string>
+    <string name="game_label_double_up_subtitle">Всего ты заработал: %s</string>
+    <string name="game_label_double_watch_video_title">Посмотри короткий рекламный видеоролик и получи в два раза больше монет!</string>
+    <string name="game_button_double_watch_approve">Получить %s монет!👍</string>
+    <string name="game_button_double_watch_decline">Упустить возможность💩</string>
+
+    <!-- HINT -->
+    <string name="hint_label_author_title">Показать автора цитаты?</string>
+    <string name="hint_label_skip_title">Не разгадать? Можно пропустить!</string>
+    <string name="hint_label_next_word_title">Сказать следующее слово?</string>
+    <string name="hint_label_subtitle">Эта подсказка стоит %s монет.</string>
+    <string name="hint_button_confirm">Показать!</string>
+    <string name="hint_button_confirm_say">Сказать!</string>
+    <string name="hint_button_confirm_free">Посмотреть видео и узнать бесплатно!</string>
+    <string name="hint_fab_author_title">Узнать автора</string>
+    <string name="hint_fab_next_word_fab_title">Узнать следующее слово</string>
+    <string name="hint_fab_skip_title">Пропустить уровень</string>
+
+    <!-- PROFILE -->
+    <string name="profile_name_hint">Ваше имя</string>
+    <string name="profile_label_choose_color">Выбери цвет игры</string>
+    <string name="profile_label_change_main_color">Цвет игры</string>
+    <string name="profile_button_feedback">Сообщить о проблеме</string>
+    <string name="profile_button_share_app">Поделиться Игрой</string>
+    <string name="profile_label_email_title">Пожалуйста не удаляйте это!</string>
+    <string name="profile_label_email_write">Напишите ваш отзыв или сообщите о проблеме:</string>
+    <string name="profile_label_share_app">Привет! Рекомендую скачать эту классную игру:</string>
+
+    <!-- BUY -->
+    <string name="topup_label_title">Выбирай подходящий вариант, %s!</string>
+    <string name="topup_label_billing_failed">Что-то пошло не так, попробуйте еще раз или обратитесь в поддержку.</string>
+    <string name="topup_label_billing_success">Монеты уже на твоем балансе, пользуйся!</string>
+</resources>

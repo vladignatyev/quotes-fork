@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+
+        <variable
+            name="viewModel"
+            type="com.quote.mosaic.ui.onboarding.OnboardingViewModel" />
+
+        <variable
+            name="fragment"
+            type="com.quote.mosaic.ui.onboarding.login.LoginFragment" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/blue">
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/ic_background"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageView
+            android:id="@+id/logo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="128dp"
+            android:background="@drawable/ic_logo"
+            app:layout_constraintBottom_toTopOf="@+id/nameTextInput"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="4dp"
+            android:layout_marginBottom="16dp"
+            android:gravity="center"
+            android:text="@string/onboarding_label_welcome"
+            android:textColor="@color/white"
+            android:textSize="22sp"
+            app:layout_constraintBottom_toTopOf="@+id/nameTextInput"
+            app:layout_constraintEnd_toEndOf="@+id/nameTextInput"
+            app:layout_constraintStart_toStartOf="@+id/nameTextInput" />
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/nameTextInput"
+            style="@style/TextInputLayout.White"
+            android:layout_width="match_parent"
+            android:layout_height="64dp"
+            android:layout_marginStart="32dp"
+            android:layout_marginEnd="32dp"
+            android:layout_marginBottom="56dp"
+            android:hint="@string/onboarding_label_name_hint"
+            app:hintTextAppearance="@style/TextAppearance.App.TextInputLayout"
+            app:layout_constraintBottom_toTopOf="@+id/next"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/nameEditText"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:drawableEnd="@drawable/ic_refresh"
+                android:maxLength="20"
+                android:singleLine="true"
+                android:text="@={viewModel.state.nameText}"
+                android:textColor="@color/white"
+                android:textCursorDrawable="@null" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <View
+            android:layout_width="48dp"
+            android:layout_height="0dp"
+            android:onClick="@{() -> viewModel.generateRandomName()}"
+            app:layout_constraintBottom_toBottomOf="@id/nameTextInput"
+            app:layout_constraintEnd_toEndOf="@id/nameTextInput"
+            app:layout_constraintTop_toTopOf="@id/nameTextInput" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="@string/onboarding_title_enter_yours"
+            android:textColor="@color/white"
+            app:layout_constraintEnd_toEndOf="@+id/nameTextInput"
+            app:layout_constraintStart_toStartOf="@+id/nameTextInput"
+            app:layout_constraintTop_toBottomOf="@+id/nameTextInput" />
+
+        <com.quote.mosaic.core.ui.button.PreloaderButton
+            android:id="@+id/next"
+            android:layout_width="0dp"
+            android:layout_height="64dp"
+            android:layout_marginStart="32dp"
+            android:layout_marginEnd="32dp"
+            android:layout_marginBottom="64dp"
+            android:alpha="@{viewModel.state.loginEnabled ? 1.0f : 0.5f}"
+            android:onClick="@{() -> viewModel.login()}"
+            android:textSize="15sp"
+            app:backgroundTint="@color/transparent"
+            app:buttonEnabled="@{!viewModel.state.loading &amp;&amp; viewModel.state.loginEnabled}"
+            app:buttonLoading="@{viewModel.state.loading}"
+            app:buttonText="@{@string/shared_button_continue}"
+            app:cornerRadius="8dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:rippleColor="#33AAAAAA"
+            app:strokeColor="@color/white"
+            app:strokeWidth="2dp" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <integer-array name="picker_colors">
+        <item>0xff0981CC</item>
+        <item>0xff673AB7</item>
+        <item>0xff9E9E9E</item>
+        <item>0xff388E3C</item>
+        <item>0xffD32F2F</item>
+        <item>0xff000000</item>
+    </integer-array>
+</resources>

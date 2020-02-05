@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+
+        <variable
+            name="fragment"
+            type="com.quote.mosaic.ui.main.profile.ProfileFragment" />
+
+        <variable
+            name="viewModel"
+            type="com.quote.mosaic.ui.main.profile.ProfileViewModel" />
+    </data>
+
+    <FrameLayout
+        android:id="@+id/container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#a5a5a5">
+
+        <androidx.core.widget.NestedScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/ic_background">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <ImageView
+                    android:id="@+id/logo"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="24dp"
+                    android:background="@drawable/ic_logo"
+                    app:layout_constraintBottom_toTopOf="@+id/shareButton"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <io.supercharge.shimmerlayout.ShimmerLayout
+                    android:id="@+id/shareButton"
+                    android:layout_width="0dp"
+                    android:layout_height="64dp"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginBottom="16dp"
+                    app:layout_constraintBottom_toTopOf="@+id/changeColorContainer"
+                    app:layout_constraintEnd_toEndOf="@+id/nameTextInput"
+                    app:layout_constraintStart_toStartOf="@+id/nameTextInput"
+                    app:layout_constraintTop_toBottomOf="@+id/logo"
+                    app:shimmer_color="#1AB19866">
+
+                    <com.quote.mosaic.core.ui.button.GoldPreloaderButton
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:alpha="@{1.0f}"
+                        android:onClick="@{() -> fragment.shareClicked()}"
+                        android:textSize="15sp"
+                        app:backgroundTint="@color/transparent"
+                        app:buttonEnabled="@{true}"
+                        app:buttonLoading="@{false}"
+                        app:buttonText="@{@string/profile_button_share_app}"
+                        app:cornerRadius="8dp"
+                        app:rippleColor="#33AAAAAA"
+                        app:strokeColor="@color/gold"
+                        app:strokeWidth="2dp" />
+                </io.supercharge.shimmerlayout.ShimmerLayout>
+
+                <View
+                    android:id="@+id/changeColorContainer"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:onClick="@{() -> fragment.onColorPickerClicked()}"
+                    app:layout_constraintBottom_toBottomOf="@id/changeColorCircle"
+                    app:layout_constraintEnd_toEndOf="@+id/nameTextInput"
+                    app:layout_constraintStart_toStartOf="@id/changeColorCircle"
+                    app:layout_constraintTop_toTopOf="@id/changeColorCircle" />
+
+                <android.widget.Button
+                    android:id="@+id/changeColorCircle"
+                    android:layout_width="56dp"
+                    android:layout_height="56dp"
+                    android:layout_marginBottom="16dp"
+                    android:onClick="@{() -> fragment.onColorPickerClicked()}"
+                    android:textColor="@color/white"
+                    app:backgroundRes="@{viewModel.state.color}"
+                    app:layout_constraintBottom_toTopOf="@+id/nameTextInput"
+                    app:layout_constraintStart_toStartOf="@+id/nameTextInput" />
+
+                <TextView
+                    android:id="@+id/changeColorTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:text="@string/profile_label_change_main_color"
+                    android:textColor="@color/white"
+                    android:textSize="20sp"
+                    android:textStyle="bold"
+                    app:layout_constraintBottom_toBottomOf="@+id/changeColorCircle"
+                    app:layout_constraintStart_toEndOf="@+id/changeColorCircle"
+                    app:layout_constraintTop_toTopOf="@+id/changeColorCircle" />
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/nameTextInput"
+                    style="@style/TextInputLayout.White"
+                    android:layout_width="0dp"
+                    android:layout_height="64dp"
+                    android:layout_marginStart="32dp"
+                    android:hint="@string/profile_name_hint"
+                    android:layout_marginEnd="32dp"
+                    android:layout_marginBottom="16dp"
+                    app:hintTextAppearance="@style/TextAppearance.App.TextInputLayout"
+                    app:layout_constraintBottom_toTopOf="@+id/saveButton"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/nameEditText"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:maxLength="20"
+                        android:singleLine="true"
+                        android:text="@={viewModel.state.nameText}"
+                        android:textColor="@color/white"
+                        android:textCursorDrawable="@null" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.quote.mosaic.core.ui.button.PreloaderButton
+                    android:id="@+id/saveButton"
+                    android:layout_width="0dp"
+                    android:layout_height="64dp"
+                    android:layout_marginBottom="16dp"
+                    android:alpha="@{viewModel.state.saveEnabled ? 1.0f : 0.5f}"
+                    android:onClick="@{() -> viewModel.save()}"
+                    android:textSize="15sp"
+                    app:backgroundTint="@color/transparent"
+                    app:buttonEnabled="@{!viewModel.state.loading &amp;&amp; viewModel.state.saveEnabled}"
+                    app:buttonLoading="@{viewModel.state.loading}"
+                    app:buttonText="@{@string/shared_button_save}"
+                    app:cornerRadius="8dp"
+                    app:layout_constraintBottom_toTopOf="@+id/feedbackButton"
+                    app:layout_constraintEnd_toEndOf="@+id/nameTextInput"
+                    app:layout_constraintStart_toStartOf="@+id/nameTextInput"
+                    app:rippleColor="#33AAAAAA"
+                    app:strokeColor="@color/white"
+                    app:strokeWidth="2dp" />
+
+                <com.quote.mosaic.core.ui.button.PreloaderButton
+                    android:id="@+id/feedbackButton"
+                    android:layout_width="0dp"
+                    android:layout_height="64dp"
+                    android:layout_marginBottom="16dp"
+                    android:alpha="@{0.8f}"
+                    android:onClick="@{() -> fragment.feedbackClicked()}"
+                    android:textSize="15sp"
+                    app:backgroundTint="@color/transparent"
+                    app:buttonEnabled="@{true}"
+                    app:buttonLoading="@{false}"
+                    app:buttonText="@{@string/profile_button_feedback}"
+                    app:cornerRadius="8dp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="@+id/nameTextInput"
+                    app:layout_constraintStart_toStartOf="@+id/nameTextInput"
+                    app:rippleColor="#33AAAAAA"
+                    app:strokeColor="@color/white"
+                    app:strokeWidth="2dp" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </androidx.core.widget.NestedScrollView>
+    </FrameLayout>
+</layout>

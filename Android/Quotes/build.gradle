@@ -1,0 +1,89 @@
+// Top-level build file where you can add configuration options common to all sub-projects/modules.
+
+buildscript {
+    ext.gradle_version = "3.5.2"
+    ext.kotlin_version = "1.3.50"
+    ext.google_version = "4.0.1"
+    ext.crashlytics_version = "1.31.2"
+    ext.nav_version = "2.1.0"
+    repositories {
+        google()
+        jcenter()
+        maven {
+            url 'https://maven.fabric.io/public'
+        }
+
+    }
+    dependencies {
+        classpath "com.android.tools.build:gradle:$gradle_version"
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath "com.google.gms:google-services:$google_version"
+        classpath "io.fabric.tools:gradle:$crashlytics_version"
+        classpath "androidx.navigation:navigation-safe-args-gradle-plugin:$nav_version"
+        // NOTE: Do not place your application dependencies here; they belong
+        // in the individual module build.gradle files
+    }
+}
+
+allprojects {
+    repositories {
+        google()
+        jcenter()
+        maven { url "https://jitpack.io" }
+
+    }
+}
+
+task clean(type: Delete) {
+    delete rootProject.buildDir
+}
+
+ext {
+    sdk = [
+            min    : 21,
+            target : 28,
+            compile: 28
+    ]
+    versions = [
+
+            kotlin              : kotlin_version,
+            gradle              : gradle_version,
+            appcompat           : "1.1.0",
+            constraint          : "1.1.3",
+            lifecycle           : "2.1.0",
+            core                : "1.2.0-alpha04",
+            navigation          : "2.2.0-alpha02",
+            material            : "1.2.0-alpha02",
+            encryptedPrefs      : "1.3.0",
+            firebase            : "17.2.1",
+            messaging           : "20.0.1",
+            dagger              : "2.24",
+            admob               : "18.3.0",
+            rxjava              : "2.2.6",
+            rxkotlin            : "2.2.0",
+            rxandroid           : "2.1.1",
+            rxrelay             : "2.0.0",
+            retrofit            : "2.4.0",
+            loggingInterceptor  : "3.10.0",
+            jackson             : "2.9.0",
+            crashlytics         : "2.10.1",
+            timber              : "4.7.1",
+            leakcanary          : "2.0-alpha-2",
+            junit               : "4.12",
+            testRunner          : "1.1.0",
+            mockitoKotlinVersion: "1.5.0",
+            lottieVersion       : "3.0.7",
+            shimmer             : "2.1.0",
+            konfetti            : "1.1.2",
+            billing             : "2.1.0",
+            colorPicker         : "2.2.2",
+            glide               : "4.10.0",
+            fragmentKtx         : "1.1.0",
+            flexbox             : "2.0.0",
+            fireLikes           : "0.0.2",
+            fab                 : "1.6.4",
+            facebook            : "5.0.0"
+
+    ]
+
+}

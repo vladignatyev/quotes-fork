@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <color name="colorPrimary">#FFFFFF</color>
+    <color name="colorPrimaryDark">#FFFFFF</color>
+    <color name="colorAccent">#FFFFFF</color>
+
+    <color name="blue">#0981CC</color>
+    <color name="darkBlue">#003E65</color>
+
+    <color name="indigo">#673AB7</color>
+    <color name="darkIndigo">#443E74</color>
+
+    <color name="white">#FFFFFF</color>
+    <color name="transparent">#00000000</color>
+
+    <color name="white_semi_trans">#A6FFFFFF</color>
+
+    <color name="mtrl_textinput_default_box_stroke_color" tools:override="true">#FFFFFF</color>
+    <color name="black">#000000</color>
+    <color name="gold">#FFCB3E</color>
+
+    <!-- Game Backgrounds -->
+    <color name="game_background_blue">#0981CC</color>
+    <color name="bar_background_blue">#003E65</color>
+
+    <color name="game_background_purple">#673AB7</color>
+    <color name="bar_background_purple">#443E74</color>
+
+    <color name="game_background_gray">#9E9E9E</color>
+    <color name="bar_background_gray">#616161</color>
+
+    <color name="game_background_green">#388E3C</color>
+    <color name="bar_background_green">#1B5E20</color>
+
+    <color name="game_background_red">#D32F2F</color>
+    <color name="bar_background_red">#B71C1C</color>
+
+    <color name="game_background_black">#000000</color>
+    <color name="bar_background_black">#212121</color>
+
+
+</resources>

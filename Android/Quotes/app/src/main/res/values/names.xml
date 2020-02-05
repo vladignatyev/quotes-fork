@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="first_names_males">
+        <item>Небесный</item>
+        <item>Славный</item>
+        <item>Огненный</item>
+        <item>Воздушный</item>
+        <item>Дикий</item>
+        <item>Забавный</item>
+        <item>Веселый</item>
+        <item>Хмурый</item>
+        <item>Меткий</item>
+        <item>Добрый</item>
+        <item>Мирный</item>
+        <item>Опасный</item>
+        <item>Робкий</item>
+        <item>Важный</item>
+        <item>Цепкий</item>
+        <item>Могучий</item>
+        <item>Главный</item>
+        <item>Шустрый</item>
+        <item>Бегущий</item>
+        <item>Страстный</item>
+        <item>Сонный</item>
+        <item>Сумасшедший</item>
+        <item>Волшебный</item>
+        <item>Милый</item>
+        <item>Популярный</item>
+        <item>Озорной</item>
+    </string-array>
+
+    <string-array name="second_names_males">
+        <item>Апельсин</item>
+        <item>Помидор</item>
+        <item>Кот</item>
+        <item>Босс</item>
+        <item>Диджей</item>
+        <item>Ученый</item>
+        <item>Актер</item>
+        <item>Артист</item>
+        <item>Техник</item>
+        <item>Писатель</item>
+        <item>Космонавт</item>
+        <item>Барыга</item>
+        <item>Знахарь</item>
+        <item>Бомбила</item>
+        <item>Граф</item>
+        <item>Барон</item>
+        <item>Воробей</item>
+        <item>Пёс</item>
+        <item>Волк</item>
+        <item>Орёл</item>
+        <item>Тесак</item>
+        <item>Повар</item>
+        <item>Ленивец</item>
+        <item>Волшебник</item>
+        <item>Джокер</item>
+        <item>Футурист</item>
+    </string-array>
+
+    <string-array name="first_names_females">
+        <item>Небесная</item>
+        <item>Славная</item>
+        <item>Огненная</item>
+        <item>Воздушная</item>
+        <item>Дикая</item>
+        <item>Забавная</item>
+        <item>Веселая</item>
+        <item>Хмурая</item>
+        <item>Меткая</item>
+        <item>Добрая</item>
+        <item>Мирная</item>
+        <item>Опасная</item>
+        <item>Робкая</item>
+        <item>Важная</item>
+        <item>Цепкая</item>
+        <item>Могучая</item>
+        <item>Главная</item>
+        <item>Шустрая</item>
+        <item>Бегущая</item>
+        <item>Страстная</item>
+        <item>Сонная</item>
+        <item>Сумасшедшая</item>
+        <item>Волшебная</item>
+        <item>Милая</item>
+        <item>Популярная</item>
+        <item>Озорная</item>
+    </string-array>
+
+    <string-array name="second_names_females">
+        <item>Апельсинка</item>
+        <item>Помидорка</item>
+        <item>Кошка</item>
+        <item>Директриса</item>
+        <item>Диджейка</item>
+        <item>Ученая</item>
+        <item>Актриса</item>
+        <item>Артистка</item>
+        <item>Техничка</item>
+        <item>Писательница</item>
+        <item>Космонавтка</item>
+        <item>Барыга</item>
+        <item>Знахарка</item>
+        <item>Таксистка</item>
+        <item>Графиня</item>
+        <item>Баронесса</item>
+        <item>Синичка</item>
+        <item>Собачка</item>
+        <item>Волчица</item>
+        <item>Орлица</item>
+        <item>Пила</item>
+        <item>Кухарка</item>
+        <item>Утка</item>
+        <item>Волшебница</item>
+        <item>Богиня</item>
+        <item>Футуристка</item>
+    </string-array>
+
+</resources>
