@@ -132,7 +132,9 @@ class AdMobSSVView(View):
                 return self.verified(request, data=data)
             else:
                 return self.non_verified(request, data=None)
-        except api.admobssv.AdMobRewardVerificator:
+        except AdMobRewardVerificator.QueryStringParsingError:
+            return HttpResponse(status=200)
+        except AdMobRewardVerificator.UnknownKeyId:
             return HttpResponse(status=200)
 
     def verified(self, request, data=None):
