@@ -127,6 +127,8 @@ class GooglePlayProduct(models.Model):
     sku = models.CharField('IAP SKU (Product ID)', max_length=256, blank=True)
     is_rewarded_product = models.BooleanField(default=False, blank=True)
     is_test = models.BooleanField(default=False, blank=True)
+    # to support: https://developers.google.com/admob/android/rewarded-video-ssv#perform_verification
+    is_admob_rewarded_ssv = models.BooleanField(default=False, blank=True)
 
     def __str__(self):
         return f'{self.sku}'
@@ -135,6 +137,7 @@ class GooglePlayProduct(models.Model):
 
 
 class AppStoreProduct(models.Model):
+    # TODO: add is_admob_rewarded_ssv = models.BooleanField(default=False, blank=True)
     pass
 
 

@@ -48,7 +48,8 @@ class Worker:
     def get_rewarded_purchases(self):
         # q = self.parallelized_queryset() if self.workers_count > 1 else self.queryset()
         q = self.queryset()
-        return q.filter(Q(product__is_rewarded_product=True), Q(status=PurchaseStatus.UNKNOWN))
+        return q.filter(Q(product__is_rewarded_product=True),
+                        Q(status=PurchaseStatus.UNKNOWN))
 
     def get_normal_purchases(self):
         # q = self.parallelized_queryset() if self.workers_count > 1 else self.queryset()

@@ -9,6 +9,7 @@ from django.db import models
 
 
 from .models import *
+from .admobssv import AdMobRewardVerificator
 
 from django.http import HttpResponse, JsonResponse
 from django.views.generic import ListView, View, DetailView
@@ -115,3 +116,24 @@ class PushSubscriptionView(SafeView):
             return HttpResponse(status=200)
         else:
             return HttpResponse(status=201)
+
+
+class AdMobSSVView(View):
+    def get(self, request, *args, **kwargs):
+        qs = request['META']['QUERY_STRING']
+
+        data = verifier.get_data(qs)
+
+        verifier = AdMobRewardVerificator()
+        ok = verifier.verify_from_query_string(qs)
+
+        if ok:
+            return self.verified(request, data=data)
+        else:
+            return self.non_verified(request, data=None)
+
+    def verified(self, request, data=None):
+        return HttpResponse(status=200)
+
+    def non_verified(self, request, data=None):
+        return HttpResponse(status=200)

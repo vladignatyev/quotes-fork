@@ -14,7 +14,9 @@ from .models import *
 from quoterank.models import *
 
 
-from api.views import AuthenticationForm, AuthenticateView, SafeView, PushSubscriptionView
+from api.views import AuthenticationForm, AuthenticateView, \
+                      SafeView, PushSubscriptionView, AdMobSSVView
+
 
 from quoterank.views import QuoteRankPreview
 
@@ -247,9 +249,6 @@ class GenericPurchaseView(FormBasedView):
 
     def post(self, request, *args, **kwargs):
         form = self.make_form_from_request(request)
-
-        print(request)
-        print(request.body)
 
         if not form or not form.is_valid():
             return HttpResponse(status=400)
@@ -566,3 +565,26 @@ class CoinProductConsumeView(FormBasedView):
             return HttpResponse(status=404)
 
         return HttpResponse(status=501)
+
+
+class AdmobPurchaseVerificationView(AdMobSSVView):
+    def verified(self, request, data=None):
+        print(request)
+        print(data)
+        try:
+            purchase = Purchase.objects.select_related('product').get(id=data['custom_data'],
+                                                                      product__is_admob_rewarded_ssv=True)
+
+            purchase.previous_status = PurchaseStatus.DEFAULT
+            purchase.status = PurchaseStatus.PURCHASED
+            purchase.save()
+        except Purchase.DoesNotExist:
+            return HttpResponse(status=404)
+
+        return super(self, AdmobPurchaseVerificationView).verified(data=data)
+
+    def non_verified(self, request, data=None):
+        # do nothing but report?
+        print(request)
+        print(data)
+        return super(self, AdmobPurchaseVerificationView).verified(data=data)

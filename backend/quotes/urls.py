@@ -52,6 +52,8 @@ urlpatterns = [
     # Google Play purchases
     path('purchase/play/', GenericPurchaseView.as_view(), name='purchase-play-view'),
 
+    path('admob/ssv/', AdmobPurchaseVerificationView.as_view(), name='purchase-admob-ssv'),
+
     path('purchase/play/status/<uuid:purchase_id>/', PurchaseStatusView.as_view(), name='purchase-status-view'),
     path('purchase/play/products/', PurchaseableProductsListView.as_view(), name='purchase-products-list'),
 
