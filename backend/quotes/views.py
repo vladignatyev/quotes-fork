@@ -11,6 +11,8 @@ from django.urls import reverse
 from django import forms
 
 from .models import *
+from api.models import Purchase
+
 from quoterank.models import *
 
 
