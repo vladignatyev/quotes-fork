@@ -141,4 +141,5 @@ class AdMobSSVView(View):
         return HttpResponse(status=200)
 
     def non_verified(self, request, data=None):
+        logger.error(f"Unable to verify request: {request.META['QUERY_STRING']}")
         return HttpResponse(status=200)

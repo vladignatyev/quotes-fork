@@ -1,20 +1,21 @@
+import base64
+import urllib
 import requests
+
+
+from base64 import b64decode
+
 import json
 
 from urllib.parse import parse_qsl
 
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives.asymmetric import ec
-
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives.serialization import load_der_parameters
+from cryptography.hazmat.primitives.asymmetric.utils import decode_dss_signature
 
 GOOGLE_ADMOB_KEY_SERVER = 'https://www.gstatic.com/admob/reward/verifier-keys.json'
-
-
-#
-# pubkey = default_backend().load_pem_public_key(load_keys_from_server()[3335741209])
-
-# print(load_keys_from_server())
-
 
 
 
@@ -30,11 +31,13 @@ class AdMobRewardVerificator:
     def verify_from_query_string(self, qs):
         content_to_verify, signature, key_id = self._parse_query_string(qs)
         key_pem = self._get_pub_key_by_id(key_id)
+        public_key = default_backend().load_pem_public_key(key_pem)
 
-        pubkey = default_backend().load_pem_public_key(key_pem)
-        # verify
-
-        return False
+        try:
+            public_key.verify(signature, content_to_verify, ec.ECDSA(hashes.SHA256()))
+        except:
+            return False
+        return True
 
     def get_data(self, qs):
         as_dict = dict(parse_qsl(qs))
@@ -53,7 +56,8 @@ class AdMobRewardVerificator:
         r = requests.get(self.key_server)
         as_json = json.loads(r.content)
 
-        result = [(kv['keyId'], kv['pem'].replace("\\n", '\n')) for kv in as_json['keys'] ]
+        result = [(str(kv['keyId']), kv['pem'].replace("\\n", '\n').encode('ascii')) for kv in as_json['keys'] ]
+
         return dict(result)
 
     def _get_pub_key_by_id(self, key_id):
@@ -75,11 +79,11 @@ class AdMobRewardVerificator:
             as_dict = dict(parse_qsl(qs))
 
             key_id = as_dict.get('key_id')
-            signature = as_dict.get('signature')
+            signature = base64.urlsafe_b64decode(as_dict.get('signature') + '===')
 
             splitted = qs.split('?')[-1].split('&' + self.SIGNATURE_PARAM_NAME)
 
-            content_to_verify = splitted[0]
+            content_to_verify = urllib.parse.unquote(splitted[0]).encode('utf-8')
 
             return content_to_verify, signature, key_id
         except:
@@ -87,5 +91,6 @@ class AdMobRewardVerificator:
 
 
 if __name__ == '__main__':
+    qs =  '?ad_network=5450213213286189855&ad_unit=1234567890&timestamp=1580923772739&transaction_id=123456789&signature=MEQCIGM6J3YkXH26c9mmJuR7ipyyeuhcKmZs1eK7VMlzAWw1AiBelO_Bux6wl0zmIMNMyqbvKjhCCxPUbcf03aFvKAIiCw&key_id=3335741209'
     a = AdMobRewardVerificator()
-    a.verify_from_query_string('?ad_network=54...55&ad_unit=12345678&reward_amount=10&reward_item=coins&timestamp=150777823&transaction_id=12...DEF&user_id=1234567&signature=ME...Z1c&key_id=1268887')
+    print(a.verify_from_query_string(qs))

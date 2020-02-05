@@ -569,8 +569,6 @@ class CoinProductConsumeView(FormBasedView):
 
 class AdmobPurchaseVerificationView(AdMobSSVView):
     def verified(self, request, data=None):
-        print(request)
-        print(data)
         try:
             purchase = Purchase.objects.select_related('product').get(id=data['custom_data'],
                                                                       product__is_admob_rewarded_ssv=True)
@@ -580,11 +578,7 @@ class AdmobPurchaseVerificationView(AdMobSSVView):
             purchase.save()
         except Purchase.DoesNotExist:
             return HttpResponse(status=404)
+        except:
+            return HttpResponse(status=400)
 
-        return super(self, AdmobPurchaseVerificationView).verified(data=data)
-
-    def non_verified(self, request, data=None):
-        # do nothing but report?
-        print(request)
-        print(data)
         return super(self, AdmobPurchaseVerificationView).verified(data=data)
