@@ -12,6 +12,7 @@ from django import forms
 
 from .models import *
 from api.models import Purchase
+from django.core.exceptions import ObjectDoesNotExist
 
 from quoterank.models import *
 
@@ -23,6 +24,7 @@ from api.views import AuthenticationForm, AuthenticateView, \
 from quoterank.views import QuoteRankPreview
 
 from .utils import json_response
+
 
 class BaseView(SafeView):
     def mixin_authorized(self, request):
@@ -578,7 +580,7 @@ class AdmobPurchaseVerificationView(AdMobSSVView):
             purchase.previous_status = PurchaseStatus.DEFAULT
             purchase.status = PurchaseStatus.PURCHASED
             purchase.save()
-        except Purchase.DoesNotExist:
+        except ObjectDoesNotExist:
             return HttpResponse(status=404)
         except:
             return HttpResponse(status=400)
