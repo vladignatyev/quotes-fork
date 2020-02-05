@@ -122,9 +122,8 @@ class AdMobSSVView(View):
     def get(self, request, *args, **kwargs):
         qs = request.META['QUERY_STRING']
 
-        data = verifier.get_data(qs)
-
         verifier = AdMobRewardVerificator()
+        data = verifier.get_data(qs)
         ok = verifier.verify_from_query_string(qs)
 
         if ok:
