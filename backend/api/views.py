@@ -120,16 +120,20 @@ class PushSubscriptionView(SafeView):
 
 class AdMobSSVView(View):
     def get(self, request, *args, **kwargs):
-        qs = request.META['QUERY_STRING']
+        try:
+            qs = request.META['QUERY_STRING']
+            logger.error("Querystring: %s", qs)
 
-        verifier = AdMobRewardVerificator()
-        data = verifier.get_data(qs)
-        ok = verifier.verify_from_query_string(qs)
+            verifier = AdMobRewardVerificator()
+            data = verifier.get_data(qs)
+            ok = verifier.verify_from_query_string(qs)
 
-        if ok:
-            return self.verified(request, data=data)
-        else:
-            return self.non_verified(request, data=None)
+            if ok:
+                return self.verified(request, data=data)
+            else:
+                return self.non_verified(request, data=None)
+        except api.admobssv.AdMobRewardVerificator:
+            return HttpResponse(status=200)
 
     def verified(self, request, data=None):
         return HttpResponse(status=200)
