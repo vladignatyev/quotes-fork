@@ -11,7 +11,6 @@ from django.urls import reverse
 from django import forms
 
 from .models import *
-from api.models import Purchase
 from django.core.exceptions import ObjectDoesNotExist
 
 import logging
@@ -578,10 +577,14 @@ class CoinProductConsumeView(FormBasedView):
 class AdmobPurchaseVerificationView(AdMobSSVView):
     def verified(self, request, data=None):
         try:
+            purchase_id = data['custom_data']
+
             Purchase = apps.get_model('api.GooglePlayIAPPurchase')
-            purchase = Purchase.objects.get(order_id=data['custom_data'], product__is_admob_rewarded_ssv=True)
+
+            purchase = Purchase.objects.get(id=purchase_id, product__is_admob_rewarded_ssv=True)
             purchase.previous_status = PurchaseStatus.DEFAULT
             purchase.status = PurchaseStatus.PURCHASED
+
             purchase.save()
         except ObjectDoesNotExist:
             return HttpResponse(status=404)
