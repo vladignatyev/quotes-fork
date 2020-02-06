@@ -55,6 +55,7 @@ class Worker:
         # q = self.parallelized_queryset() if self.workers_count > 1 else self.queryset()
         q = self.queryset()
         return q.filter(Q(product__is_rewarded_product=False),
+                        Q(product__is_admob_rewarded_ssv=False),
                         Q(date_created__gt=self.get_refund_period(), date_updated__lt=self.get_purchased_last_update_interval(),
                           status=PurchaseStatus.PURCHASED, ) | Q(status=PurchaseStatus.UNKNOWN))
 
