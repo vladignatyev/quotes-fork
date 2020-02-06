@@ -92,5 +92,6 @@ class AdMobRewardVerificator:
 
 if __name__ == '__main__':
     qs =  '?ad_network=5450213213286189855&ad_unit=1234567890&timestamp=1580923772739&transaction_id=123456789&signature=MEQCIGM6J3YkXH26c9mmJuR7ipyyeuhcKmZs1eK7VMlzAWw1AiBelO_Bux6wl0zmIMNMyqbvKjhCCxPUbcf03aFvKAIiCw&key_id=3335741209'
+    qs = '?ad_network=5450213213286189855&ad_unit=5032174875&custom_data=balance_recharge%3A2181a4c8-4522-4af2-bddc-ee86c4ca9a84&reward_amount=1&reward_item=Next%20word&timestamp=1581014198904&transaction_id=25c00f9eb183495519a50896dd1a1c9a&signature=MEQCIH2aQ0DZmhEDKUeqRQH0kRwIl0Z0Pm5_4mYkwK1XV_Z4AiBeI2fYPphEVhG4j1ETcLvyt0dU2Ypj1-pt-DeYyMdO8w&key_id=3335741209'
     a = AdMobRewardVerificator()
     print(a.verify_from_query_string(qs))
