@@ -583,7 +583,7 @@ class AdmobPurchaseVerificationView(AdMobSSVView):
             discovery = PurchaseProductDiscovery()
             product = discovery.get_product_by_product_id(product_id=data['custom_data'])
 
-            purchase = Purchase.objects.get(product=product, product__is_admob_rewarded_ssv=True)
+            purchase = Purchase.objects.get(product=product.google_play_product, product__is_admob_rewarded_ssv=True)
 
             purchase.previous_status = PurchaseStatus.DEFAULT
             purchase.status = PurchaseStatus.PURCHASED
