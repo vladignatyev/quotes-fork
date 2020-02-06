@@ -14,6 +14,10 @@ from .models import *
 from api.models import Purchase
 from django.core.exceptions import ObjectDoesNotExist
 
+import logging
+logger = logging.getLogger(__name__)
+
+
 from quoterank.models import *
 
 
@@ -582,7 +586,9 @@ class AdmobPurchaseVerificationView(AdMobSSVView):
             purchase.save()
         except ObjectDoesNotExist:
             return HttpResponse(status=404)
-        except:
+        except Exception as e:
+            logger.error(e)
+
             return HttpResponse(status=400)
 
         return super(self, AdmobPurchaseVerificationView).verified(data=data)
