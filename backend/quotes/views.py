@@ -593,4 +593,4 @@ class AdmobPurchaseVerificationView(AdMobSSVView):
 
             return HttpResponse(status=400)
 
-        return super(self, AdmobPurchaseVerificationView).verified(data=data)
+        return super(AdmobPurchaseVerificationView, self).verified(data=data)
