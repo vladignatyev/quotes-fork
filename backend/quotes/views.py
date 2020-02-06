@@ -579,12 +579,7 @@ class AdmobPurchaseVerificationView(AdMobSSVView):
     def verified(self, request, data=None):
         try:
             Purchase = apps.get_model('api.GooglePlayIAPPurchase')
-
-            discovery = PurchaseProductDiscovery()
-            product = discovery.get_product_by_product_id(product_id=data['custom_data'])
-
-            purchase = Purchase.objects.get(product=product.google_play_product, product__is_admob_rewarded_ssv=True)
-
+            purchase = Purchase.objects.get(order_id=data['custom_data'], product__is_admob_rewarded_ssv=True)
             purchase.previous_status = PurchaseStatus.DEFAULT
             purchase.status = PurchaseStatus.PURCHASED
             purchase.save()
