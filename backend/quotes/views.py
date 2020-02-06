@@ -590,7 +590,6 @@ class AdmobPurchaseVerificationView(AdMobSSVView):
             return HttpResponse(status=404)
         except Exception as e:
             logger.error(e)
-
             return HttpResponse(status=400)
 
-        return super(AdmobPurchaseVerificationView, self).verified(data=data)
+        return super(AdmobPurchaseVerificationView, self).verified(request, data=data)
