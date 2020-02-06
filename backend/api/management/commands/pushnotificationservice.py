@@ -2,7 +2,7 @@ from django.conf import settings
 
 from longjob.worker import LongJobBaseCommand, Worker
 
-from api.models import PushNotificationQueueItem
+from api.models import PushNotificationQueueItem, PushSubscription
 from api.notifications import FirebaseMessagingApp
 
 
