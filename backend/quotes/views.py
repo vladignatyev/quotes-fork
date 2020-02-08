@@ -587,9 +587,10 @@ class AdmobPurchaseVerificationView(AdMobSSVView):
 
             purchase.save()
         except ObjectDoesNotExist:
-            return HttpResponse(status=404)
+            # return HttpResponse(status=404)
+            return HttpResponse(status=200)
         except Exception as e:
             logger.error(e)
-            return HttpResponse(status=400)
+            return HttpResponse(status=200)
 
         return super(AdmobPurchaseVerificationView, self).verified(request, data=data)
