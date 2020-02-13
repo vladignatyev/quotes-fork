@@ -17,14 +17,22 @@ class PushSendingWorker(Worker):
 
         if push_notification_model.is_broadcast:
             subscriptions = PushSubscription.objects.all()
-            message = self.fcmapp.build_multicast_message_from_subscriptions(push_notification_model, subscriptions)
-            result = self.fcmapp.send_multicast_message(message, dry_run=settings.DEBUG)
-            job.done_with_result(result_text=f'Total: {len(result.responses)} Success: {result.success_count} Failures: {result.failure_count}')
+            log_items = []
+            for subscription in subscriptions:
+                message = self.fcmapp.build_message_from_model(push_notification_model, subscription)
+                result = self.fcmapp.send_message(message, dry_run=(settings.DEBUG or settings.TEST))
+                log_items.append(f'Sent to token {subscription.token} with result {result}')
+
+            job.done_with_result(result_text=f'Message ID: {result}')
+
+            # message = self.fcmapp.build_multicast_message_from_subscriptions(push_notification_model, subscriptions)
+            # result = self.fcmapp.send_multicast_message(message, dry_run=(settings.DEBUG or settings.TEST))
+            # job.done_with_result(result_text=f'Total: {len(result.responses)} Success: {result.success_count} Failures: {result.failure_count}')
 
         else:
             push_subscription = push_notification_model.push_subscription
             message = self.fcmapp.build_message_from_model(push_notification_model, push_subscription)
-            result = self.fcmapp.send_message(message, dry_run=settings.DEBUG)
+            result = self.fcmapp.send_message(message, dry_run=(settings.DEBUG or settings.TEST))
             job.done_with_result(result_text=f'Message ID: {result}')
 
 
