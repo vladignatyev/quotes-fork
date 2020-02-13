@@ -63,7 +63,9 @@ class AuthenticateView(View):
 
         self.cleaned_data = self.form.clean()
 
-        if not check_signature(self.cleaned_data['device_token'], self.cleaned_data['timestamp'].strftime('%Y-%m-%dT%H:%M:%S%z'), self.cleaned_data['signature']):
+        if not check_signature(self.cleaned_data['device_token'],
+                               self.cleaned_data['timestamp'].strftime('%Y-%m-%dT%H:%M:%S%z'),
+                               self.cleaned_data['signature']):
             return self.invalid_response()
 
         try:

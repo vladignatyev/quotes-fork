@@ -16,6 +16,8 @@ from ..views import BaseView
 
 from .common import AuthenticatedTestCase, ContentMixin
 
+from django.db import transaction
+
 
 class QuotesAuthenticateTest(TestCase):
     def test_should_create_profile(self):
@@ -34,8 +36,11 @@ class QuotesAuthenticateTest(TestCase):
             'nickname': nickname
         }
 
+        self.assertEqual(len(list(Profile.objects.all())), 0)
+
         # When
         response = self.client.post(url, json.dumps(payload, ensure_ascii=False), content_type='application/json')
+        # response2 = self.client.post(url, json.dumps(payload, ensure_ascii=False), content_type='application/json')
 
         # Then
         self.assertEqual(200, response.status_code)
@@ -43,11 +48,49 @@ class QuotesAuthenticateTest(TestCase):
         payload = json.loads(response.content)
         auth_token = payload['auth_token']
 
-        profile = Profile.objects.get_by_auth_token(auth_token)
+        # profile = Profile.objects.get_by_auth_token(auth_token)
+        device_session = DeviceSession.objects.get(token=device_token)
+        profile = Profile.objects.get_by_session(device_session)
         self.assertEqual(nickname, profile.nickname)
         self.assertEqual(GameBalance.objects.get_actual(), profile.settings)
 
         self.assertEqual(1, len(Profile.objects.all()))
+
+    #
+    # def test_should_create_profile(self):
+    #     # Given
+    #     url = reverse('quote-auth')
+    #
+    #     device_token = 'sometesttoken'
+    #     timestamp = timezone.now().strftime('%Y-%m-%dT%H:%M:%S%z')
+    #     signature = generate_signature(device_token, timestamp)
+    #     nickname = 'Тестировщик'
+    #
+    #     payload = {
+    #         'device_token': device_token,
+    #         'timestamp': timestamp,
+    #         'signature': signature,
+    #         'nickname': nickname
+    #     }
+    #     # When
+    #     response = self.client.post(url, json.dumps(payload, ensure_ascii=False), content_type='application/json')
+    #     # response2 = self.client.post(url, json.dumps(payload, ensure_ascii=False), content_type='application/json')
+    #
+    #     # Then
+    #     self.assertEqual(200, response.status_code)
+    #
+    #     payload = json.loads(response.content)
+    #     auth_token = payload['auth_token']
+    # 
+    #     # profile = Profile.objects.get_by_auth_token(auth_token)
+    #     device_session = DeviceSession.objects.get(token=device_token)
+    #     profile = Profile.objects.get_by_session(device_session)
+    #     self.assertEqual(nickname, profile.nickname)
+    #     self.assertEqual(GameBalance.objects.get_actual(), profile.settings)
+    #
+    #     self.assertEqual(1, len(Profile.objects.all()))
+
+
 
     def test_should_respond_401_for_broken_case(self):
         # Given
@@ -798,6 +841,8 @@ class ProfileUpdateViewTest(AuthenticatedTestCase):
         url = reverse('profile-update-view')
         profile = self.profile
 
+        self.assertEqual(len(list(Profile.objects.all())), 1)
+
         new_nickname = 'test nickname'
 
         # When
@@ -807,6 +852,8 @@ class ProfileUpdateViewTest(AuthenticatedTestCase):
         # Then
         self.assertEqual(200, response.status_code)
         self.assertEqual(new_nickname, Profile.objects.get(pk=self.profile.pk).nickname)
+
+        self.assertEqual(len(list(Profile.objects.all())), 1)
 
 
 class TopicDetailViewTest(AuthenticatedTestCase, ContentMixin):
