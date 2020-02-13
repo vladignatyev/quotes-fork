@@ -1,0 +1,346 @@
+<table role="schedule">
+  <input role="data-holder" type="hidden" name="{{ widget.name }}"{% if widget.value != None %} value="{{ widget.value|stringformat:'s' }}"{% endif %}>
+  <thead><th colspan="25">Day / hour schedule <span role="day-now" style="display:none;">{% now "w" %}</span> <span  style="display:none;" role="hour-now">{% now "H" %}</span><span  style="display:none;">:</span><span  style="display:none;">{% now "i" %}</span></th></thead>
+  <tbody>
+  <tr role="schedule-bulk-hour-select">
+    <td><a href="javascript:;" role="schedule-shift-minus-hour">
+      <!-- ❮</a> <a href="javascript:;" role="schedule-shift-plus-hour">❯</a> -->
+    </td>
+    <td data-sh-time="00"><a href="javascript:;" class="notalink">00</a></td>
+    <td data-sh-time="01"><a href="javascript:;" class="notalink">01</a></td>
+    <td data-sh-time="02"><a href="javascript:;" class="notalink">02</a></td>
+    <td data-sh-time="03"><a href="javascript:;" class="notalink">03</a></td>
+    <td data-sh-time="04"><a href="javascript:;" class="notalink">04</a></td>
+    <td data-sh-time="05"><a href="javascript:;" class="notalink">05</a></td>
+    <td data-sh-time="06"><a href="javascript:;" class="notalink">06</a></td>
+    <td data-sh-time="07"><a href="javascript:;" class="notalink">07</a></td>
+    <td data-sh-time="08"><a href="javascript:;" class="notalink">08</a></td>
+    <td data-sh-time="09"><a href="javascript:;" class="notalink">09</a></td>
+    <td data-sh-time="10"><a href="javascript:;" class="notalink">10</a></td>
+    <td data-sh-time="11"><a href="javascript:;" class="notalink">11</a></td>
+    <td data-sh-time="12"><a href="javascript:;" class="notalink">12</a></td>
+    <td data-sh-time="13"><a href="javascript:;" class="notalink">13</a></td>
+    <td data-sh-time="14"><a href="javascript:;" class="notalink">14</a></td>
+    <td data-sh-time="15"><a href="javascript:;" class="notalink">15</a></td>
+    <td data-sh-time="16"><a href="javascript:;" class="notalink">16</a></td>
+    <td data-sh-time="17"><a href="javascript:;" class="notalink">17</a></td>
+    <td data-sh-time="18"><a href="javascript:;" class="notalink">18</a></td>
+    <td data-sh-time="19"><a href="javascript:;" class="notalink">19</a></td>
+    <td data-sh-time="20"><a href="javascript:;" class="notalink">20</a></td>
+    <td data-sh-time="21"><a href="javascript:;" class="notalink">21</a></td>
+    <td data-sh-time="22"><a href="javascript:;" class="notalink">22</a></td>
+    <td data-sh-time="23"><a href="javascript:;" class="notalink">23</a></td>
+  </tr>
+  <tr data-sh-day="monday" role="schedule-bulk-day-select">
+    <td><a class="notalink" href="javascript:;">Monday</a></td>
+    <td data-sh-time="00"><input type="checkbox" /></td>
+    <td data-sh-time="01"><input type="checkbox" /></td>
+    <td data-sh-time="02"><input type="checkbox" /></td>
+    <td data-sh-time="03"><input type="checkbox" /></td>
+    <td data-sh-time="04"><input type="checkbox" /></td>
+    <td data-sh-time="05"><input type="checkbox" /></td>
+    <td data-sh-time="06"><input type="checkbox" /></td>
+    <td data-sh-time="07"><input type="checkbox" /></td>
+    <td data-sh-time="08"><input type="checkbox" /></td>
+    <td data-sh-time="09"><input type="checkbox" /></td>
+    <td data-sh-time="10"><input type="checkbox" /></td>
+    <td data-sh-time="11"><input type="checkbox" /></td>
+    <td data-sh-time="12"><input type="checkbox" /></td>
+    <td data-sh-time="13"><input type="checkbox" /></td>
+    <td data-sh-time="14"><input type="checkbox" /></td>
+    <td data-sh-time="15"><input type="checkbox" /></td>
+    <td data-sh-time="16"><input type="checkbox" /></td>
+    <td data-sh-time="17"><input type="checkbox" /></td>
+    <td data-sh-time="18"><input type="checkbox" /></td>
+    <td data-sh-time="19"><input type="checkbox" /></td>
+    <td data-sh-time="20"><input type="checkbox" /></td>
+    <td data-sh-time="21"><input type="checkbox" /></td>
+    <td data-sh-time="22"><input type="checkbox" /></td>
+    <td data-sh-time="23"><input type="checkbox" /></td>
+  </tr>
+  <tr data-sh-day="tuesday" role="schedule-bulk-day-select">
+    <td><a class="notalink" href="javascript:;">Tuesday</a></td>
+    <td data-sh-time="00"><input type="checkbox" /></td>
+    <td data-sh-time="01"><input type="checkbox" /></td>
+    <td data-sh-time="02"><input type="checkbox" /></td>
+    <td data-sh-time="03"><input type="checkbox" /></td>
+    <td data-sh-time="04"><input type="checkbox" /></td>
+    <td data-sh-time="05"><input type="checkbox" /></td>
+    <td data-sh-time="06"><input type="checkbox" /></td>
+    <td data-sh-time="07"><input type="checkbox" /></td>
+    <td data-sh-time="08"><input type="checkbox" /></td>
+    <td data-sh-time="09"><input type="checkbox" /></td>
+    <td data-sh-time="10"><input type="checkbox" /></td>
+    <td data-sh-time="11"><input type="checkbox" /></td>
+    <td data-sh-time="12"><input type="checkbox" /></td>
+    <td data-sh-time="13"><input type="checkbox" /></td>
+    <td data-sh-time="14"><input type="checkbox" /></td>
+    <td data-sh-time="15"><input type="checkbox" /></td>
+    <td data-sh-time="16"><input type="checkbox" /></td>
+    <td data-sh-time="17"><input type="checkbox" /></td>
+    <td data-sh-time="18"><input type="checkbox" /></td>
+    <td data-sh-time="19"><input type="checkbox" /></td>
+    <td data-sh-time="20"><input type="checkbox" /></td>
+    <td data-sh-time="21"><input type="checkbox" /></td>
+    <td data-sh-time="22"><input type="checkbox" /></td>
+    <td data-sh-time="23"><input type="checkbox" /></td>
+  </tr>
+  <tr data-sh-day="wednesday" role="schedule-bulk-day-select">
+    <td><a class="notalink" href="javascript:;">Wednesday</a></td>
+    <td data-sh-time="00"><input type="checkbox" /></td>
+    <td data-sh-time="01"><input type="checkbox" /></td>
+    <td data-sh-time="02"><input type="checkbox" /></td>
+    <td data-sh-time="03"><input type="checkbox" /></td>
+    <td data-sh-time="04"><input type="checkbox" /></td>
+    <td data-sh-time="05"><input type="checkbox" /></td>
+    <td data-sh-time="06"><input type="checkbox" /></td>
+    <td data-sh-time="07"><input type="checkbox" /></td>
+    <td data-sh-time="08"><input type="checkbox" /></td>
+    <td data-sh-time="09"><input type="checkbox" /></td>
+    <td data-sh-time="10"><input type="checkbox" /></td>
+    <td data-sh-time="11"><input type="checkbox" /></td>
+    <td data-sh-time="12"><input type="checkbox" /></td>
+    <td data-sh-time="13"><input type="checkbox" /></td>
+    <td data-sh-time="14"><input type="checkbox" /></td>
+    <td data-sh-time="15"><input type="checkbox" /></td>
+    <td data-sh-time="16"><input type="checkbox" /></td>
+    <td data-sh-time="17"><input type="checkbox" /></td>
+    <td data-sh-time="18"><input type="checkbox" /></td>
+    <td data-sh-time="19"><input type="checkbox" /></td>
+    <td data-sh-time="20"><input type="checkbox" /></td>
+    <td data-sh-time="21"><input type="checkbox" /></td>
+    <td data-sh-time="22"><input type="checkbox" /></td>
+    <td data-sh-time="23"><input type="checkbox" /></td>
+  </tr>
+  <tr data-sh-day="thursday" role="schedule-bulk-day-select">
+    <td><a class="notalink" href="javascript:;">Thursday</a></td>
+    <td data-sh-time="00"><input type="checkbox" /></td>
+    <td data-sh-time="01"><input type="checkbox" /></td>
+    <td data-sh-time="02"><input type="checkbox" /></td>
+    <td data-sh-time="03"><input type="checkbox" /></td>
+    <td data-sh-time="04"><input type="checkbox" /></td>
+    <td data-sh-time="05"><input type="checkbox" /></td>
+    <td data-sh-time="06"><input type="checkbox" /></td>
+    <td data-sh-time="07"><input type="checkbox" /></td>
+    <td data-sh-time="08"><input type="checkbox" /></td>
+    <td data-sh-time="09"><input type="checkbox" /></td>
+    <td data-sh-time="10"><input type="checkbox" /></td>
+    <td data-sh-time="11"><input type="checkbox" /></td>
+    <td data-sh-time="12"><input type="checkbox" /></td>
+    <td data-sh-time="13"><input type="checkbox" /></td>
+    <td data-sh-time="14"><input type="checkbox" /></td>
+    <td data-sh-time="15"><input type="checkbox" /></td>
+    <td data-sh-time="16"><input type="checkbox" /></td>
+    <td data-sh-time="17"><input type="checkbox" /></td>
+    <td data-sh-time="18"><input type="checkbox" /></td>
+    <td data-sh-time="19"><input type="checkbox" /></td>
+    <td data-sh-time="20"><input type="checkbox" /></td>
+    <td data-sh-time="21"><input type="checkbox" /></td>
+    <td data-sh-time="22"><input type="checkbox" /></td>
+    <td data-sh-time="23"><input type="checkbox" /></td>
+  </tr>
+  <tr data-sh-day="friday" role="schedule-bulk-day-select">
+    <td><a class="notalink" href="javascript:;">Friday</a></td>
+    <td data-sh-time="00"><input type="checkbox" /></td>
+    <td data-sh-time="01"><input type="checkbox" /></td>
+    <td data-sh-time="02"><input type="checkbox" /></td>
+    <td data-sh-time="03"><input type="checkbox" /></td>
+    <td data-sh-time="04"><input type="checkbox" /></td>
+    <td data-sh-time="05"><input type="checkbox" /></td>
+    <td data-sh-time="06"><input type="checkbox" /></td>
+    <td data-sh-time="07"><input type="checkbox" /></td>
+    <td data-sh-time="08"><input type="checkbox" /></td>
+    <td data-sh-time="09"><input type="checkbox" /></td>
+    <td data-sh-time="10"><input type="checkbox" /></td>
+    <td data-sh-time="11"><input type="checkbox" /></td>
+    <td data-sh-time="12"><input type="checkbox" /></td>
+    <td data-sh-time="13"><input type="checkbox" /></td>
+    <td data-sh-time="14"><input type="checkbox" /></td>
+    <td data-sh-time="15"><input type="checkbox" /></td>
+    <td data-sh-time="16"><input type="checkbox" /></td>
+    <td data-sh-time="17"><input type="checkbox" /></td>
+    <td data-sh-time="18"><input type="checkbox" /></td>
+    <td data-sh-time="19"><input type="checkbox" /></td>
+    <td data-sh-time="20"><input type="checkbox" /></td>
+    <td data-sh-time="21"><input type="checkbox" /></td>
+    <td data-sh-time="22"><input type="checkbox" /></td>
+    <td data-sh-time="23"><input type="checkbox" /></td>
+  </tr>
+  <tr data-sh-day="saturday" role="schedule-bulk-day-select">
+    <td><a class="notalink" href="javascript:;">Saturday</a></td>
+    <td data-sh-time="00"><input type="checkbox" /></td>
+    <td data-sh-time="01"><input type="checkbox" /></td>
+    <td data-sh-time="02"><input type="checkbox" /></td>
+    <td data-sh-time="03"><input type="checkbox" /></td>
+    <td data-sh-time="04"><input type="checkbox" /></td>
+    <td data-sh-time="05"><input type="checkbox" /></td>
+    <td data-sh-time="06"><input type="checkbox" /></td>
+    <td data-sh-time="07"><input type="checkbox" /></td>
+    <td data-sh-time="08"><input type="checkbox" /></td>
+    <td data-sh-time="09"><input type="checkbox" /></td>
+    <td data-sh-time="10"><input type="checkbox" /></td>
+    <td data-sh-time="11"><input type="checkbox" /></td>
+    <td data-sh-time="12"><input type="checkbox" /></td>
+    <td data-sh-time="13"><input type="checkbox" /></td>
+    <td data-sh-time="14"><input type="checkbox" /></td>
+    <td data-sh-time="15"><input type="checkbox" /></td>
+    <td data-sh-time="16"><input type="checkbox" /></td>
+    <td data-sh-time="17"><input type="checkbox" /></td>
+    <td data-sh-time="18"><input type="checkbox" /></td>
+    <td data-sh-time="19"><input type="checkbox" /></td>
+    <td data-sh-time="20"><input type="checkbox" /></td>
+    <td data-sh-time="21"><input type="checkbox" /></td>
+    <td data-sh-time="22"><input type="checkbox" /></td>
+    <td data-sh-time="23"><input type="checkbox" /></td>
+  </tr>
+  <tr data-sh-day="sunday" role="schedule-bulk-day-select">
+    <td><a class="notalink" href="javascript:;">Sunday</a></td>
+    <td data-sh-time="00"><input type="checkbox" /></td>
+    <td data-sh-time="01"><input type="checkbox" /></td>
+    <td data-sh-time="02"><input type="checkbox" /></td>
+    <td data-sh-time="03"><input type="checkbox" /></td>
+    <td data-sh-time="04"><input type="checkbox" /></td>
+    <td data-sh-time="05"><input type="checkbox" /></td>
+    <td data-sh-time="06"><input type="checkbox" /></td>
+    <td data-sh-time="07"><input type="checkbox" /></td>
+    <td data-sh-time="08"><input type="checkbox" /></td>
+    <td data-sh-time="09"><input type="checkbox" /></td>
+    <td data-sh-time="10"><input type="checkbox" /></td>
+    <td data-sh-time="11"><input type="checkbox" /></td>
+    <td data-sh-time="12"><input type="checkbox" /></td>
+    <td data-sh-time="13"><input type="checkbox" /></td>
+    <td data-sh-time="14"><input type="checkbox" /></td>
+    <td data-sh-time="15"><input type="checkbox" /></td>
+    <td data-sh-time="16"><input type="checkbox" /></td>
+    <td data-sh-time="17"><input type="checkbox" /></td>
+    <td data-sh-time="18"><input type="checkbox" /></td>
+    <td data-sh-time="19"><input type="checkbox" /></td>
+    <td data-sh-time="20"><input type="checkbox" /></td>
+    <td data-sh-time="21"><input type="checkbox" /></td>
+    <td data-sh-time="22"><input type="checkbox" /></td>
+    <td data-sh-time="23"><input type="checkbox" /></td>
+  </tr>
+</tbody>
+</table>
+
+<script type="text/javascript">
+
+  function schedulerInit(o) {
+    let dataHolder = o.querySelector('[role=data-holder]');
+
+    const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+    const hours = ['00', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23'];
+
+    function updateData(e) {
+      let dayOfWeek;
+      let hourOfDay;
+
+      let state = [];
+
+      for (var i = 0; i < days.length; i++) {
+        let day = days[i];
+        for (var j = 0; j < hours.length; j++) {
+          let hour = hours[j];
+
+          if (o.querySelector('tr[data-sh-day="'+ day +'"] > td[data-sh-time="' + hour + '"] [type=checkbox]').checked) {
+            state.push(`${i}:${hour}`);
+          }
+        }
+      }
+
+      dataHolder.value = state.join('||');
+    }
+
+    function updateFromData() {
+      if (!dataHolder.value) return;
+      let chunks = dataHolder.value.split('||');
+      console.log(chunks);
+      for (var i = 0, l = chunks.length; i < l; i++) {
+        let c = chunks[i];
+        let dh = c.split(':');
+        let day = days[dh[0]];
+        let hour = dh[1];
+        let checkbox = o.querySelector('tr[data-sh-day="'+ day +'"] > td[data-sh-time="' + hour + '"] [type=checkbox]');
+        if (checkbox) checkbox.checked = true;
+      }
+    }
+
+    document.body.querySelector('form').addEventListener('submit', (e) => updateData());
+
+    o.querySelectorAll('[role=schedule-bulk-day-select] a').forEach((bulkDay) => {
+      bulkDay.addEventListener('click', (e) => {
+        let row = e.target.parentNode.parentNode;
+        if (row.hasAttribute('selected')) {
+          row.removeAttribute('selected');
+        } else {
+          row.setAttribute('selected', true);
+        }
+        row.querySelectorAll('input[type=checkbox]').forEach((input) => input.checked = row.hasAttribute('selected'))
+      });
+    });
+
+    o.querySelectorAll('[role=schedule-bulk-hour-select] a').forEach((bulkHour) => {
+      bulkHour.addEventListener('click', (e) => {
+        let hourEl = e.target;
+        let hourVal = e.target.parentNode.getAttribute('data-sh-time');
+        if (hourEl.hasAttribute('selected')) {
+          hourEl.removeAttribute('selected');
+        } else {
+          hourEl.setAttribute('selected', true);
+        }
+        o.querySelectorAll('td[data-sh-time="' + hourVal + '"]' + ' input[type=checkbox]').forEach((input) => input.checked = hourEl.hasAttribute('selected'))
+      });
+    });
+
+    let dragging = false;
+
+    o.querySelectorAll('[type=checkbox]').forEach((checkbox) => {
+      checkbox.addEventListener('mousedown', (e) => dragging = true);
+      document.body.addEventListener('mouseup', (e) => dragging = false);
+      checkbox.addEventListener('mouseout', (e) => {
+        if (dragging) {
+          e.target.checked = !e.target.checked;
+        }
+      });
+    });
+
+
+    let currentDayOfWeek = days[o.querySelector('[role=day-now]').innerText | 0];
+    let currentTimeHour = o.querySelector('[role=hour-now]').innerText;
+
+    o.querySelector('tr[data-sh-day="' + currentDayOfWeek + '"]').classList.add("selected");
+    o.querySelectorAll('td[data-sh-time="' + currentTimeHour + '"]').forEach((td) => td.classList.add("selected"));
+
+
+    updateFromData();
+  }
+
+  window.addEventListener('DOMContentLoaded', () => {
+    let schedules = document.querySelectorAll('[role=schedule]');
+    if (schedules.length == 0) return;
+    if (schedules[0].hasAttribute('js')) return;
+    schedules[0].setAttribute('js', true);
+
+    schedules.forEach((o, i) => schedulerInit(o));
+  });
+
+</script>
+
+<style media="screen">
+  [role=schedule] .notalink {
+    text-decoration: dotted;
+    text-decoration-line: underline;
+  }
+
+  [role=schedule] input {
+    -webkit-user-drag: none;
+    -khtml-user-drag: none;
+    -moz-user-drag: none;
+    -o-user-drag: none;
+    user-drag: none;
+  }
+
+  [role=schedule] tr.selected, [role=schedule] td.selected {
+    background: #E8D98D;
+  }
+</style>

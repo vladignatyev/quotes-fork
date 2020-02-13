@@ -51,7 +51,7 @@ class PushSubscription(models.Model):
 
 class PushNotificationQueueItem(LongJobQueueItem):
     # todo: switch to many to many for using FCM batch send
-    push_subscription = models.ForeignKey(PushSubscription, on_delete=models.CASCADE, null=True)
+    push_subscription = models.ForeignKey(PushSubscription, on_delete=models.CASCADE, null=True, blank=True)
 
     title = models.CharField(max_length=256, blank=True, default='')
     body = models.TextField(blank=True, default='')
@@ -62,6 +62,27 @@ class PushNotificationQueueItem(LongJobQueueItem):
     condition = models.CharField(max_length=256, blank=True, null=True, default='')
 
     is_broadcast = models.BooleanField(default=False, blank=True)
+
+
+from django.contrib.postgres.fields import JSONField
+
+class PushMessage(models.Model):
+    title = models.CharField(max_length=256, blank=True, default='')
+    body = models.TextField(blank=True, default='')
+    image_url = models.CharField(max_length=256, blank=True, default='')
+
+    data = JSONField(blank=True)
+    topic = models.CharField(max_length=256, blank=True, null=True, default='')
+    condition = models.CharField(max_length=256, blank=True, null=True, default='')
+
+    schedule = models.CharField(max_length=1024, blank=True, default='')
+
+
+
+    # queries: *|00,
+
+
+
 
 
 

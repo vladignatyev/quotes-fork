@@ -44,30 +44,42 @@ class FirebaseMessagingApp(FirebaseApp):
 
         notification = self._build_notification_from_model(push_notification_model)
 
-        message = messaging.Message(
-            topic=push_notification_model.topic or None,
-            condition=push_notification_model.condition or None,
-            data=data_payload,
-            token=push_subscription_model.token,
-            notification=notification
-        )
-        return message
+        message_params = {}
+        message_params['data'] = data_payload
+        message_params['notification'] = notification
 
-    def build_multicast_message_from_subscriptions(self, push_notification_model, push_subscription_models):
-        tokens = [o.token for o in push_subscription_models]
-
-        if str(push_notification_model.data) != '':
-            # todo: check that all values are strings
-            data_payload = json.loads(push_notification_model.data)
+        if push_subscription_model:
+            if push_subscription_model.token:
+                message_params['token'] = push_subscription_model.token
+            elif push_subscription_model.condition:
+                message_params['condition'] = push_notification_model.condition
         else:
-            data_payload = None
+            message_params['topic'] = push_notification_model.topic
 
-        notification = self._build_notification_from_model(push_notification_model)
-
-        message = messaging.MulticastMessage(tokens,
-                                             data=data_payload,
-                                             notification=notification)
+        message = messaging.Message(**message_params)
+        #     topic=push_notification_model.topic or None,
+        #     condition=push_notification_model.condition or None,
+        #     data=data_payload,
+        #     token=push_subscription_model.token,
+        #     notification=notification
+        # )
         return message
+
+    # def build_multicast_message_from_subscriptions(self, push_notification_model, push_subscription_models):
+    #     tokens = [o.token for o in push_subscription_models]
+    #
+    #     if str(push_notification_model.data) != '':
+    #         # todo: check that all values are strings
+    #         data_payload = json.loads(push_notification_model.data)
+    #     else:
+    #         data_payload = None
+    #
+    #     notification = self._build_notification_from_model(push_notification_model)
+    #
+    #     message = messaging.MulticastMessage(tokens,
+    #                                          data=data_payload,
+    #                                          notification=notification)
+    #     return message
 
     # todo: wrap required error handlers
     def send_multicast_message(self, message, dry_run=False):

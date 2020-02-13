@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django import forms
 
 from .models import *
 from longjob.admin import LongJobAdmin
@@ -24,6 +25,26 @@ class PushSubscriptionAdmin(admin.ModelAdmin):
 
 class GooglePlayIAPSubscriptionAdmin(admin.ModelAdmin):
     pass
+
+
+class ScheduleWidget(forms.Widget):
+    template_name = 'admin/schedule.html'
+    # def render(name, value, attrs=None, renderer=None):
+    #     context = self.get_context(name, value, attrs)
+    #     context['schedule'] = {}
+    #     return self._render(self.template_name, context, renderer)
+    pass
+
+class PushMessageAdminForm(forms.ModelForm):
+  class Meta:
+    model = PushMessage
+    widgets = {
+      'schedule': ScheduleWidget(),
+    }
+    fields = '__all__'
+
+class PushMessageAdmin(admin.ModelAdmin):
+  form = PushMessageAdminForm
 
 
 @admin.register(GooglePlayIAPPurchase)
@@ -61,6 +82,7 @@ class GooglePlayProductAdmin(admin.ModelAdmin):
 
 admin.site.register(DeviceSession, DeviceSessionAdmin)
 admin.site.register(PushSubscription, PushSubscriptionAdmin)
+admin.site.register(PushMessage, PushMessageAdmin)
 
 admin.site.register(GooglePlayProduct, GooglePlayProductAdmin)
 # admin.site.register(GooglePlayIAPSubscription, GooglePlayIAPSubscriptionAdmin)

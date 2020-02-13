@@ -15,13 +15,10 @@ class PushSendingWorker(Worker):
     def do_job_with_logger(self, job, logger):
         push_notification_model = job
 
-        if push_notification_model.is_broadcast:
-            subscriptions = PushSubscription.objects.all()
-            log_items = []
-            for subscription in subscriptions:
-                message = self.fcmapp.build_message_from_model(push_notification_model, subscription)
-                result = self.fcmapp.send_message(message, dry_run=(settings.DEBUG or settings.TEST))
-                log_items.append(f'Sent to token {subscription.token} with result {result}')
+        if push_notification_model.is_broadcast and push_notification_model.topic:
+            message = self.fcmapp.build_message_from_model(push_notification_model, None)
+            result = self.fcmapp.send_message(message, dry_run=(settings.DEBUG or settings.TEST))
+            # log_items.append(f'Sent to token {subscription.token} with result {result}')
 
             job.done_with_result(result_text=f'Message ID: {result}')
 
