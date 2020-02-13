@@ -177,5 +177,7 @@ LOGGING = {
 
 DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 
+import sys
+TEST = 'test' in sys.argv
 
 from .settings_aws import *
