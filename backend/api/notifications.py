@@ -36,7 +36,7 @@ class FirebaseMessagingApp(FirebaseApp):
         return notification
 
     def build_message_from_model(self, push_notification_model, push_subscription_model):
-        if str(push_notification_model.data) != '':
+        if push_notification_model.data is not None:
             # todo: check that all values are strings
             data_payload = json.loads(push_notification_model.data)
         else:
