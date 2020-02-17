@@ -13,6 +13,11 @@ from .crypto import *
 
 from longjob.models import LongJobQueueItem
 
+from django.contrib.postgres.fields import JSONField
+
+from django.utils.translation import ugettext_lazy as _
+
+
 
 class DeviceSessionManager(models.Manager):
     def is_valid_token(self, token, valid_chars=r'^[a-z|A-Z|0-9]+$'):
@@ -49,6 +54,8 @@ class PushSubscription(models.Model):
     token = models.CharField(max_length=256)
 
 
+
+
 class PushNotificationQueueItem(LongJobQueueItem):
     # todo: switch to many to many for using FCM batch send
     push_subscription = models.ForeignKey(PushSubscription, on_delete=models.CASCADE, null=True, blank=True)
@@ -57,32 +64,62 @@ class PushNotificationQueueItem(LongJobQueueItem):
     body = models.TextField(blank=True, default='')
     image_url = models.CharField(max_length=256, blank=True, default='')
 
-    data = models.TextField(blank=True, default='')
+    data = models.TextField(blank=True, default='', null=True)
     topic = models.CharField(max_length=256, blank=True, null=True, default='')
     condition = models.CharField(max_length=256, blank=True, null=True, default='')
 
     is_broadcast = models.BooleanField(default=False, blank=True)
+    meta = models.TextField('Internal field', blank=True, default='')
 
 
-from django.contrib.postgres.fields import JSONField
+from django.utils.translation import gettext_lazy as _
+from django.core.exceptions import ValidationError
+from django.forms.models import model_to_dict
 
 class PushMessage(models.Model):
-    title = models.CharField(max_length=256, blank=True, default='')
-    body = models.TextField(blank=True, default='')
+    title = models.CharField(max_length=256, blank=False, default='')
+    body = models.TextField(blank=False, default='')
     image_url = models.CharField(max_length=256, blank=True, default='')
 
-    data = JSONField(blank=True)
+    data = JSONField(blank=True, null=True)
     topic = models.CharField(max_length=256, blank=True, null=True, default='')
     condition = models.CharField(max_length=256, blank=True, null=True, default='')
 
-    schedule = models.CharField(max_length=1024, blank=True, default='')
+    # schedule = models.CharField(max_length=1024, blank=True, default='')
+
+    monday = models.TimeField(_('Monday'), blank=True, null=True)
+    tuesday = models.TimeField(_('Tuesday'), blank=True, null=True)
+    wednesday = models.TimeField(_('Wednesday'), blank=True, null=True)
+    thursday = models.TimeField(_('Thursday'), blank=True, null=True)
+    friday = models.TimeField(_('Friday'), blank=True, null=True)
+    saturday = models.TimeField(_('Saturday'), blank=True, null=True)
+    sunday = models.TimeField(_('Sunday'), blank=True, null=True)
+
+    def clean(self):
+        if not self.topic and not self.condition:
+            raise ValidationError(_('Either Topic or Condition should be set for message to broadcast.'))
+        if self.topic and self.condition:
+            raise ValidationError(_('Either Topic or Condition should be set, not both!'))
+
+        d = model_to_dict(self, fields=('monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'))
+        if all([not item for item in d.values()]):
+            raise ValidationError(_('At least one time/date should be set for scheduled messages.'))
+        super(PushMessage, self).clean()
+
+    def get_when(self):
+        d = model_to_dict(self, fields=('monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'))
+        return filter(lambda o: o is not None, [(k, v) if v else None for k, v in d.items()])
 
 
+    def to_queue_item(self):
+        d = model_to_dict(self, exclude=('monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'))
+        d['is_broadcast'] = True
 
-    # queries: *|00,
+        return PushNotificationQueueItem(**d)
 
-
-
+    def __str__(self):
+        beautiful_when = ','.join([f'{_(when[0].capitalize())}, {when[1]:%H:%M}' for when in self.get_when()])
+        return f'{self.title} | {self.body} @ {beautiful_when}'
 
 
 

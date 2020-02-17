@@ -27,24 +27,25 @@ class GooglePlayIAPSubscriptionAdmin(admin.ModelAdmin):
     pass
 
 
-class ScheduleWidget(forms.Widget):
-    template_name = 'admin/schedule.html'
-    # def render(name, value, attrs=None, renderer=None):
-    #     context = self.get_context(name, value, attrs)
-    #     context['schedule'] = {}
-    #     return self._render(self.template_name, context, renderer)
-    pass
+# class ScheduleWidget(forms.Widget):
+#     template_name = 'admin/schedule.html'
+#
+# class PushMessageAdminForm(forms.ModelForm):
+#   class Meta:
+#     model = PushMessage
+#     widgets = {
+#       'schedule': ScheduleWidget(),
+#     }
+#     fields = '__all__'
 
-class PushMessageAdminForm(forms.ModelForm):
-  class Meta:
-    model = PushMessage
-    widgets = {
-      'schedule': ScheduleWidget(),
-    }
-    fields = '__all__'
+from django.forms import widgets
 
 class PushMessageAdmin(admin.ModelAdmin):
-  form = PushMessageAdminForm
+    formfield_overrides = {
+        models.TimeField: {'widget': widgets.TimeInput(format='%H:%M')},
+    }
+
+  # form = PushMessageAdminForm
 
 
 @admin.register(GooglePlayIAPPurchase)
