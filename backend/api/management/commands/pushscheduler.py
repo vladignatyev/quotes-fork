@@ -27,7 +27,7 @@ class Command(BaseCommand):
         now = datetime.now()
         hour, minute, weekday = now.hour, now.minute, now.isoweekday()
 
-        field_name = (0, 'monday', 'tuesday', 'wendesday', 'thursday', 'friday', 'saturday', 'sunday')[weekday]
+        field_name = (0, 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday')[weekday]
 
         logger.debug(f'Batch @ {field_name}, {hour}:{minute}')
         filter = {f'{field_name}': f'{hour}:{minute}'}
